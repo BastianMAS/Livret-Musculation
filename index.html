@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Livret Musculation CAP</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%);
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+        .card { 
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem; 
+            padding: 2rem; 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-size: 1rem;
+        }
+        .btn:hover { transform: scale(1.05); }
+        .btn-primary { 
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            color: white;
+        }
+        .btn-success { 
+            background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+            color: white;
+        }
+        .btn-secondary { 
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .btn-danger { 
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+            color: white;
+        }
+        .btn-link {
+            background: transparent;
+            color: #67e8f9;
+            text-decoration: underline;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+        }
+        .input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+        .input::placeholder { color: rgba(255, 255, 255, 0.5); }
+        .input:focus { outline: none; border-color: #06b6d4; }
+        select.input { 
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+            padding-right: 2.5rem;
+        }
+        .text-white { color: white; }
+        .text-cyan { color: #67e8f9; }
+        .text-center { text-align: center; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-4 { margin-bottom: 2rem; }
+        .mt-2 { margin-top: 1rem; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 1rem; }
+        .grid { display: grid; }
+        .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-cols-5 { grid-template-columns: repeat(5, 1fr); }
+        .hidden { display: none; }
+        .muscle-btn {
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        .muscle-btn.active {
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            color: white;
+            transform: scale(1.05);
+        }
+        .session-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+        .session-card:hover { background: rgba(255, 255, 255, 0.15); }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .badge-force { background: linear-gradient(135deg, #f97316 0%, #fb923c 100%); color: white; }
+        .badge-endurance { background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); color: white; }
+        .badge-equilibre { background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); color: white; }
+        .lock-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            color: white;
+        }
+        .rm-result {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(20, 184, 166, 0.2) 100%);
+            border: 2px solid rgba(16, 185, 129, 0.5);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        
+        .sub-tab-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        .sub-tab-btn.active {
+            background: rgba(6, 182, 212, 0.3);
+            color: white;
+        }
+        
+        .content-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .exercise-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .exercise-card h4 {
+            color: #67e8f9;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+        
+        .exercise-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .exercise-card li {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .exercise-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #06b6d4;
+        }
+        
+        .tip-box {
+            background: rgba(16, 185, 129, 0.15);
+            border-left: 4px solid #10b981;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .warning-box {
+            background: rgba(251, 146, 60, 0.15);
+            border-left: 4px solid #fb923c;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .circuit-exercise {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            cursor: pointer;
+        }
+
+        .radio-label input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .anatomy-image-container {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            padding: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .anatomy-image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .muscle-info-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #06b6d4;
+        }
+        
+        .muscle-info-card h4 {
+            color: #67e8f9;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .muscle-info-section {
+            margin-top: 0.75rem;
+        }
+        
+        .muscle-info-section h5 {
+            color: #10b981;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .muscle-info-section p {
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+        
+        .muscle-info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .muscle-info-section li {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.3rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            line-height: 1.5;
+        }
+        
+        .muscle-info-section li:before {
+            content: "•";
+            position: absolute;
+            left: 0.5rem;
+            color: #06b6d4;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>// Données des cours et exercices
+        const coursData = {
+            principes: [
+                {
+                    titre: "Progression Progressive",
+                    contenu: "Augmentez graduellement la charge, le volume ou l'intensité pour continuer à progresser. Visez une augmentation de 2-5% par semaine.",
+                    conseils: [
+                        "Augmentez d'abord les répétitions avant d'augmenter la charge",
+                        "Tenez un journal d'entraînement",
+                        "Soyez patient, la progression prend du temps"
+                    ]
+                },
+                {
+                    titre: "Récupération Adéquate",
+                    contenu: "Le muscle se construit pendant le repos, pas pendant l'entraînement. Respectez 48-72h de repos entre deux séances pour le même groupe musculaire.",
+                    conseils: [
+                        "Dormez 7-9 heures par nuit",
+                        "Hydratez-vous bien",
+                        "Mangez suffisamment de protéines (1.6-2.2g/kg)"
+                    ]
+                },
+                {
+                    titre: "Technique Avant Charge",
+                    contenu: "Une bonne technique prévient les blessures et maximise les gains. Maîtrisez le mouvement avant d'augmenter la charge.",
+                    conseils: [
+                        "Filmez-vous pour vérifier votre technique",
+                        "N'hésitez pas à diminuer la charge si nécessaire",
+                        "Concentrez-vous sur le muscle ciblé"
+                    ]
+                }
+            ],
+            exercicesPectoraux: [
+                {
+                    nom: "Développé couché",
+                    description: "Exercice de base pour les pectoraux",
+                    technique: [
+                        "Allongez-vous sur le banc, pieds au sol",
+                        "Saisissez la barre légèrement plus large que les épaules",
+                        "Descendez la barre vers le bas des pectoraux",
+                        "Poussez en contractant les pectoraux"
+                    ],
+                    variantes: ["Développé incliné", "Développé décliné", "Développé avec haltères"]
+                },
+                {
+                    nom: "Pompes",
+                    description: "Exercice au poids du corps très efficace",
+                    technique: [
+                        "Position de planche, mains sous les épaules",
+                        "Descendez le corps en gardant le dos droit",
+                        "Remontez en poussant fort",
+                        "Gardez les abdos gainés"
+                    ],
+                    variantes: ["Pompes surélevées", "Pompes déclinées", "Pompes diamant"]
+                },
+                {
+                    nom: "Écarté aux haltères",
+                    description: "Excellent pour l'étirement des pectoraux",
+                    technique: [
+                        "Allongé sur un banc, haltères au-dessus de la poitrine",
+                        "Écartez les bras en gardant une légère flexion des coudes",
+                        "Descendez jusqu'à sentir l'étirement",
+                        "Remontez en contractant les pectoraux"
+                    ],
+                    variantes: ["Écarté incliné", "Écarté à la poulie"]
+                }
+            ],
+            exercicesDos: [
+                {
+                    nom: "Tractions",
+                    description: "Le roi des exercices pour le dos",
+                    technique: [
+                        "Suspendez-vous à une barre, mains en pronation",
+                        "Tirez jusqu'à ce que le menton dépasse la barre",
+                        "Contractez les omoplates en haut du mouvement",
+                        "Descendez de manière contrôlée"
+                    ],
+                    variantes: ["Tractions supination", "Tractions neutres", "Tractions assistées"]
+                },
+                {
+                    nom: "Rowing barre",
+                    description: "Développe l'épaisseur du dos",
+                    technique: [
+                        "Penchez-vous en avant, dos droit",
+                        "Tirez la barre vers le bas des abdos",
+                        "Serrez les omoplates en haut",
+                        "Gardez les coudes près du corps"
+                    ],
+                    variantes: ["Rowing haltère", "Rowing T-bar", "Rowing Yates"]
+                },
+                {
+                    nom: "Soulevé de terre",
+                    description: "Exercice complet pour tout le dos",
+                    technique: [
+                        "Pieds écartés largeur des hanches",
+                        "Saisissez la barre, dos droit",
+                        "Poussez avec les jambes puis tendez le dos",
+                        "Gardez la barre proche du corps"
+                    ],
+                    variantes: ["Soulevé de terre roumain", "Soulevé de terre sumo"]
+                }
+            ],
+            exercicesEpaules: [
+                {
+                    nom: "Développé militaire",
+                    description: "Base pour les deltoïdes",
+                    technique: [
+                        "Debout ou assis, barre devant les épaules",
+                        "Poussez verticalement au-dessus de la tête",
+                        "Gardez les abdos gainés",
+                        "Descendez de manière contrôlée"
+                    ],
+                    variantes: ["Développé Arnold", "Développé nuque", "Développé avec haltères"]
+                },
+                {
+                    nom: "Élévations latérales",
+                    description: "Cible les deltoïdes moyens",
+                    technique: [
+                        "Debout, haltères le long du corps",
+                        "Élevez les bras sur les côtés jusqu'à l'horizontale",
+                        "Gardez une légère flexion des coudes",
+                        "Contrôlez la descente"
+                    ],
+                    variantes: ["Élévations à la poulie", "Élévations penchées"]
+                }
+            ],
+            exercicesBras: [
+                {
+                    nom: "Curl biceps barre",
+                    description: "Exercice de base pour les biceps",
+                    technique: [
+                        "Debout, barre en supination",
+                        "Fléchissez les coudes sans bouger les épaules",
+                        "Contractez en haut",
+                        "Descendez lentement"
+                    ],
+                    variantes: ["Curl haltères", "Curl marteau", "Curl pupitre"]
+                },
+                {
+                    nom: "Dips",
+                    description: "Excellent pour les triceps",
+                    technique: [
+                        "Mains sur les barres parallèles",
+                        "Descendez en fléchissant les coudes",
+                        "Gardez le buste légèrement penché en avant",
+                        "Poussez jusqu'à l'extension complète"
+                    ],
+                    variantes: ["Dips lestés", "Dips sur banc"]
+                },
+                {
+                    nom: "Extension triceps",
+                    description: "Isole les triceps",
+                    technique: [
+                        "Allongé, barre au-dessus du front",
+                        "Descendez vers le front en fléchissant uniquement les coudes",
+                        "Remontez en contractant les triceps",
+                        "Gardez les coudes fixes"
+                    ],
+                    variantes: ["Extension poulie haute", "Extension nuque"]
+                }
+            ],
+            exercicesJambes: [
+                {
+                    nom: "Squat",
+                    description: "Le roi des exercices pour les jambes",
+                    technique: [
+                        "Barre sur les trapèzes, pieds largeur des épaules",
+                        "Descendez en poussant les fesses en arrière",
+                        "Allez au moins jusqu'à la parallèle",
+                        "Poussez en gardant les talons au sol"
+                    ],
+                    variantes: ["Squat avant", "Squat bulgare", "Goblet squat"]
+                },
+                {
+                    nom: "Fentes",
+                    description: "Excellent pour quadriceps et fessiers",
+                    technique: [
+                        "Faites un grand pas en avant",
+                        "Descendez le genou arrière vers le sol",
+                        "Le genou avant ne dépasse pas les orteils",
+                        "Poussez sur le talon avant pour remonter"
+                    ],
+                    variantes: ["Fentes marchées", "Fentes bulgares", "Fentes sautées"]
+                },
+                {
+                    nom: "Leg curl",
+                    description: "Isole les ischio-jambiers",
+                    technique: [
+                        "Allongé sur la machine, chevilles sous le boudin",
+                        "Fléchissez les jambes vers les fessiers",
+                        "Contractez en haut",
+                        "Descendez lentement"
+                    ],
+                    variantes: ["Leg curl debout", "Leg curl assis"]
+                }
+            ],
+            exercicesAbdos: [
+                { nom: "Crunch", description: "Classique pour le grand droit" },
+                { nom: "Planche", description: "Gainage statique" },
+                { nom: "Russian twist", description: "Pour les obliques" },
+                { nom: "Levée de jambes", description: "Bas des abdos" },
+                { nom: "Mountain climbers", description: "Cardio et abdos" },
+                { nom: "Bicycle crunch", description: "Obliques dynamiques" },
+                { nom: "Dead bug", description: "Stabilité du core" },
+                { nom: "Hollow hold", description: "Gainage avancé" }
+            ],
+            anatomie: {
+                "Pectoraux": {
+                    role: "Les pectoraux sont les muscles principaux de la poitrine. Ils permettent l'adduction (rapprochement du bras vers le corps), la flexion de l'épaule et la rotation interne du bras. Ils sont essentiels dans les mouvements de poussée.",
+                    insertions: [
+                        "Origine : Clavicule (faisceau claviculaire), sternum et cartilages costaux (faisceau sterno-costal)",
+                        "Terminaison : Lèvre latérale de la gouttière bicipitale de l'humérus",
+                        "Le grand pectoral se divise en 3 faisceaux : claviculaire (haut), sternal (milieu) et abdominal (bas)"
+                    ]
+                },
+                "Grand dorsal": {
+                    role: "Le plus large muscle du dos, il permet l'extension, l'adduction et la rotation interne du bras. Il est le muscle principal dans les mouvements de tirage vertical (tractions) et contribue à la stabilité de l'épaule.",
+                    insertions: [
+                        "Origine : Processus épineux des 6 dernières vertèbres thoraciques, toutes les vertèbres lombaires, crête sacrée, crête iliaque et 3-4 dernières côtes",
+                        "Terminaison : Gouttière bicipitale de l'humérus (sillon inter-tuberculaire)",
+                        "Forme une large bande musculaire en forme de V dans le dos"
+                    ]
+                },
+                "Trapèzes": {
+                    role: "Muscle superficiel du dos en forme de trapèze, il permet l'élévation, l'abaissement et la rétraction des omoplates. Il stabilise également l'épaule lors des mouvements du bras et soutient le port de charges.",
+                    insertions: [
+                        "Origine : Ligament nuchal, processus épineux de C7 à T12, protubérance occipitale externe",
+                        "Terminaison : Tiers latéral de la clavicule (faisceau supérieur), acromion et épine de la scapula (faisceau moyen et inférieur)",
+                        "Se divise en 3 faisceaux : supérieur, moyen et inférieur avec des actions différentes"
+                    ]
+                },
+                "Deltoïdes": {
+                    role: "Muscle de l'épaule formant son galbe arrondi. Il permet l'abduction (élévation latérale), la flexion (faisceau antérieur) et l'extension (faisceau postérieur) du bras. C'est le muscle principal pour tous les mouvements de l'épaule.",
+                    insertions: [
+                        "Origine : Tiers latéral de la clavicule (antérieur), acromion (moyen), épine de la scapula (postérieur)",
+                        "Terminaison : Tubérosité deltoïdienne de l'humérus (face latérale)",
+                        "Se compose de 3 faisceaux distincts : antérieur, moyen (latéral) et postérieur"
+                    ]
+                },
+                "Biceps": {
+                    role: "Muscle à deux chefs situé à l'avant du bras. Il permet la flexion du coude et la supination de l'avant-bras (rotation de la paume vers le haut). Il assiste aussi la flexion de l'épaule.",
+                    insertions: [
+                        "Origine : Apophyse coracoïde (chef court) et tubercule supra-glénoïdien de la scapula (chef long)",
+                        "Terminaison : Tubérosité radiale et aponévrose bicipitale (lacertus fibrosus)",
+                        "Deux chefs distincts (long et court) qui fusionnent en un seul tendon distal"
+                    ]
+                },
+                "Triceps": {
+                    role: "Muscle à trois chefs situé à l'arrière du bras. Il permet l'extension du coude et l'extension de l'épaule (chef long). C'est le seul muscle extenseur du coude et il représente 2/3 de la masse du bras.",
+                    insertions: [
+                        "Origine : Tubercule infra-glénoïdien de la scapula (chef long), face postérieure de l'humérus au-dessus et au-dessous du sillon radial (chefs latéral et médial)",
+                        "Terminaison : Olécrâne de l'ulna via un tendon commun",
+                        "Trois chefs : long (traverse l'épaule), latéral (externe) et médial (profond)"
+                    ]
+                },
+                "Abdominaux": {
+                    role: "Groupe musculaire de la paroi abdominale antérieure. Ils permettent la flexion du tronc, la rotation et l'inclinaison latérale. Ils protègent les organes internes, stabilisent le bassin et participent à la respiration et à l'augmentation de la pression abdominale.",
+                    insertions: [
+                        "Grand droit : Crête pubienne (origine) → Cartilages costaux 5-7 et processus xiphoïde (terminaison)",
+                        "Obliques externes : 8 dernières côtes → Crête iliaque et ligne blanche",
+                        "Obliques internes : Crête iliaque → Cartilages costaux inférieurs et ligne blanche",
+                        "Transverse : Cartilages costaux, fascia thoraco-lombaire, crête iliaque → Ligne blanche (muscle le plus profond)"
+                    ]
+                },
+                "Quadriceps": {
+                    role: "Le plus volumineux et puissant muscle du corps humain, situé à l'avant de la cuisse. Il permet l'extension du genou et la flexion de la hanche (droit fémoral). C'est le muscle principal de la marche, de la course et des sauts.",
+                    insertions: [
+                        "Origine : Épine iliaque antéro-inférieure (droit fémoral), grand trochanter et ligne âpre du fémur (vaste latéral et médial), face antérieure du fémur (vaste intermédiaire)",
+                        "Terminaison : Tubérosité tibiale via le tendon patellaire (passe par la rotule)",
+                        "Composé de 4 chefs : droit fémoral, vaste latéral, vaste médial et vaste intermédiaire"
+                    ]
+                },
+                "Ischio-jambiers": {
+                    role: "Groupe musculaire situé à l'arrière de la cuisse. Ils permettent l'extension de la hanche et la flexion du genou. Ils sont essentiels pour la course, le saut et la décélération. Muscle antagoniste du quadriceps.",
+                    insertions: [
+                        "Origine : Tubérosité ischiatique (semi-tendineux, semi-membraneux, chef long du biceps fémoral) et ligne âpre du fémur (chef court du biceps fémoral)",
+                        "Terminaison : Tête de la fibula (biceps fémoral), face médiale du tibia (semi-tendineux et semi-membraneux)",
+                        "Composé de 3 muscles : biceps fémoral (2 chefs), semi-tendineux et semi-membraneux"
+                    ]
+                },
+                "Fessiers": {
+                    role: "Le groupe musculaire le plus puissant du corps, formant les fesses. Le grand fessier permet l'extension et la rotation latérale de la hanche. Le moyen et petit fessier permettent l'abduction et stabilisent le bassin lors de la marche.",
+                    insertions: [
+                        "Grand fessier : Crête iliaque, sacrum, coccyx → Tubérosité glutéale du fémur et tractus ilio-tibial",
+                        "Moyen fessier : Face externe de l'ilium → Grand trochanter du fémur",
+                        "Petit fessier : Face externe de l'ilium (sous le moyen fessier) → Grand trochanter du fémur",
+                        "Le grand fessier est le plus gros et superficiel, le moyen et petit sont plus profonds et latéraux"
+                    ]
+                },
+                "Mollets": {
+                    role: "Situés à l'arrière de la jambe, ils permettent la flexion plantaire (pointer les orteils) et participent à la flexion du genou (gastrocnémien). Ils sont essentiels pour la marche, la course, le saut et l'équilibre. Muscles très sollicités au quotidien.",
+                    insertions: [
+                        "Gastrocnémien (jumeau) : Condyles fémoraux (2 chefs médial et latéral) → Calcanéum via le tendon d'Achille",
+                        "Soléaire : Face postérieure du tibia et fibula → Calcanéum via le tendon d'Achille",
+                        "Le gastrocnémien est superficiel (forme le galbe du mollet), le soléaire est profond et plus volumineux"
+                    ]
+                }
+            }
+        };
+
+        // Système de stockage
+        const storage = {
+            save(key, value, global = false) {
+                try {
+                    const storageKey = global ? key : `${app.currentUser}-${key}`;
+                    localStorage.setItem(storageKey, JSON.stringify(value));
+                    return true;
+                } catch (e) {
+                    console.error('Storage error:', e);
+                    return false;
+                }
+            },
+            get(key, global = false) {
+                try {
+                    const storageKey = global ? key : `${app.currentUser}-${key}`;
+                    const item = localStorage.getItem(storageKey);
+                    return {
+                        exists: item !== null,
+                        value: item
+                    };
+                } catch (e) {
+                    return { exists: false, value: null };
+                }
+            },
+            remove(key, global = false) {
+                try {
+                    const storageKey = global ? key : `${app.currentUser}-${key}`;
+                    localStorage.removeItem(storageKey);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+        };
+
+        // Questions de sécurité
+        const securityQuestions = [
+            "Quel est le nom de votre premier animal de compagnie ?",
+            "Dans quelle ville êtes-vous né(e) ?",
+            "Quel est le nom de jeune fille de votre mère ?",
+            "Quel était votre surnom d'enfance ?",
+            "Quel est le nom de votre école primaire ?"
+        ];class LivretApp {
+            constructor() {
+                this.currentUser = null;
+                this.currentView = 'login';
+                this.currentTab = 'dashboard';
+                this.sessions = [];
+                this.currentSession = null;
+                this.musclesList = ['Pectoraux', 'Grand dorsal', 'Trapèzes', 'Deltoïdes', 'Biceps', 'Triceps', 'Abdominaux', 'Quadriceps', 'Ischio-jambiers', 'Fessiers', 'Mollets'];
+                this.currentCoursTab = 'principes';
+                this.init();
+            }
+
+            init() {
+                this.loadSessions();
+                this.render();
+            }
+
+            loadSessions() {
+                if (!this.currentUser) return;
+                const result = storage.get('sessions');
+                if (result.exists) {
+                    this.sessions = JSON.parse(result.value);
+                }
+            }
+
+            saveSessions() {
+                storage.save('sessions', this.sessions);
+            }
+
+            render() {
+                const app = document.getElementById('app');
+                
+                if (this.currentView === 'login') {
+                    app.innerHTML = this.renderLogin();
+                    this.attachLoginEvents();
+                } else if (this.currentView === 'signup') {
+                    app.innerHTML = this.renderSignup();
+                    this.attachLoginEvents();
+                } else if (this.currentView === 'reset') {
+                    app.innerHTML = this.renderPasswordReset();
+                    this.attachResetEvents();
+                } else if (this.currentView === 'dashboard') {
+                    app.innerHTML = this.renderDashboard();
+                    this.attachDashboardEvents();
+                } else if (this.currentView === 'session-form') {
+                    app.innerHTML = this.renderSessionForm();
+                    this.attachSessionFormEvents();
+                } else if (this.currentView === 'session-detail') {
+                    app.innerHTML = this.renderSessionDetail();
+                }
+            }
+
+            renderLogin() {
+                return `
+                    <div class="container">
+                        <div class="card" style="max-width: 450px; margin: 4rem auto;">
+                            <div class="text-center mb-4">
+                                <div class="lock-icon" style="margin: 0 auto 1.5rem;">🔒</div>
+                                <h1 class="text-white" style="font-size: 2rem; margin-bottom: 0.5rem;">Livret Musculation</h1>
+                                <p class="text-cyan">CAP - Suivi personnalisé</p>
+                            </div>
+                            
+                            <form id="login-form">
+                                <div class="mb-2">
+                                    <label class="text-white mb-1" style="display: block;">Nom d'utilisateur</label>
+                                    <input type="text" class="input" id="login-username" required>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="text-white mb-1" style="display: block;">Mot de passe</label>
+                                    <input type="password" class="input" id="login-password" required>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">Se connecter</button>
+                                
+                                <div class="text-center">
+                                    <button type="button" class="btn btn-link" onclick="app.showSignup()">Créer un compte</button>
+                                    <button type="button" class="btn btn-link" onclick="app.showPasswordReset()">Mot de passe oublié ?</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderSignup() {
+                return `
+                    <div class="container">
+                        <div class="card" style="max-width: 450px; margin: 4rem auto;">
+                            <div class="text-center mb-4">
+                                <h1 class="text-white" style="font-size: 2rem; margin-bottom: 0.5rem;">Créer un compte</h1>
+                                <p class="text-cyan">Rejoignez le programme CAP</p>
+                            </div>
+                            
+                            <form id="signup-form">
+                                <div class="mb-2">
+                                    <label class="text-white mb-1" style="display: block;">Nom d'utilisateur</label>
+                                    <input type="text" class="input" id="signup-username" required>
+                                </div>
+                                
+                                <div class="mb-2">
+                                    <label class="text-white mb-1" style="display: block;">Mot de passe</label>
+                                    <input type="password" class="input" id="signup-password" required>
+                                </div>
+                                
+                                <div class="mb-2">
+                                    <label class="text-white mb-1" style="display: block;">Confirmer le mot de passe</label>
+                                    <input type="password" class="input" id="signup-password-confirm" required>
+                                </div>
+                                
+                                <div class="mb-2">
+                                    <label class="text-white mb-1" style="display: block;">Question de sécurité</label>
+                                    <select class="input" id="signup-security-question" required>
+                                        <option value="">Choisissez une question...</option>
+                                        ${securityQuestions.map((q, i) => `<option value="${i}">${q}</option>`).join('')}
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="text-white mb-1" style="display: block;">Réponse</label>
+                                    <input type="text" class="input" id="signup-security-answer" required>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-success" style="width: 100%; margin-bottom: 1rem;">S'inscrire</button>
+                                
+                                <div class="text-center">
+                                    <button type="button" class="btn btn-link" onclick="app.showLogin()">Retour à la connexion</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderPasswordReset() {
+                return `
+                    <div class="container">
+                        <div class="card" style="max-width: 450px; margin: 4rem auto;">
+                            <div class="text-center mb-4">
+                                <h1 class="text-white" style="font-size: 2rem; margin-bottom: 0.5rem;">Réinitialiser le mot de passe</h1>
+                                <p class="text-cyan">Récupérez l'accès à votre compte</p>
+                            </div>
+                            
+                            <form id="reset-form">
+                                <div class="mb-2">
+                                    <label class="text-white mb-1" style="display: block;">Nom d'utilisateur</label>
+                                    <input type="text" class="input" id="reset-username" required>
+                                </div>
+                                
+                                <div id="question-container" style="display: none;">
+                                    <div class="mb-2">
+                                        <label class="text-white mb-1" style="display: block;" id="question-label"></label>
+                                        <input type="text" class="input" id="reset-security-answer" required>
+                                    </div>
+                                </div>
+                                
+                                <div id="password-container" style="display: none;">
+                                    <div class="mb-2">
+                                        <label class="text-white mb-1" style="display: block;">Nouveau mot de passe</label>
+                                        <input type="password" class="input" id="reset-new-password" required>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label class="text-white mb-1" style="display: block;">Confirmer le mot de passe</label>
+                                        <input type="password" class="input" id="reset-password-confirm" required>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-warning" style="width: 100%; margin-bottom: 1rem;">Réinitialiser</button>
+                                
+                                <div class="text-center">
+                                    <button type="button" class="btn btn-link" onclick="app.showLogin()">Retour à la connexion</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderDashboard() {
+                return `
+                    <div class="container">
+                        <div class="card">
+                            <div class="flex justify-between items-center mb-4">
+                                <h1 class="text-white" style="font-size: 2rem;">Bienvenue, ${this.currentUser} 💪</h1>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-warning" onclick="app.exportData()">💾 Exporter</button>
+                                    <button class="btn btn-warning" onclick="app.importData()">📥 Importer</button>
+                                    <button class="btn btn-secondary" onclick="app.logout()">Déconnexion</button>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2 mb-4" style="overflow-x: auto;">
+                                <button class="tab-btn ${this.currentTab === 'dashboard' ? 'active' : ''}" onclick="app.switchTab('dashboard')">📊 Dashboard</button>
+                                <button class="tab-btn ${this.currentTab === 'rm' ? 'active' : ''}" onclick="app.switchTab('rm')">🎯 Calculateur 1RM</button>
+                                <button class="tab-btn ${this.currentTab === 'sessions' ? 'active' : ''}" onclick="app.switchTab('sessions')">📝 Mes Séances</button>
+                                <button class="tab-btn ${this.currentTab === 'cours' ? 'active' : ''}" onclick="app.switchTab('cours')">📚 Cours & Ressources</button>
+                            </div>
+
+                            ${this.currentTab === 'dashboard' ? this.renderDashboardTab() : ''}
+                            ${this.currentTab === 'rm' ? this.renderRMTab() : ''}
+                            ${this.currentTab === 'sessions' ? this.renderSessionsTab() : ''}
+                            ${this.currentTab === 'cours' ? this.renderCoursTab() : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderDashboardTab() {
+                const stats = {
+                    total: this.sessions.length,
+                    force: this.sessions.filter(s => s.type === 'Force').length,
+                    endurance: this.sessions.filter(s => s.type === 'Endurance').length,
+                    equilibre: this.sessions.filter(s => s.type === 'Équilibre').length
+                };
+
+                return `
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(6, 182, 212, 0.3);">
+                            <div class="text-cyan" style="font-size: 2.5rem; font-weight: bold;">${stats.total}</div>
+                            <div class="text-white" style="opacity: 0.9;">Séances créées</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(251, 146, 60, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(249, 115, 22, 0.3);">
+                            <div style="color: #fb923c; font-size: 2.5rem; font-weight: bold;">${stats.force}</div>
+                            <div class="text-white" style="opacity: 0.9;">Force</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(6, 182, 212, 0.3);">
+                            <div class="text-cyan" style="font-size: 2.5rem; font-weight: bold;">${stats.endurance}</div>
+                            <div class="text-white" style="opacity: 0.9;">Endurance</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(20, 184, 166, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(16, 185, 129, 0.3);">
+                            <div style="color: #14b8a6; font-size: 2.5rem; font-weight: bold;">${stats.equilibre}</div>
+                            <div class="text-white" style="opacity: 0.9;">Équilibre</div>
+                        </div>
+                    </div>
+
+                    <div class="tip-box">
+                        <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">💡 Conseil du jour</div>
+                        <div class="text-white" style="opacity: 0.9;">N'oubliez pas de bien vous échauffer avant chaque séance et de vous étirer après. La récupération est aussi importante que l'entraînement !</div>
+                    </div>
+                `;
+            }
+
+            renderRMTab() {
+                return `
+                    <div>
+                        <h2 class="text-white mb-2" style="font-size: 1.5rem;">Calculateur de 1RM</h2>
+                        <p class="text-white mb-4" style="opacity: 0.8;">Calculez votre charge maximale sur une répétition</p>
+
+                        <form id="rm-form" class="mb-4">
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <div>
+                                    <label class="text-white mb-1" style="display: block;">Charge soulevée (kg)</label>
+                                    <input type="number" class="input" id="rm-weight" step="0.5" required>
+                                </div>
+                                <div>
+                                    <label class="text-white mb-1" style="display: block;">Nombre de répétitions</label>
+                                    <input type="number" class="input" id="rm-reps" min="1" max="12" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Calculer mon 1RM</button>
+                        </form>
+
+                        <div id="rm-result" class="hidden"></div>
+
+                        <div class="tip-box">
+                            <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">ℹ️ Comment utiliser ce calculateur ?</div>
+                            <ul style="list-style: none; padding: 0;">
+                                <li class="text-white" style="opacity: 0.9; padding: 0.25rem 0;">• Entrez une charge que vous pouvez soulever entre 1 et 12 fois</li>
+                                <li class="text-white" style="opacity: 0.9; padding: 0.25rem 0;">• Le calculateur estimera votre 1RM (charge maximale)</li>
+                                <li class="text-white" style="opacity: 0.9; padding: 0.25rem 0;">• Plus précis entre 3-8 répétitions</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderSessionsTab() {
+                return `
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-white" style="font-size: 1.5rem;">Mes Séances d'entraînement</h2>
+                            <button class="btn btn-primary" onclick="app.createNewSession()">➕ Nouvelle séance</button>
+                        </div>
+
+                        ${this.sessions.length === 0 ? `
+                            <div class="text-center" style="padding: 3rem 1rem;">
+                                <div style="font-size: 4rem; margin-bottom: 1rem;">📝</div>
+                                <p class="text-white" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Aucune séance créée</p>
+                                <p class="text-white" style="opacity: 0.7;">Commencez par créer votre première séance d'entraînement</p>
+                            </div>
+                        ` : `
+                            <div>
+                                ${this.sessions.map((session, index) => `
+                                    <div class="session-card" onclick="app.viewSession(${index})">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <h3 class="text-white" style="font-size: 1.2rem;">${session.nom}</h3>
+                                            <span class="badge badge-${session.type.toLowerCase()}">${session.type}</span>
+                                        </div>
+                                        <div class="flex gap-2 mb-2" style="flex-wrap: wrap;">
+                                            ${session.muscles.map(m => `<span class="badge" style="background: rgba(6, 182, 212, 0.3); color: #67e8f9;">${m}</span>`).join('')}
+                                        </div>
+                                        <p class="text-white" style="opacity: 0.7; font-size: 0.9rem;">${session.exercices.length} exercice(s)</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+
+            renderCoursTab() {
+                return `
+                    <div>
+                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">📚 Cours & Ressources Pédagogiques</h2>
+                        
+                        <div class="flex gap-2 mb-4" style="overflow-x: auto; padding-bottom: 0.5rem;">
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'principes' ? 'active' : ''}" onclick="app.switchCoursTab('principes')">💡 Principes</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'pectoraux' ? 'active' : ''}" onclick="app.switchCoursTab('pectoraux')">💪 Pectoraux</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'dos' ? 'active' : ''}" onclick="app.switchCoursTab('dos')">🔺 Dos</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'epaules' ? 'active' : ''}" onclick="app.switchCoursTab('epaules')">🏔️ Épaules</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'bras' ? 'active' : ''}" onclick="app.switchCoursTab('bras')">💪 Bras</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'jambes' ? 'active' : ''}" onclick="app.switchCoursTab('jambes')">🦵 Jambes</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'anatomie' ? 'active' : ''}" onclick="app.switchCoursTab('anatomie')">🧬 Planches Anatomiques</button>
+                        </div>
+
+                        ${this.renderCoursContent()}
+                    </div>
+                `;
+            }
+
+            renderCoursContent() {
+                if (this.currentCoursTab === 'principes') {
+                    return `
+                        <div class="content-section">
+                            <h3 class="text-cyan mb-4" style="font-size: 1.3rem;">Les Principes Fondamentaux de la Musculation</h3>
+                            
+                            ${coursData.principes.map(principe => `
+                                <div class="exercise-card">
+                                    <h4>${principe.titre}</h4>
+                                    <p class="text-white" style="opacity: 0.9; margin-bottom: 1rem; line-height: 1.6;">${principe.contenu}</p>
+                                    <div class="tip-box" style="margin-top: 1rem;">
+                                        <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">✨ Conseils pratiques :</div>
+                                        <ul>
+                                            ${principe.conseils.map(conseil => `<li>${conseil}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else if (this.currentCoursTab === 'pectoraux') {
+                    return this.renderExercicesSection(coursData.exercicesPectoraux, 'Pectoraux');
+                } else if (this.currentCoursTab === 'dos') {
+                    return this.renderExercicesSection(coursData.exercicesDos, 'Dos');
+                } else if (this.currentCoursTab === 'epaules') {
+                    return this.renderExercicesSection(coursData.exercicesEpaules, 'Épaules');
+                } else if (this.currentCoursTab === 'bras') {
+                    return this.renderExercicesSection(coursData.exercicesBras, 'Bras');
+                } else if (this.currentCoursTab === 'jambes') {
+                    return this.renderExercicesSection(coursData.exercicesJambes, 'Jambes');
+                } else if (this.currentCoursTab === 'anatomie') {
+                    return this.renderAnatomieSection();
+                }
+            }
+
+            renderExercicesSection(exercices, titre) {
+                return `
+                    <div class="content-section">
+                        <h3 class="text-cyan mb-4" style="font-size: 1.3rem;">Exercices pour les ${titre}</h3>
+                        
+                        ${exercices.map(ex => `
+                            <div class="exercise-card">
+                                <h4>${ex.nom}</h4>
+                                <p class="text-white" style="opacity: 0.9; margin-bottom: 1rem; font-style: italic;">${ex.description}</p>
+                                
+                                <div style="margin-bottom: 1rem;">
+                                    <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem; color: #10b981;">🎯 Technique d'exécution :</div>
+                                    <ul>
+                                        ${ex.technique.map(step => `<li>${step}</li>`).join('')}
+                                    </ul>
+                                </div>
+                                
+                                ${ex.variantes ? `
+                                    <div class="tip-box">
+                                        <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">🔄 Variantes :</div>
+                                        <p class="text-white" style="opacity: 0.9;">${ex.variantes.join(' • ')}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            renderAnatomieSection() {
+                return `
+                    <div class="content-section">
+                        <h3 class="text-cyan mb-4" style="font-size: 1.3rem;">🧬 Planches Anatomiques</h3>
+                        
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="anatomy-image-container">
+                                <img src="https://github.com/BastianMAS/livret-musculation-cap/blob/main/images/planche%20anatomique%20dos.PNG?raw=true" alt="Planche anatomique dos">
+                                <p class="text-white" style="font-size: 0.9rem; opacity: 0.8; margin-top: 0.5rem;">Vue de dos</p>
+                            </div>
+                            
+                            <div class="anatomy-image-container">
+                                <img src="https://github.com/BastianMAS/livret-musculation-cap/blob/main/images/planche%20anatomique%20face.PNG?raw=true" alt="Planche anatomique face">
+                                <p class="text-white" style="font-size: 0.9rem; opacity: 0.8; margin-top: 0.5rem;">Vue de face</p>
+                            </div>
+                        </div>
+
+                        <h3 class="text-cyan mb-3" style="font-size: 1.2rem; margin-top: 2rem;">📖 Anatomie Musculaire Détaillée</h3>
+                        
+                        ${this.musclesList.map(muscle => {
+                            const info = coursData.anatomie[muscle];
+                            return `
+                                <div class="muscle-info-card">
+                                    <h4>💪 ${muscle}</h4>
+                                    
+                                    <div class="muscle-info-section">
+                                        <h5>🎯 Rôle et fonction</h5>
+                                        <p>${info.role}</p>
+                                    </div>
+                                    
+                                    <div class="muscle-info-section">
+                                        <h5>🔗 Insertions anatomiques</h5>
+                                        <ul>
+                                            ${info.insertions.map(insertion => `<li>${insertion}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+
+            renderSessionForm() {
+                return `
+                    <div class="container">
+                        <div class="card">
+                            <div class="flex justify-between items-center mb-4">
+                                <h1 class="text-white" style="font-size: 2rem;">➕ Nouvelle Séance</h1>
+                                <button class="btn btn-secondary" onclick="app.cancelSession()">← Retour</button>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="text-white mb-1" style="display: block;">Nom de la séance</label>
+                                <input type="text" class="input" id="session-name" placeholder="Ex: Pectoraux + Triceps">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="text-white mb-1" style="display: block;">Type de séance</label>
+                                <select class="input" id="session-type">
+                                    <option value="Force">Force</option>
+                                    <option value="Endurance">Endurance</option>
+                                    <option value="Équilibre">Équilibre</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="text-white mb-2" style="display: block;">Muscles ciblés</label>
+                                <div class="grid grid-cols-3 gap-2" id="muscles-list"></div>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-white" style="display: block;">Exercices</label>
+                                    <button class="btn btn-primary" onclick="app.addExercice()">➕ Ajouter</button>
+                                </div>
+                                <div id="exercices-list"></div>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <button class="btn btn-success" onclick="app.saveSession()" style="flex: 1;">💾 Enregistrer</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderSessionDetail() {
+                const session = this.sessions[this.currentSession];
+                return `
+                    <div class="container">
+                        <div class="card">
+                            <div class="flex justify-between items-center mb-4">
+                                <div>
+                                    <h1 class="text-white mb-2" style="font-size: 2rem;">${session.nom}</h1>
+                                    <span class="badge badge-${session.type.toLowerCase()}">${session.type}</span>
+                                </div>
+                                <button class="btn btn-secondary" onclick="app.backToSessions()">← Retour</button>
+                            </div>
+
+                            <div class="mb-4">
+                                <h3 class="text-cyan mb-2">Muscles ciblés</h3>
+                                <div class="flex gap-2" style="flex-wrap: wrap;">
+                                    ${session.muscles.map(m => `<span class="badge" style="background: rgba(6, 182, 212, 0.3); color: #67e8f9;">${m}</span>`).join('')}
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h3 class="text-cyan mb-2">Exercices (${session.exercices.length})</h3>
+                                ${session.exercices.map((ex, i) => `
+                                    <div style="background: rgba(255, 255, 255, 0.1); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.2);">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <h4 class="text-white" style="font-size: 1.1rem;">${i + 1}. ${ex.nom}</h4>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-3">
+                                            <div>
+                                                <div class="text-cyan" style="font-size: 0.85rem;">Séries</div>
+                                                <div class="text-white" style="font-size: 1.2rem; font-weight: 600;">${ex.series}</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-cyan" style="font-size: 0.85rem;">Répétitions</div>
+                                                <div class="text-white" style="font-size: 1.2rem; font-weight: 600;">${ex.repetitions}</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-cyan" style="font-size: 0.85rem;">Charge</div>
+                                                <div class="text-white" style="font-size: 1.2rem; font-weight: 600;">${ex.charge}</div>
+                                            </div>
+                                        </div>
+                                        ${ex.repos ? `<div class="text-white mt-2" style="opacity: 0.8; font-size: 0.9rem;">⏱️ Repos : ${ex.repos}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            switchCoursTab(tab) {
+                this.currentCoursTab = tab;
+                this.render();
+            }handleLogin(e) {
+                e.preventDefault();
+                const username = document.getElementById('login-username').value;
+                const password = document.getElementById('login-password').value;
+
+                const userKey = `user-${username}`;
+                const userResult = storage.get(userKey, true);
+
+                if (!userResult.exists) {
+                    alert('Nom d\'utilisateur incorrect');
+                    return;
+                }
+
+                const userData = JSON.parse(userResult.value);
+                if (userData.password !== password) {
+                    alert('Mot de passe incorrect');
+                    return;
+                }
+
+                this.currentUser = username;
+                this.currentView = 'dashboard';
+                this.loadSessions();
+                this.render();
+            }
+
+            handleSignup(e) {
+                e.preventDefault();
+                const username = document.getElementById('signup-username').value;
+                const password = document.getElementById('signup-password').value;
+                const passwordConfirm = document.getElementById('signup-password-confirm').value;
+                const securityQuestion = document.getElementById('signup-security-question').value;
+                const securityAnswer = document.getElementById('signup-security-answer').value;
+
+                if (password !== passwordConfirm) {
+                    alert('Les mots de passe ne correspondent pas');
+                    return;
+                }
+
+                const userKey = `user-${username}`;
+                const userResult = storage.get(userKey, true);
+
+                if (userResult.exists) {
+                    alert('Ce nom d\'utilisateur existe déjà');
+                    return;
+                }
+
+                const userData = {
+                    password: password,
+                    securityQuestion: securityQuestion,
+                    securityAnswer: securityAnswer.toLowerCase()
+                };
+
+                storage.save(userKey, userData, true);
+                alert('Compte créé avec succès !');
+                this.showLogin();
+            }
+
+            handlePasswordReset(e) {
+                e.preventDefault();
+                const username = document.getElementById('reset-username').value;
+                const securityAnswer = document.getElementById('reset-security-answer').value;
+                const newPassword = document.getElementById('reset-new-password').value;
+                const passwordConfirm = document.getElementById('reset-password-confirm').value;
+
+                if (newPassword !== passwordConfirm) {
+                    alert('Les mots de passe ne correspondent pas');
+                    return;
+                }
+
+                const userKey = `user-${username}`;
+                const userResult = storage.get(userKey, true);
+
+                if (!userResult.exists) {
+                    alert('Nom d\'utilisateur incorrect');
+                    return;
+                }
+
+                const userData = JSON.parse(userResult.value);
+                if (userData.securityAnswer !== securityAnswer.toLowerCase()) {
+                    alert('Réponse de sécurité incorrecte');
+                    return;
+                }
+
+                userData.password = newPassword;
+                storage.save(userKey, userData, true);
+                alert('Mot de passe réinitialisé avec succès !');
+                this.showLogin();
+            }
+
+            showLogin() {
+                this.currentView = 'login';
+                this.render();
+            }
+
+            showSignup() {
+                this.currentView = 'signup';
+                this.render();
+            }
+
+            showPasswordReset() {
+                this.currentView = 'reset';
+                this.render();
+            }
+
+            logout() {
+                this.currentUser = null;
+                this.sessions = [];
+                this.currentView = 'login';
+                this.render();
+            }
+
+            switchTab(tab) {
+                this.currentTab = tab;
+                this.render();
+            }
+
+            calculateRM(e) {
+                e.preventDefault();
+                const weight = parseFloat(document.getElementById('rm-weight').value);
+                const reps = parseInt(document.getElementById('rm-reps').value);
+
+                const rm = weight * (1 + reps / 30);
+                
+                const resultDiv = document.getElementById('rm-result');
+                resultDiv.classList.remove('hidden');
+                resultDiv.innerHTML = `
+                    <div class="rm-result">
+                        <div class="text-white" style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 0.5rem;">Votre 1RM estimé</div>
+                        <div style="font-size: 3rem; font-weight: bold; color: #10b981; margin-bottom: 1rem;">${rm.toFixed(1)} kg</div>
+                        <div class="text-white" style="opacity: 0.8;">Basé sur ${weight}kg × ${reps} répétition${reps > 1 ? 's' : ''}</div>
+                    </div>
+                `;
+            }
+
+            createNewSession() {
+                this.currentSession = null;
+                this.currentView = 'session-form';
+                this.render();
+                this.initSessionForm();
+            }
+
+            initSessionForm() {
+                // Initialiser la liste des muscles
+                const musclesList = document.getElementById('muscles-list');
+                musclesList.innerHTML = this.musclesList.map(muscle => `
+                    <button type="button" class="muscle-btn" onclick="app.toggleMuscle(this, '${muscle}')">${muscle}</button>
+                `).join('');
+
+                // Ajouter un exercice par défaut
+                this.exercicesTemp = [];
+                this.musclesTemp = [];
+                this.addExercice();
+            }
+
+            toggleMuscle(btn, muscle) {
+                btn.classList.toggle('active');
+                if (this.musclesTemp.includes(muscle)) {
+                    this.musclesTemp = this.musclesTemp.filter(m => m !== muscle);
+                } else {
+                    this.musclesTemp.push(muscle);
+                }
+            }
+
+            addExercice() {
+                const exercicesList = document.getElementById('exercices-list');
+                const index = this.exercicesTemp.length;
+                
+                const exerciceHTML = `
+                    <div class="exercise-card mb-2" id="exercice-${index}">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-cyan">Exercice ${index + 1}</h4>
+                            <button class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="app.removeExercice(${index})">🗑️</button>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <input type="text" class="input" placeholder="Nom de l'exercice" id="ex-name-${index}">
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-2 mb-2">
+                            <div>
+                                <label class="text-white" style="font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Séries</label>
+                                <input type="number" class="input" placeholder="4" id="ex-series-${index}">
+                            </div>
+                            <div>
+                                <label class="text-white" style="font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Répétitions</label>
+                                <input type="number" class="input" placeholder="8-12" id="ex-reps-${index}">
+                            </div>
+                            <div>
+                                <label class="text-white" style="font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Charge</label>
+                                <input type="text" class="input" placeholder="20kg" id="ex-charge-${index}">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-white" style="font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Temps de repos</label>
+                            <input type="text" class="input" placeholder="Ex: 90 secondes" id="ex-repos-${index}">
+                        </div>
+                    </div>
+                `;
+                
+                exercicesList.insertAdjacentHTML('beforeend', exerciceHTML);
+                this.exercicesTemp.push({});
+            }
+
+            removeExercice(index) {
+                const exerciceElement = document.getElementById(`exercice-${index}`);
+                if (exerciceElement) {
+                    exerciceElement.remove();
+                }
+            }
+
+            saveSession() {
+                const name = document.getElementById('session-name').value;
+                const type = document.getElementById('session-type').value;
+
+                if (!name || name.trim() === '') {
+                    alert('Veuillez donner un nom à la séance');
+                    return;
+                }
+
+                if (this.musclesTemp.length === 0) {
+                    alert('Veuillez sélectionner au moins un muscle');
+                    return;
+                }
+
+                // Récupérer tous les exercices
+                const exercices = [];
+                for (let i = 0; i < this.exercicesTemp.length; i++) {
+                    const exName = document.getElementById(`ex-name-${i}`);
+                    const exSeries = document.getElementById(`ex-series-${i}`);
+                    const exReps = document.getElementById(`ex-reps-${i}`);
+                    const exCharge = document.getElementById(`ex-charge-${i}`);
+                    const exRepos = document.getElementById(`ex-repos-${i}`);
+
+                    if (exName && exName.value.trim() !== '') {
+                        exercices.push({
+                            nom: exName.value,
+                            series: exSeries.value || '4',
+                            repetitions: exReps.value || '8-12',
+                            charge: exCharge.value || 'À définir',
+                            repos: exRepos.value || '90 secondes'
+                        });
+                    }
+                }
+
+                if (exercices.length === 0) {
+                    alert('Veuillez ajouter au moins un exercice');
+                    return;
+                }
+
+                const session = {
+                    nom: name,
+                    type: type,
+                    muscles: this.musclesTemp,
+                    exercices: exercices
+                };
+
+                this.sessions.push(session);
+                this.saveSessions();
+
+                alert('✅ Séance enregistrée avec succès !');
+                this.backToSessions();
+            }
+
+            editSession(index) {
+                this.currentSession = index;
+                this.currentView = 'session-form';
+                this.render();
+            }
+
+            viewSession(index) {
+                this.currentSession = index;
+                this.currentView = 'session-detail';
+                this.render();
+            }
+
+            cancelSession() {
+                this.currentSession = null;
+                this.currentView = 'dashboard';
+                this.currentTab = 'sessions';
+                this.render();
+            }
+
+            backToSessions() {
+                this.currentSession = null;
+                this.currentView = 'dashboard';
+                this.currentTab = 'sessions';
+                this.render();
+            }
+
+            exportData() {
+                const data = {
+                    username: this.currentUser,
+                    userData: JSON.parse(storage.get(`user-${this.currentUser}`, true).value),
+                    sessions: this.sessions,
+                    exportDate: new Date().toISOString()
+                };
+
+                const dataStr = JSON.stringify(data, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `livret-musculation-${this.currentUser}-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                
+                URL.revokeObjectURL(url);
+                alert('✅ Données exportées avec succès ! Sauvegardez ce fichier sur votre Google Drive ou clé USB.');
+            }
+
+            importData() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        try {
+                            const data = JSON.parse(event.target.result);
+                            
+                            // Sauvegarder les données utilisateur
+                            const userKey = `user-${data.username}`;
+                            storage.save(userKey, data.userData, true);
+                            
+                            // Se connecter avec ce compte
+                            this.currentUser = data.username;
+                            this.sessions = data.sessions || [];
+                            this.saveSessions();
+                            
+                            alert('✅ Données importées avec succès ! Vous êtes maintenant connecté.');
+                            this.render();
+                        } catch (error) {
+                            alert('❌ Erreur : Fichier invalide. Assurez-vous d\'importer un fichier exporté depuis ce livret.');
+                        }
+                    };
+                    reader.readAsText(file);
+                };
+                
+                input.click();
+            }
+
+            attachLoginEvents() {
+                const loginForm = document.getElementById('login-form');
+                const signupForm = document.getElementById('signup-form');
+                
+                if (loginForm) {
+                    loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+                }
+                
+                if (signupForm) {
+                    signupForm.addEventListener('submit', (e) => this.handleSignup(e));
+                }
+            }
+
+            attachResetEvents() {
+                const resetForm = document.getElementById('reset-form');
+                const usernameInput = document.getElementById('reset-username');
+                
+                if (usernameInput) {
+                    usernameInput.addEventListener('blur', () => {
+                        const username = usernameInput.value;
+                        if (username) {
+                            const userKey = `user-${username}`;
+                            const userResult = storage.get(userKey, true);
+                            
+                            if (userResult.exists) {
+                                const userData = JSON.parse(userResult.value);
+                                const questionContainer = document.getElementById('question-container');
+                                const questionLabel = document.getElementById('question-label');
+                                const passwordContainer = document.getElementById('password-container');
+                                
+                                questionLabel.textContent = securityQuestions[userData.securityQuestion];
+                                questionContainer.style.display = 'block';
+                                passwordContainer.style.display = 'block';
+                            }
+                        }
+                    });
+                }
+                
+                if (resetForm) {
+                    resetForm.addEventListener('submit', (e) => this.handlePasswordReset(e));
+                }
+            }
+
+            attachDashboardEvents() {
+                const rmForm = document.getElementById('rm-form');
+                if (rmForm) {
+                    rmForm.addEventListener('submit', (e) => this.calculateRM(e));
+                }
+            }
+
+            attachSessionFormEvents() {
+                // Les événements sont gérés par onclick dans le HTML
+            }
+        }
+
+        const app = new LivretApp();
+    </script>
+</body>
+</html>
