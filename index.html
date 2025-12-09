@@ -1,0 +1,2820 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livret de Musculation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .text-white {
+            color: #f1f5f9;
+        }
+
+        .text-cyan {
+            color: #67e8f9;
+        }
+
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-4 { margin-top: 1rem; }
+
+        .input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.75rem;
+            color: #f1f5f9;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .btn-warning:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(100, 116, 139, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-link {
+            background: transparent;
+            color: #67e8f9;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-link:hover {
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-3 {
+            gap: 0.75rem;
+        }
+
+        .grid {
+            display: grid;
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .user-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.4);
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 0.75rem;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            background: rgba(6, 182, 212, 0.1);
+            color: #67e8f9;
+            border-color: rgba(6, 182, 212, 0.3);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .sub-tab-btn {
+            padding: 0.6rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 0.6rem;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .sub-tab-btn:hover {
+            background: rgba(6, 182, 212, 0.1);
+            color: #67e8f9;
+            border-color: rgba(6, 182, 212, 0.3);
+        }
+
+        .sub-tab-btn.active {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .rm-history-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .rm-history-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.2);
+            border-color: rgba(6, 182, 212, 0.3);
+        }
+
+        .session-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .session-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.2);
+            border-color: rgba(6, 182, 212, 0.3);
+        }
+
+        .session-card.completed {
+            border-color: rgba(16, 185, 129, 0.5);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .session-completed-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .session-history-item {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-force {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fb923c;
+            border: 1px solid rgba(249, 115, 22, 0.3);
+        }
+
+        .badge-endurance {
+            background: rgba(6, 182, 212, 0.2);
+            color: #67e8f9;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .badge-équilibre {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .avatar-upload {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.8);
+            border: 3px dashed rgba(6, 182, 212, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+            font-size: 2.5rem;
+        }
+
+        .avatar-upload:hover {
+            border-color: #06b6d4;
+            transform: scale(1.05);
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #06b6d4;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .default-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .muscle-btn {
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-radius: 0.75rem;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .muscle-btn:hover {
+            background: rgba(6, 182, 212, 0.1);
+            color: #67e8f9;
+            border-color: rgba(6, 182, 212, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .muscle-btn.selected {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .exercice-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .tip-box {
+            background: rgba(6, 182, 212, 0.1);
+            border-left: 4px solid #06b6d4;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .warning-box {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .content-section {
+            margin-bottom: 2rem;
+        }
+
+        .exercise-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .exercise-card h4 {
+            color: #67e8f9;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .exercise-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .exercise-card ul li {
+            color: #e2e8f0;
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .exercise-card ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .mobile-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .mobile-table th {
+            background: rgba(6, 182, 212, 0.2);
+            color: #67e8f9;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .mobile-table td {
+            padding: 1rem;
+            color: #e2e8f0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .mobile-table tr:hover {
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        .anatomy-image-container {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .anatomy-image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 0.75rem;
+        }
+
+        .muscle-info-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .muscle-info-card h4 {
+            color: #67e8f9;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .muscle-info-section {
+            margin-bottom: 1rem;
+        }
+
+        .muscle-info-section h5 {
+            color: #10b981;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .muscle-info-section p {
+            color: #e2e8f0;
+            line-height: 1.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .muscle-info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .muscle-info-section ul li {
+            color: #e2e8f0;
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .muscle-info-section ul li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #06b6d4;
+            font-weight: bold;
+        }
+
+        /* TIMER STYLES */
+        .timer-container {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+            border: 2px solid rgba(6, 182, 212, 0.4);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .timer-display {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #67e8f9;
+            margin: 2rem 0;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+        }
+
+        .timer-display.running {
+            color: #10b981;
+            animation: pulse 1s infinite;
+        }
+
+        .timer-display.paused {
+            color: #f59e0b;
+        }
+
+        .timer-display.finished {
+            color: #ef4444;
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+        }
+
+        .timer-preset {
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(6, 182, 212, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: #67e8f9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .timer-preset:hover {
+            background: rgba(6, 182, 212, 0.2);
+            border-color: #06b6d4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .timer-preset.active {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .timer-input-group {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: center;
+            margin: 1rem 0;
+        }
+
+        .timer-input {
+            width: 80px;
+            padding: 0.5rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.5rem;
+            color: #f1f5f9;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .chrono-laps {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+
+        .lap-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            color: #e2e8f0;
+        }
+
+        .lap-item:last-child {
+            border-bottom: none;
+        }
+
+        /* JOURNAL STYLES */
+        .session-notes-area {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.75rem;
+            color: #f1f5f9;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .session-notes-area:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+
+        .session-completion-modal {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0.5rem;
+            }
+
+            .card {
+                padding: 1rem;
+                border-radius: 1rem;
+            }
+
+            .flex {
+                flex-direction: column;
+            }
+
+            .tab-btn, .sub-tab-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .mobile-table {
+                font-size: 0.85rem;
+            }
+
+            .mobile-table th,
+            .mobile-table td {
+                padding: 0.5rem;
+            }
+
+            .timer-display {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>// DONNÉES DES COURS
+        const coursData = {
+            principes: [
+                {
+                    titre: "1. Principe de Surcharge Progressive",
+                    contenu: "Pour progresser en musculation, il faut constamment augmenter la charge, le volume ou l'intensité de l'entraînement. Le corps s'adapte aux stimuli qu'on lui impose : si on soulève toujours la même charge, il n'y a plus de progression.",
+                    conseils: [
+                        "Augmenter progressivement les charges de 2-5% par semaine",
+                        "Varier le nombre de répétitions et de séries",
+                        "Modifier la vitesse d'exécution ou les temps de repos"
+                    ]
+                },
+                {
+                    titre: "2. Principe de Spécificité",
+                    contenu: "Les adaptations du corps sont spécifiques au type d'entraînement réalisé. Si vous voulez développer votre force maximale, vous devez vous entraîner avec des charges lourdes. Pour l'endurance musculaire, privilégiez des charges légères avec beaucoup de répétitions.",
+                    conseils: [
+                        "Définir clairement son objectif (force, volume, endurance)",
+                        "Adapter le choix des exercices à son objectif",
+                        "Respecter les paramètres du mobile choisi"
+                    ]
+                },
+                {
+                    titre: "3. Principe de Récupération",
+                    contenu: "Le muscle ne se développe pas pendant l'entraînement mais pendant la phase de récupération. Un repos insuffisant empêche la progression et augmente le risque de blessure. Il faut respecter 48-72h de repos entre deux séances sollicitant les mêmes groupes musculaires.",
+                    conseils: [
+                        "Dormir 7-9h par nuit pour optimiser la récupération",
+                        "Alterner les groupes musculaires travaillés",
+                        "Prévoir des semaines de décharge toutes les 4-6 semaines"
+                    ]
+                },
+                {
+                    titre: "4. Principe de Variation",
+                    contenu: "Pour éviter la stagnation, il est essentiel de varier régulièrement son programme d'entraînement. Changer d'exercices, modifier l'ordre, ajuster les paramètres permet de continuer à progresser et d'éviter la routine.",
+                    conseils: [
+                        "Changer de programme toutes les 6-8 semaines",
+                        "Varier les angles de travail pour un même muscle",
+                        "Alterner entre différents mobiles dans l'année"
+                    ]
+                }
+            ],
+
+            mobiles: [
+                {
+                    nom: "FORCE",
+                    color: "#fb923c",
+                    objectif: "Développer la force maximale",
+                    charge: "85-100%",
+                    repetitions: "1-5",
+                    series: "4-6",
+                    repos: "3-5 min",
+                    formes: [
+                        "Charges libres lourdes (barres, haltères)",
+                        "Exercices poly-articulaires (squat, développé couché, soulevé de terre)",
+                        "Travail en concentrique pur",
+                        "Méthode bulgare, pyramidale"
+                    ]
+                },
+                {
+                    nom: "ÉQUILIBRE / VOLUME",
+                    color: "#14b8a6",
+                    objectif: "Développer la masse musculaire",
+                    charge: "65-80%",
+                    repetitions: "6-12",
+                    series: "3-5",
+                    repos: "1-2 min",
+                    formes: [
+                        "Mélange charges libres et machines guidées",
+                        "Exercices d'isolation musculaire",
+                        "Tempo lent (4-2-1)",
+                        "Super-sets, bi-sets, drop-sets"
+                    ]
+                },
+                {
+                    nom: "ENDURANCE",
+                    color: "#06b6d4",
+                    objectif: "Améliorer l'endurance musculaire",
+                    charge: "40-60%",
+                    repetitions: "15-25+",
+                    series: "2-4",
+                    repos: "30s-1min",
+                    formes: [
+                        "Circuit training",
+                        "Entraînement en continu",
+                        "Méthode HIIT adaptée",
+                        "Exercices au poids du corps"
+                    ]
+                }
+            ],
+
+            typesContraction: [
+                {
+                    type: "Concentrique",
+                    definition: "Le muscle se contracte en se raccourcissant (phase de montée)",
+                    exemple: "Monter la barre au développé couché",
+                    mobile: "Force, Équilibre, Endurance"
+                },
+                {
+                    type: "Excentrique",
+                    definition: "Le muscle se contracte en s'allongeant (phase de descente contrôlée)",
+                    exemple: "Descendre la barre lentement au développé couché",
+                    mobile: "Force, Équilibre"
+                },
+                {
+                    type: "Isométrique",
+                    definition: "Le muscle se contracte sans changement de longueur (maintien statique)",
+                    exemple: "Tenir la position de gainage",
+                    mobile: "Endurance, Équilibre"
+                },
+                {
+                    type: "Pliométrique",
+                    definition: "Contraction explosive combinant excentrique et concentrique rapide",
+                    exemple: "Pompes sautées, box jumps",
+                    mobile: "Force explosive"
+                }
+            ],
+
+            hygiene: {
+                avant: [
+                    {
+                        titre: "Échauffement (10-15 min)",
+                        contenu: "L'échauffement prépare le corps à l'effort : augmentation de la température corporelle, activation cardio-vasculaire, mobilisation articulaire. Commencer par 5 min de cardio léger puis réaliser des mouvements dynamiques spécifiques aux muscles qui vont être travaillés."
+                    },
+                    {
+                        titre: "Hydratation",
+                        contenu: "Boire 300-500ml d'eau 1-2h avant la séance. Une bonne hydratation améliore les performances et réduit les risques de blessures."
+                    },
+                    {
+                        titre: "Collation pré-training (optionnel)",
+                        contenu: "Si la séance est intense, consommer 1-2h avant des glucides complexes (flocons d'avoine, banane) pour avoir de l'énergie disponible."
+                    }
+                ],
+                pendant: [
+                    {
+                        titre: "Hydratation régulière",
+                        contenu: "Boire 150-250ml d'eau toutes les 15-20 min pendant l'effort pour compenser les pertes hydriques dues à la transpiration."
+                    },
+                    {
+                        titre: "Respect des temps de repos",
+                        contenu: "Les temps de repos sont essentiels selon le mobile : 3-5 min pour la force, 1-2 min pour l'équilibre, 30s-1min pour l'endurance. Ne pas les négliger !"
+                    },
+                    {
+                        titre: "Technique avant charge",
+                        contenu: "Privilégier toujours une exécution technique parfaite plutôt que de soulever lourd avec une mauvaise posture. Cela prévient les blessures et optimise le recrutement musculaire."
+                    }
+                ],
+                apres: [
+                    {
+                        titre: "Retour au calme (5-10 min)",
+                        contenu: "Réaliser des étirements passifs et doux pour favoriser la récupération musculaire et réduire les courbatures. Tenir chaque étirement 20-30 secondes sans forcer."
+                    },
+                    {
+                        titre: "Hydratation et nutrition",
+                        contenu: "Dans les 30 min suivant la séance, boire de l'eau et consommer des protéines (20-30g) + glucides pour optimiser la récupération musculaire."
+                    },
+                    {
+                        titre: "Repos et sommeil",
+                        contenu: "Le muscle se reconstruit pendant le repos. Respecter 48-72h entre deux séances sur les mêmes groupes musculaires et dormir 7-9h par nuit."
+                    }
+                ]
+            },
+
+            anatomie: {
+                "Pectoraux": {
+                    role: "Les pectoraux sont des muscles puissants de la région thoracique. Ils permettent l'adduction du bras (rapprocher le bras du corps), la flexion de l'épaule et la rotation interne du bras. Ils sont essentiels dans les mouvements de poussée.",
+                    insertions: [
+                        "Origine : Clavicule (faisceau claviculaire), sternum et cartilages costaux (faisceau sternal)",
+                        "Terminaison : Humérus (tubérosité deltoïdienne)"
+                    ]
+                },
+                "Grand dorsal": {
+                    role: "Le grand dorsal est le muscle le plus large du dos. Il permet l'extension, l'adduction et la rotation interne du bras. C'est un muscle majeur pour tous les mouvements de tirage.",
+                    insertions: [
+                        "Origine : Vertèbres thoraciques (T7-T12), lombaires, crête iliaque, côtes inférieures",
+                        "Terminaison : Humérus (gouttière bicipitale)"
+                    ]
+                },
+                "Trapèzes": {
+                    role: "Les trapèzes stabilisent et mobilisent l'omoplate. Ils permettent l'élévation, l'abaissement, l'adduction et la rotation de la scapula. Ils sont composés de 3 faisceaux : supérieur, moyen et inférieur.",
+                    insertions: [
+                        "Origine : Occipital, ligament nucal, apophyses épineuses C7-T12",
+                        "Terminaison : Clavicule, acromion, épine de la scapula"
+                    ]
+                },
+                "Deltoïdes": {
+                    role: "Les deltoïdes recouvrent l'articulation de l'épaule. Ils permettent l'abduction, la flexion et l'extension du bras selon le faisceau sollicité (antérieur, moyen, postérieur). Muscle essentiel pour la mobilité de l'épaule.",
+                    insertions: [
+                        "Origine : Clavicule (faisceau antérieur), acromion (faisceau moyen), épine scapulaire (faisceau postérieur)",
+                        "Terminaison : Humérus (tubérosité deltoïdienne)"
+                    ]
+                },
+                "Biceps": {
+                    role: "Le biceps brachial est le muscle fléchisseur principal du coude. Il permet aussi la supination de l'avant-bras (rotation externe). Composé de 2 chefs : long et court.",
+                    insertions: [
+                        "Origine : Omoplate (apophyse coracoïde pour le court chef, tubercule supra-glénoïdien pour le long chef)",
+                        "Terminaison : Radius (tubérosité bicipitale)"
+                    ]
+                },
+                "Triceps": {
+                    role: "Le triceps brachial est le muscle extenseur du coude. Composé de 3 chefs (long, latéral, médial), il est antagoniste du biceps et essentiel dans tous les mouvements de poussée.",
+                    insertions: [
+                        "Origine : Omoplate (tubercule infra-glénoïdien pour le long chef), humérus pour les 2 autres chefs",
+                        "Terminaison : Ulna (olécrane)"
+                    ]
+                },
+                "Abdominaux": {
+                    role: "Les abdominaux (grand droit, obliques, transverse) forment la sangle abdominale. Ils permettent la flexion du tronc, la rotation et l'inclinaison latérale. Ils stabilisent le bassin et protègent les organes internes.",
+                    insertions: [
+                        "Grand droit : Origine pubis, Terminaison côtes 5-7 et xiphoïde",
+                        "Obliques : Côtes → Crête iliaque et aponévrose abdominale",
+                        "Transverse : Côtes et fascia → Aponévrose abdominale"
+                    ]
+                },
+                "Quadriceps": {
+                    role: "Le quadriceps est le muscle extenseur du genou. Composé de 4 chefs (droit fémoral, vaste latéral, vaste médial, vaste intermédiaire), c'est le muscle le plus puissant du corps humain.",
+                    insertions: [
+                        "Origine : Bassin (droit fémoral), fémur (3 vastes)",
+                        "Terminaison : Rotule puis tibia via le tendon rotulien"
+                    ]
+                },
+                "Ischio-jambiers": {
+                    role: "Les ischio-jambiers (biceps fémoral, semi-tendineux, semi-membraneux) permettent la flexion du genou et l'extension de la hanche. Muscles essentiels pour la course et les sauts.",
+                    insertions: [
+                        "Origine : Ischion (tubérosité ischiatique)",
+                        "Terminaison : Tibia et fibula"
+                    ]
+                },
+                "Fessiers": {
+                    role: "Les fessiers (grand, moyen, petit) sont les muscles les plus puissants du corps. Le grand fessier permet l'extension de la hanche, essentielle pour se lever, courir, sauter. Les moyens et petits fessiers assurent l'abduction et la stabilisation du bassin.",
+                    insertions: [
+                        "Origine : Os iliaque, sacrum, coccyx",
+                        "Terminaison : Fémur (tubérosité glutéale et tractus ilio-tibial)"
+                    ]
+                },
+                "Mollets": {
+                    role: "Les mollets (gastrocnémiens et soléaire) forment le triceps sural. Ils permettent la flexion plantaire de la cheville (se mettre sur la pointe des pieds). Essentiels pour la marche, la course et les sauts.",
+                    insertions: [
+                        "Origine : Fémur (gastrocnémiens), tibia/fibula (soléaire)",
+                        "Terminaison : Calcanéum via le tendon d'Achille"
+                    ]
+                }
+            },
+
+            exercicesPectoraux: [
+                {
+                    nom: "Développé Couché",
+                    description: "Exercice de base pour les pectoraux, sollicite aussi les triceps et deltoïdes antérieurs.",
+                    videos: [
+                        { titre: "Développé Couché - Technique complète", url: "https://www.youtube.com/watch?v=rT7DgCr-3pg" },
+                        { titre: "Développé Couché Haltères", url: "https://www.youtube.com/watch?v=VmB1G1K7v94" }
+                    ],
+                    technique: [
+                        "Position allongée sur banc, pieds au sol",
+                        "Saisir la barre largeur épaules + 10cm",
+                        "Descendre la barre sur le bas des pectoraux",
+                        "Pousser verticalement en contractant les pectoraux",
+                        "Garder les omoplates serrées tout le mouvement"
+                    ],
+                    variantes: ["Développé incliné (haut des pecs)", "Développé décliné (bas des pecs)", "Développé haltères"]
+                },
+                {
+                    nom: "Pompes",
+                    description: "Exercice au poids du corps très complet pour les pectoraux et la stabilité.",
+                    videos: [
+                        { titre: "Pompes - Technique parfaite", url: "https://www.youtube.com/watch?v=IODxDxX7oi4" }
+                    ],
+                    technique: [
+                        "Position planche, mains largeur épaules",
+                        "Corps aligné de la tête aux pieds",
+                        "Descendre en contrôlant jusqu'à frôler le sol",
+                        "Remonter en poussant fort",
+                        "Garder les abdos gainés"
+                    ],
+                    variantes: ["Pompes surélevées", "Pompes déclinées", "Pompes diamant", "Pompes larges"]
+                },
+                {
+                    nom: "Écarté Haltères",
+                    description: "Exercice d'isolation pour étirer et congestionner les pectoraux.",
+                    videos: [
+                        { titre: "Écarté Couché aux Haltères", url: "https://www.youtube.com/watch?v=eozdVDA78K0" }
+                    ],
+                    technique: [
+                        "Position allongée, bras tendus au-dessus de la poitrine",
+                        "Descendre les haltères en arc de cercle",
+                        "Coudes légèrement fléchis (15-20°)",
+                        "Sentir l'étirement des pectoraux",
+                        "Remonter en contractant fort"
+                    ],
+                    variantes: ["Écarté incliné", "Écarté poulie vis-à-vis"]
+                },
+                {
+                    nom: "Dips",
+                    description: "Exercice exigeant qui cible le bas des pectoraux et les triceps.",
+                    videos: [
+                        { titre: "Dips Pectoraux", url: "https://www.youtube.com/watch?v=2z8JmcrW-As" }
+                    ],
+                    technique: [
+                        "Saisir les barres parallèles",
+                        "Se pencher en avant (buste penché = pectoraux)",
+                        "Descendre jusqu'à 90° de flexion",
+                        "Remonter en poussant",
+                        "Éviter de bloquer les coudes en haut"
+                    ],
+                    variantes: ["Dips lesté", "Dips assisté", "Dips triceps (buste droit)"]
+                },
+                {
+                    nom: "Pull-over",
+                    description: "Exercice pour ouvrir la cage thoracique et travailler les pectoraux en amplitude.",
+                    videos: [
+                        { titre: "Pull-over Haltère", url: "https://www.youtube.com/watch?v=FK0kAY13nr4" }
+                    ],
+                    technique: [
+                        "Position en travers du banc, épaules appuyées",
+                        "Tenir un haltère à deux mains au-dessus du torse",
+                        "Descendre l'haltère derrière la tête en arc",
+                        "Sentir l'étirement des pectoraux et du dos",
+                        "Remonter en contractant"
+                    ],
+                    variantes: ["Pull-over poulie haute", "Pull-over barre"]
+                }
+            ],
+
+            exercicesDos: [
+                {
+                    nom: "Tractions",
+                    description: "Exercice roi pour le dos, sollicite grand dorsal, trapèzes et biceps.",
+                    videos: [
+                        { titre: "Tractions Pronation - Technique", url: "https://www.youtube.com/watch?v=eGo4IYlbE5g" },
+                        { titre: "Progresser aux Tractions", url: "https://www.youtube.com/watch?v=mRznU6pzez0" }
+                    ],
+                    technique: [
+                        "Saisir la barre en pronation (paumes vers l'avant)",
+                        "Se suspendre bras tendus",
+                        "Tirer en ramenant les coudes vers le bas",
+                        "Monter le menton au-dessus de la barre",
+                        "Descendre en contrôlant"
+                    ],
+                    variantes: ["Tractions supination (biceps++)", "Tractions prise large", "Tractions lestées"]
+                },
+                {
+                    nom: "Rowing Barre",
+                    description: "Exercice de base pour l'épaisseur du dos et la force globale.",
+                    videos: [
+                        { titre: "Rowing Barre Buste Penché", url: "https://www.youtube.com/watch?v=FWJR5Ve8bnQ" }
+                    ],
+                    technique: [
+                        "Barre au sol, pieds largeur bassin",
+                        "Fléchir les genoux, buste penché 45°",
+                        "Saisir la barre en pronation",
+                        "Tirer vers le bas des abdos",
+                        "Serrer les omoplates en haut"
+                    ],
+                    variantes: ["Rowing T-bar", "Rowing haltère", "Rowing Yates (supination)"]
+                },
+                {
+                    nom: "Tirage Vertical",
+                    description: "Machine guidée pour travailler la largeur du dos en toute sécurité.",
+                    videos: [
+                        { titre: "Tirage Poitrine Poulie Haute", url: "https://www.youtube.com/watch?v=CAwf7n6Luuc" }
+                    ],
+                    technique: [
+                        "S'asseoir et caler les genoux",
+                        "Saisir la barre en pronation large",
+                        "Tirer vers le haut de la poitrine",
+                        "Coudes vers le bas et l'arrière",
+                        "Contracter le dos en bas"
+                    ],
+                    variantes: ["Tirage nuque (attention épaules)", "Tirage prise serrée", "Tirage supination"]
+                },
+                {
+                    nom: "Rowing Haltère",
+                    description: "Exercice unilatéral pour corriger les déséquilibres et l'amplitude.",
+                    videos: [
+                        { titre: "Rowing Haltère à Un Bras", url: "https://www.youtube.com/watch?v=roCP6wCXPqo" }
+                    ],
+                    technique: [
+                        "Un genou et une main sur le banc",
+                        "Dos plat, parallèle au sol",
+                        "Tirer l'haltère vers la hanche",
+                        "Coude le long du corps",
+                        "Serrer l'omoplate en haut"
+                    ],
+                    variantes: ["Rowing 2 haltères simultané", "Rowing Kroc (lourd, explosif)"]
+                },
+                {
+                    nom: "Soulevé de Terre",
+                    description: "Exercice complet du corps, excellent pour la chaîne postérieure et la force générale.",
+                    videos: [
+                        { titre: "Soulevé de Terre - Technique Complète", url: "https://www.youtube.com/watch?v=op9kVnSso6Q" },
+                        { titre: "Deadlift - Erreurs à Éviter", url: "https://www.youtube.com/watch?v=hCDzSR6bW10" }
+                    ],
+                    technique: [
+                        "Barre au-dessus du milieu des pieds",
+                        "Pieds largeur hanches, pointes légèrement ouvertes",
+                        "Saisir la barre, dos plat, regard devant",
+                        "Pousser dans les jambes pour décoller",
+                        "Verrouiller hanches et épaules en haut"
+                    ],
+                    variantes: ["Soulevé de terre sumo", "Soulevé de terre roumain (ischio)", "Deficit deadlift"]
+                },
+                {
+                    nom: "Face Pull",
+                    description: "Excellent pour les trapèzes moyens, rhomboïdes et deltoïdes postérieurs. Essentiel pour la posture.",
+                    videos: [
+                        { titre: "Face Pull - Technique", url: "https://www.youtube.com/watch?v=rep-qVOkqgk" }
+                    ],
+                    technique: [
+                        "Corde attachée poulie haute",
+                        "Reculer pour avoir tension",
+                        "Tirer vers le visage",
+                        "Écarter les mains en fin de mouvement",
+                        "Serrer les omoplates"
+                    ],
+                    variantes: ["Face pull assis", "Face pull incliné"]
+                },
+                {
+                    nom: "Shrugs (Haussements d'épaules)",
+                    description: "Isolation pour les trapèzes supérieurs, muscle de la nuque.",
+                    videos: [
+                        { titre: "Shrugs Haltères", url: "https://www.youtube.com/watch?v=TnhKjnwZ1_A" }
+                    ],
+                    technique: [
+                        "Debout, haltères le long du corps",
+                        "Monter les épaules vers les oreilles",
+                        "Pause 1 sec en haut",
+                        "Descendre en contrôlant",
+                        "Ne pas rouler les épaules"
+                    ],
+                    variantes: ["Shrugs barre", "Shrugs trapèze bar"]
+                }
+            ],
+
+            exercicesEpaules: [
+                {
+                    nom: "Développé Militaire",
+                    description: "Exercice de base pour les épaules, sollicite principalement les deltoïdes antérieurs et moyens.",
+                    videos: [
+                        { titre: "Développé Militaire Barre", url: "https://www.youtube.com/watch?v=QAQ64hK4Xxs" }
+                    ],
+                    technique: [
+                        "Debout ou assis, barre devant à hauteur des clavicules",
+                        "Saisir largeur épaules",
+                        "Pousser verticalement au-dessus de la tête",
+                        "Verrouiller bras tendus en haut",
+                        "Descendre contrôlé"
+                    ],
+                    variantes: ["Développé haltères", "Développé Arnold", "Développé nuque (prudence)"]
+                },
+                {
+                    nom: "Élévations Latérales",
+                    description: "Isolation pour les deltoïdes moyens (largeur des épaules).",
+                    videos: [
+                        { titre: "Élévations Latérales Haltères", url: "https://www.youtube.com/watch?v=3VcKaXpzqRo" }
+                    ],
+                    technique: [
+                        "Debout, haltères le long du corps",
+                        "Lever les bras sur les côtés",
+                        "Monter jusqu'à hauteur des épaules",
+                        "Coudes légèrement fléchis",
+                        "Descendre lentement"
+                    ],
+                    variantes: ["Élévations poulie basse", "Élévations penché (deltoïdes postérieurs)"]
+                },
+                {
+                    nom: "Oiseau (Élévations postérieures)",
+                    description: "Ciblage des deltoïdes postérieurs, souvent négligés mais essentiels pour la posture.",
+                    videos: [
+                        { titre: "Oiseau Banc Incliné", url: "https://www.youtube.com/watch?v=ttvfGg9d76c" }
+                    ],
+                    technique: [
+                        "Buste penché à 90°, dos plat",
+                        "Haltères sous les épaules",
+                        "Écarter les bras sur les côtés",
+                        "Coudes légèrement fléchis",
+                        "Serrer les omoplates en haut"
+                    ],
+                    variantes: ["Oiseau poulie vis-à-vis", "Oiseau machine"]
+                }
+            ],
+
+            exercicesBras: [
+                {
+                    nom: "Curl Barre",
+                    description: "Exercice de base pour les biceps, permet de charger lourd.",
+                    videos: [
+                        { titre: "Curl Barre EZ", url: "https://www.youtube.com/watch?v=kwG2ipFRgfo" }
+                    ],
+                    technique: [
+                        "Debout, barre devant les cuisses",
+                        "Coudes collés au corps",
+                        "Monter la barre en contractant biceps",
+                        "Pause 1 sec en haut",
+                        "Descendre en contrôlant"
+                    ],
+                    variantes: ["Curl barre droite", "Curl barre EZ", "Curl 21"]
+                },
+                {
+                    nom: "Curl Haltères Alternés",
+                    description: "Permet une grande amplitude et corrige les déséquilibres.",
+                    videos: [
+                        { titre: "Curl Haltères Technique", url: "https://www.youtube.com/watch?v=sAq_ocpRh_I" }
+                    ],
+                    technique: [
+                        "Debout, haltères le long du corps",
+                        "Alterner bras droit puis gauche",
+                        "Rotation en supination pendant montée",
+                        "Contracter fort en haut",
+                        "Descendre contrôlé"
+                    ],
+                    variantes: ["Curl simultané", "Curl marteau (brachial)", "Curl incliné"]
+                },
+                {
+                    nom: "Curl Pupitre",
+                    description: "Isolation stricte des biceps, impossible de tricher.",
+                    videos: [
+                        { titre: "Curl Pupitre Larry Scott", url: "https://www.youtube.com/watch?v=jSto_KPVOhg" }
+                    ],
+                    technique: [
+                        "Bras appuyés sur le pupitre",
+                        "Barre ou haltères devant",
+                        "Monter en contractant biceps",
+                        "Ne pas décoller les coudes",
+                        "Descendre jusqu'en bas"
+                    ],
+                    variantes: ["Pupitre haltère", "Pupitre machine"]
+                },
+                {
+                    nom: "Extension Poulie Haute",
+                    description: "Exercice d'isolation pour les triceps, travail en continu.",
+                    videos: [
+                        { titre: "Extension Triceps Poulie", url: "https://www.youtube.com/watch?v=2-LAMcpzODU" }
+                    ],
+                    technique: [
+                        "Face à la poulie, coudes au corps",
+                        "Saisir la corde ou barre",
+                        "Pousser vers le bas",
+                        "Verrouiller en bas",
+                        "Remonter contrôlé"
+                    ],
+                    variantes: ["Extension corde", "Extension barre", "Extension un bras"]
+                },
+                {
+                    nom: "Barre au Front",
+                    description: "Exercice de masse pour les triceps, permet de bien charger.",
+                    videos: [
+                        { titre: "Barre au Front (Skullcrusher)", url: "https://www.youtube.com/watch?v=d_KZxkY_0cM" }
+                    ],
+                    technique: [
+                        "Allongé sur banc, barre au-dessus du front",
+                        "Coudes fixes pointés vers le plafond",
+                        "Descendre la barre vers le front",
+                        "Remonter en poussant avec triceps",
+                        "Ne pas bouger les coudes"
+                    ],
+                    variantes: ["Barre front EZ", "Haltères", "Poulie basse"]
+                },
+                {
+                    nom: "Extension Nuque Haltère",
+                    description: "Travail du chef long du triceps pour le volume du bras.",
+                    videos: [
+                        { titre: "Extension Nuque Assis", url: "https://www.youtube.com/watch?v=_gsUck-7M74" }
+                    ],
+                    technique: [
+                        "Assis, haltère tenu à deux mains au-dessus",
+                        "Descendre derrière la nuque",
+                        "Coudes fixes vers le haut",
+                        "Remonter en poussant",
+                        "Bien étirer en bas"
+                    ],
+                    variantes: ["Extension nuque barre", "Extension nuque poulie"]
+                }
+            ],
+
+            exercicesJambes: [
+                {
+                    nom: "Squat",
+                    description: "Roi des exercices pour les jambes, développe quadriceps, fessiers et force générale.",
+                    videos: [
+                        { titre: "Squat Barre - Technique Complète", url: "https://www.youtube.com/watch?v=ultWZbUMPL8" },
+                        { titre: "Squat - Erreurs Fréquentes", url: "https://www.youtube.com/watch?v=vmNPOjaGrVE" }
+                    ],
+                    technique: [
+                        "Barre haute sur les trapèzes (ou basse sur deltoïdes postérieurs)",
+                        "Pieds largeur épaules, pointes légèrement ouvertes",
+                        "Descendre en poussant fesses en arrière",
+                        "Descendre jusqu'aux cuisses parallèles au sol",
+                        "Remonter en poussant dans les talons"
+                    ],
+                    variantes: ["Squat avant (front squat)", "Squat sumo", "Squat bulgare", "Goblet squat"]
+                },
+                {
+                    nom: "Presse à Cuisses",
+                    description: "Alternative sécurisée au squat, permet de charger lourd sans risque pour le dos.",
+                    videos: [
+                        { titre: "Presse à Cuisses - Technique", url: "https://www.youtube.com/watch?v=IZxyjW7MPJQ" }
+                    ],
+                    technique: [
+                        "Dos plaqué contre le dossier",
+                        "Pieds largeur épaules sur la plateforme",
+                        "Descendre en contrôlant",
+                        "Genoux suivent la pointe des pieds",
+                        "Pousser sans verrouiller complètement"
+                    ],
+                    variantes: ["Presse pieds hauts (fessiers)", "Presse pieds bas (quadriceps)", "Presse une jambe"]
+                },
+                {
+                    nom: "Fentes",
+                    description: "Exercice unilatéral pour l'équilibre, la coordination et le développement harmonieux.",
+                    videos: [
+                        { titre: "Fentes Alternées", url: "https://www.youtube.com/watch?v=QOVaHwm-Q6U" }
+                    ],
+                    technique: [
+                        "Debout, faire un grand pas en avant",
+                        "Descendre en fléchissant les deux genoux",
+                        "Genou arrière frôle le sol",
+                        "Genou avant ne dépasse pas la pointe du pied",
+                        "Pousser pour revenir en position"
+                    ],
+                    variantes: ["Fentes marchées", "Fentes bulgares (pied arrière surélevé)", "Fentes sautées"]
+                },
+                {
+                    nom: "Soulevé de Terre Roumain",
+                    description: "Exercice ciblant les ischio-jambiers et les fessiers avec étirement.",
+                    videos: [
+                        { titre: "Romanian Deadlift", url: "https://www.youtube.com/watch?v=CQp5I9KgdXk" }
+                    ],
+                    technique: [
+                        "Debout, barre devant les cuisses",
+                        "Genoux légèrement fléchis",
+                        "Descendre en poussant fesses en arrière",
+                        "Dos plat, sentir étirement ischio",
+                        "Remonter en contractant fessiers"
+                    ],
+                    variantes: ["RDL haltères", "RDL une jambe"]
+                },
+                {
+                    nom: "Leg Curl",
+                    description: "Isolation des ischio-jambiers, travail de l'arrière de cuisse.",
+                    videos: [
+                        { titre: "Leg Curl Allongé", url: "https://www.youtube.com/watch?v=ELOCsoDSmrg" }
+                    ],
+                    technique: [
+                        "Allongé face contre la machine",
+                        "Chevilles sous le rouleau",
+                        "Monter en ramenant talons vers fessiers",
+                        "Contracter ischio en haut",
+                        "Descendre contrôlé"
+                    ],
+                    variantes: ["Leg curl assis", "Leg curl debout"]
+                },
+                {
+                    nom: "Extension de Jambes",
+                    description: "Isolation des quadriceps, finition pour congestionner.",
+                    videos: [
+                        { titre: "Leg Extension Machine", url: "https://www.youtube.com/watch?v=YyvSfEjZIJg" }
+                    ],
+                    technique: [
+                        "Assis, dos contre le dossier",
+                        "Tibias sous le rouleau",
+                        "Pousser pour tendre les jambes",
+                        "Contracter quadriceps en haut",
+                        "Descendre contrôlé"
+                    ],
+                    variantes: ["Extension une jambe", "Extension tempo lent"]
+                },
+                {
+                    nom: "Hip Thrust",
+                    description: "Exercice roi pour les fessiers, développement de la puissance de hanche.",
+                    videos: [
+                        { titre: "Hip Thrust - Technique", url: "https://www.youtube.com/watch?v=SEdqd1n0cvg" }
+                    ],
+                    technique: [
+                        "Dos contre un banc, barre sur les hanches",
+                        "Pieds au sol largeur hanches",
+                        "Pousser hanches vers le haut",
+                        "Corps aligné épaules-hanches-genoux",
+                        "Contracter fort fessiers en haut"
+                    ],
+                    variantes: ["Hip thrust une jambe", "Hip thrust bande élastique", "Glute bridge (au sol)"]
+                },
+                {
+                    nom: "Mollets Debout",
+                    description: "Développement des mollets (gastrocnémiens), muscle souvent négligé.",
+                    videos: [
+                        { titre: "Mollets Machine Debout", url: "https://www.youtube.com/watch?v=JbyjNymZOt0" }
+                    ],
+                    technique: [
+                        "Debout, pointes de pieds sur cale",
+                        "Talons dans le vide",
+                        "Monter sur pointes de pieds",
+                        "Pause 1-2 sec en haut",
+                        "Descendre en étirant"
+                    ],
+                    variantes: ["Mollets assis (soléaire)", "Mollets presse", "Mollets une jambe"]
+                }
+            ],
+
+            exercicesAbdos: [
+                {
+                    nom: "Crunch",
+                    description: "Exercice de base pour le grand droit des abdominaux (tablettes).",
+                    videos: [
+                        { titre: "Crunch Classique", url: "https://www.youtube.com/watch?v=Xyd_fa5zoEU" }
+                    ],
+                    technique: [
+                        "Allongé sur le dos, pieds au sol",
+                        "Mains derrière la tête sans tirer",
+                        "Enrouler le buste en contractant abdos",
+                        "Décoller les épaules du sol",
+                        "Descendre contrôlé"
+                    ],
+                    variantes: ["Crunch pieds relevés", "Crunch poulie haute", "Bicycle crunch"]
+                },
+                {
+                    nom: "Planche / Gainage",
+                    description: "Exercice isométrique pour la stabilité du tronc et les abdos profonds.",
+                    videos: [
+                        { titre: "Gainage - Technique Parfaite", url: "https://www.youtube.com/watch?v=ASdvN_XEl_c" }
+                    ],
+                    technique: [
+                        "Position planche, appui sur avant-bras",
+                        "Corps aligné tête-épaules-bassin-chevilles",
+                        "Serrer abdos et fessiers",
+                        "Respirer normalement",
+                        "Tenir 30-60 sec"
+                    ],
+                    variantes: ["Planche latérale", "Planche dynamique", "RKC plank (tension maximale)"]
+                }
+            ]
+        };
+
+        // SYSTÈME DE STOCKAGE AVEC UTILISATEUR
+        const storage = {
+            save: function(key, value) {
+                if (!app.currentUser) return;
+                const fullKey = `user-${app.currentUser}-${key}`;
+                if (typeof value === 'object') {
+                    localStorage.setItem(fullKey, JSON.stringify(value));
+                } else {
+                    localStorage.setItem(fullKey, value);
+                }
+            },
+            get: function(key, global = false) {
+                if (!app.currentUser && !global) return { exists: false };
+                const fullKey = global ? key : `user-${app.currentUser}-${key}`;
+                const value = localStorage.getItem(fullKey);
+                return {
+                    exists: value !== null,
+                    value: value
+                };
+            }
+        };
+
+        // SYSTÈME DE SÉCURITÉ MULTI-CLASSES
+        const securite = {
+            classes: {
+                "1CAP": {
+                    code: "1CAP-2025",
+                    eleves: [
+                        "Élève 1", "Élève 2", "Élève 3", "Élève 4", "Élève 5",
+                        "Élève 6", "Élève 7", "Élève 8", "Élève 9", "Élève 10",
+                        "Élève 11", "Élève 12", "Élève 13", "Élève 14", "Élève 15",
+                        "Élève 16", "Élève 17", "Élève 18", "Élève 19", "Élève 20",
+                        "Élève 21", "Élève 22", "Élève 23", "Élève 24", "Élève 25",
+                        "Élève 26", "Élève 27", "Élève 28", "Élève 29", "Élève 30",
+                        "Élève 31", "Élève 32", "Élève 33", "Élève 34", "Élève 35",
+                        "Élève 36", "Élève 37", "Élève 38", "Élève 39", "Élève 40"
+                    ]
+                },
+                "2CAP": {
+                    code: "2CAP-2025",
+                    eleves: [
+                        "Élève 1", "Élève 2", "Élève 3", "Élève 4", "Élève 5",
+                        "Élève 6", "Élève 7", "Élève 8", "Élève 9", "Élève 10",
+                        "Élève 11", "Élève 12", "Élève 13", "Élève 14", "Élève 15",
+                        "Élève 16", "Élève 17", "Élève 18", "Élève 19", "Élève 20",
+                        "Élève 21", "Élève 22", "Élève 23", "Élève 24", "Élève 25",
+                        "Élève 26", "Élève 27", "Élève 28", "Élève 29", "Élève 30",
+                        "Élève 31", "Élève 32", "Élève 33", "Élève 34", "Élève 35",
+                        "Élève 36", "Élève 37", "Élève 38", "Élève 39", "Élève 40"
+                    ]
+                },
+                "SECONDE-MRC": {
+                    code: "MRC-2025",
+                    eleves: [
+                        "Élève 1", "Élève 2", "Élève 3", "Élève 4", "Élève 5",
+                        "Élève 6", "Élève 7", "Élève 8", "Élève 9", "Élève 10",
+                        "Élève 11", "Élève 12", "Élève 13", "Élève 14", "Élève 15",
+                        "Élève 16", "Élève 17", "Élève 18", "Élève 19", "Élève 20",
+                        "Élève 21", "Élève 22", "Élève 23", "Élève 24", "Élève 25",
+                        "Élève 26", "Élève 27", "Élève 28", "Élève 29", "Élève 30",
+                        "Élève 31", "Élève 32", "Élève 33", "Élève 34", "Élève 35",
+                        "Élève 36", "Élève 37", "Élève 38", "Élève 39", "Élève 40"
+                    ]
+                },
+                "SECONDE-AOP": {
+                    code: "AOP-2025",
+                    eleves: [
+                        "Élève 1", "Élève 2", "Élève 3", "Élève 4", "Élève 5",
+                        "Élève 6", "Élève 7", "Élève 8", "Élève 9", "Élève 10",
+                        "Élève 11", "Élève 12", "Élève 13", "Élève 14", "Élève 15",
+                        "Élève 16", "Élève 17", "Élève 18", "Élève 19", "Élève 20",
+                        "Élève 21", "Élève 22", "Élève 23", "Élève 24", "Élève 25",
+                        "Élève 26", "Élève 27", "Élève 28", "Élève 29", "Élève 30",
+                        "Élève 31", "Élève 32", "Élève 33", "Élève 34", "Élève 35",
+                        "Élève 36", "Élève 37", "Élève 38", "Élève 39", "Élève 40"
+                    ]
+                },
+                "PROF-EPS-CABRINI": {
+                    code: "CABRINI-2025",
+                    eleves: [
+                        "Individu 1", "Individu 2", "Individu 3", "Individu 4", "Individu 5",
+                        "Individu 6", "Individu 7", "Individu 8", "Individu 9", "Individu 10",
+                        "Individu 11", "Individu 12", "Individu 13", "Individu 14", "Individu 15",
+                        "Individu 16", "Individu 17", "Individu 18", "Individu 19", "Individu 20",
+                        "Individu 21", "Individu 22", "Individu 23", "Individu 24", "Individu 25",
+                        "Individu 26", "Individu 27", "Individu 28", "Individu 29", "Individu 30",
+                        "Individu 31", "Individu 32", "Individu 33", "Individu 34", "Individu 35"
+                    ]
+                },
+                "PREPA-PHYSIQUE-GOLF": {
+                    code: "GOLF-2025",
+                    eleves: [
+                        "Individu 1", "Individu 2", "Individu 3", "Individu 4", "Individu 5",
+                        "Individu 6", "Individu 7", "Individu 8", "Individu 9", "Individu 10",
+                        "Individu 11", "Individu 12", "Individu 13", "Individu 14", "Individu 15",
+                        "Individu 16", "Individu 17", "Individu 18", "Individu 19", "Individu 20",
+                        "Individu 21", "Individu 22", "Individu 23", "Individu 24", "Individu 25",
+                        "Individu 26", "Individu 27", "Individu 28", "Individu 29", "Individu 30",
+                        "Individu 31", "Individu 32", "Individu 33", "Individu 34", "Individu 35"
+                    ]
+                },
+                "PREPA-PHYSIQUE-AUTRE": {
+                    code: "AUTRE-2025",
+                    eleves: [
+                        "Individu 1", "Individu 2", "Individu 3", "Individu 4", "Individu 5",
+                        "Individu 6", "Individu 7", "Individu 8", "Individu 9", "Individu 10",
+                        "Individu 11", "Individu 12", "Individu 13", "Individu 14", "Individu 15",
+                        "Individu 16", "Individu 17", "Individu 18", "Individu 19", "Individu 20",
+                        "Individu 21", "Individu 22", "Individu 23", "Individu 24", "Individu 25",
+                        "Individu 26", "Individu 27", "Individu 28", "Individu 29", "Individu 30",
+                        "Individu 31", "Individu 32", "Individu 33", "Individu 34", "Individu 35"
+                    ]
+                },
+                "COACHING": {
+                    code: "COACHING-2025",
+                    eleves: [
+                        "Individu 1", "Individu 2", "Individu 3", "Individu 4", "Individu 5",
+                        "Individu 6", "Individu 7", "Individu 8", "Individu 9", "Individu 10",
+                        "Individu 11", "Individu 12", "Individu 13", "Individu 14", "Individu 15",
+                        "Individu 16", "Individu 17", "Individu 18", "Individu 19", "Individu 20",
+                        "Individu 21", "Individu 22", "Individu 23", "Individu 24", "Individu 25",
+                        "Individu 26", "Individu 27", "Individu 28", "Individu 29", "Individu 30",
+                        "Individu 31", "Individu 32", "Individu 33", "Individu 34", "Individu 35"
+                    ]
+                }
+            },
+            
+            classeActive: null,
+
+            verifierCode: function(code) {
+                for (const [nomClasse, data] of Object.entries(this.classes)) {
+                    if (data.code === code) {
+                        this.classeActive = nomClasse;
+                        return true;
+                    }
+                }
+                return false;
+            },
+
+            verifierUtilisateur: function(prenom) {
+                if (!this.classeActive) return false;
+                const classe = this.classes[this.classeActive];
+                return classe.eleves.includes(prenom);
+            },
+
+            getNomClasse: function() {
+                if (!this.classeActive) return "Non défini";
+                const noms = {
+                    "1CAP": "1ère année CAP",
+                    "2CAP": "2ème année CAP",
+                    "SECONDE-MRC": "Seconde MRC",
+                    "SECONDE-AOP": "Seconde AOP",
+                    "PROF-EPS-CABRINI": "Professeurs EPS Cabrini",
+                    "PREPA-PHYSIQUE-GOLF": "Préparation Physique Golf",
+                    "PREPA-PHYSIQUE-AUTRE": "Préparation Physique Autre",
+                    "COACHING": "Coaching Personnel"
+                };
+                return noms[this.classeActive] || this.classeActive;
+            },
+
+            validerCode: function() {
+                localStorage.setItem('classe-active', this.classeActive);
+            },
+
+            estDejaConnecte: function() {
+                const classeStockee = localStorage.getItem('classe-active');
+                if (classeStockee && this.classes[classeStockee]) {
+                    this.classeActive = classeStockee;
+                    return true;
+                }
+                return false;
+            },
+
+            revoquerAcces: function() {
+                localStorage.removeItem('classe-active');
+                this.classeActive = null;
+            }
+        };class LivretApp {
+            constructor() {
+                this.currentUser = null;
+                this.currentView = securite.estDejaConnecte() ? 'login' : 'code-access';
+                this.currentTab = 'dashboard';
+                this.sessions = [];
+                this.rmHistory = [];
+                this.currentSession = null;
+                this.userAvatar = null;
+                this.musclesList = ['Pectoraux', 'Grand dorsal', 'Trapèzes', 'Deltoïdes', 'Biceps', 'Triceps', 'Abdominaux', 'Quadriceps', 'Ischio-jambiers', 'Fessiers', 'Mollets'];
+                this.currentCoursTab = 'principes';
+                this.exercicesTemp = [];
+                this.musclesTemp = [];
+                this.timerMode = 'repos';
+                this.timerSeconds = 60;
+                this.timerRunning = false;
+                this.timerInterval = null;
+                this.chronoSeconds = 0;
+                this.chronoRunning = false;
+                this.chronoInterval = null;
+                this.chronoLaps = [];
+                this.sessionHistory = [];
+                this.init();
+            }
+
+            init() {
+                this.loadSessions();
+                this.loadRMHistory();
+                this.loadUserAvatar();
+                this.loadSessionHistory();
+                this.render();
+            }
+
+            loadSessions() {
+                if (!this.currentUser) return;
+                const result = storage.get('sessions');
+                if (result.exists) {
+                    this.sessions = JSON.parse(result.value);
+                }
+            }
+
+            saveSessions() {
+                storage.save('sessions', this.sessions);
+            }
+
+            loadRMHistory() {
+                if (!this.currentUser) return;
+                const result = storage.get('rmHistory');
+                if (result.exists) {
+                    this.rmHistory = JSON.parse(result.value);
+                }
+            }
+
+            saveRMHistory() {
+                storage.save('rmHistory', this.rmHistory);
+            }
+
+            loadUserAvatar() {
+                if (!this.currentUser) return;
+                const result = storage.get('avatar');
+                if (result.exists) {
+                    this.userAvatar = JSON.parse(result.value);
+                }
+            }
+
+            saveUserAvatar() {
+                storage.save('avatar', this.userAvatar);
+            }
+
+            loadSessionHistory() {
+                if (!this.currentUser) return;
+                const result = storage.get('sessionHistory');
+                if (result.exists) {
+                    this.sessionHistory = JSON.parse(result.value);
+                }
+            }
+
+            saveSessionHistory() {
+                storage.save('sessionHistory', this.sessionHistory);
+            }
+
+            render() {
+                const app = document.getElementById('app');
+                
+                if (this.currentView === 'code-access') {
+                    app.innerHTML = this.renderCodeAccess();
+                    this.attachCodeAccessEvents();
+                } else if (this.currentView === 'login') {
+                    app.innerHTML = this.renderLogin();
+                    this.attachLoginEvents();
+                } else if (this.currentView === 'signup') {
+                    app.innerHTML = this.renderSignup();
+                    this.attachSignupEvents();
+                } else if (this.currentView === 'dashboard') {
+                    app.innerHTML = this.renderDashboard();
+                    this.attachDashboardEvents();
+                } else if (this.currentView === 'session-form') {
+                    app.innerHTML = this.renderSessionForm();
+                    this.attachSessionFormEvents();
+                } else if (this.currentView === 'session-detail') {
+                    app.innerHTML = this.renderSessionDetail();
+                    this.attachSessionDetailEvents();
+                }
+            }
+
+            renderCodeAccess() {
+                return `
+                    <div class="container">
+                        <div class="card" style="max-width: 500px; margin: 4rem auto;">
+                            <div class="text-center mb-4">
+                                <div class="user-icon" style="margin: 0 auto 1.5rem;">🔒</div>
+                                <h1 class="text-white" style="font-size: 2rem; margin-bottom: 0.5rem;">Accès Protégé</h1>
+                                <p class="text-cyan">Entrez le code d'accès de votre classe</p>
+                            </div>
+                            
+                            <form id="code-form">
+                                <div class="mb-4">
+                                    <label class="text-white mb-1" style="display: block;">Code de classe</label>
+                                    <input type="password" class="input" id="code-input" placeholder="Ex: 1CAP-2025" required autofocus>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary" style="width: 100%;">Valider</button>
+                            </form>
+
+                            <div id="code-error" class="hidden" style="margin-top: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.75rem;">
+                                <p class="text-white" style="text-align: center;">❌ Code incorrect</p>
+                            </div>
+                            
+                            <div class="tip-box" style="margin-top: 2rem;">
+                                <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">💡 Code oublié ?</div>
+                                <p class="text-white" style="opacity: 0.8; font-size: 0.9rem;">Demandez le code de votre classe à votre professeur.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderLogin() {
+                const users = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('user-') && !key.includes('-sessions') && !key.includes('-rmHistory') && !key.includes('-avatar') && !key.includes('-sessionHistory')) {
+                        const username = key.replace('user-', '');
+                        users.push(username);
+                    }
+                }
+
+                return `
+                    <div class="container">
+                        <div class="card" style="max-width: 450px; margin: 4rem auto;">
+                            <div class="text-center mb-4">
+                                <div class="user-icon" style="margin: 0 auto 1.5rem;">💪</div>
+                                <h1 class="text-white" style="font-size: 2rem; margin-bottom: 0.5rem;">Livret de Musculation</h1>
+                                <p class="text-cyan">Suivi personnalisé - ${securite.getNomClasse()}</p>
+                            </div>
+                            
+                            ${users.length > 0 ? `
+                                <div class="mb-4">
+                                    <label class="text-white mb-1" style="display: block;">Sélectionner un profil</label>
+                                    <select class="input" id="select-user">
+                                        <option value="">-- Choisir un profil --</option>
+                                        ${users.map(u => `<option value="${u}">${u}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;" onclick="app.handleSelectUser()">Se connecter</button>
+                                <div class="text-center">
+                                    <button class="btn btn-link" onclick="app.showSignup()">Créer un nouveau profil</button>
+                                </div>
+                            ` : `
+                                <div class="text-center">
+                                    <p class="text-white mb-4" style="opacity: 0.8;">Aucun profil existant</p>
+                                    <button class="btn btn-success" style="width: 100%;" onclick="app.showSignup()">Créer mon profil</button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderSignup() {
+                return `
+                    <div class="container">
+                        <div class="card" style="max-width: 500px; margin: 2rem auto;">
+                            <div class="text-center mb-4">
+                                <h1 class="text-white" style="font-size: 2rem; margin-bottom: 0.5rem;">Créer mon profil</h1>
+                                <p class="text-cyan">Renseignez vos informations - ${securite.getNomClasse()}</p>
+                            </div>
+                            
+                            <form id="signup-form">
+                                <div class="text-center mb-4">
+                                    <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+                                    <div class="avatar-upload" onclick="document.getElementById('avatar-input').click()">
+                                        <span id="avatar-preview">📷</span>
+                                    </div>
+                                    <p class="text-white" style="opacity: 0.7; font-size: 0.9rem;">Cliquez pour ajouter une photo</p>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="text-white mb-1" style="display: block;">Prénom</label>
+                                    <input type="text" class="input" id="signup-username" placeholder="Votre prénom" required>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-3 mb-2">
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Âge</label>
+                                        <input type="number" class="input" id="signup-age" placeholder="Ex: 25" min="10" max="100" required>
+                                    </div>
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Sexe</label>
+                                        <select class="input" id="signup-sexe" required>
+                                            <option value="">Choisir...</option>
+                                            <option value="Homme">Homme</option>
+                                            <option value="Femme">Femme</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 mb-4">
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Taille (cm)</label>
+                                        <input type="number" class="input" id="signup-taille" placeholder="Ex: 175" min="100" max="250" required>
+                                    </div>
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Poids (kg)</label>
+                                        <input type="number" class="input" id="signup-poids" placeholder="Ex: 70" min="30" max="200" step="0.1" required>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-success" style="width: 100%; margin-bottom: 1rem;">Créer mon profil</button>
+                                
+                                <div class="text-center">
+                                    <button type="button" class="btn btn-link" onclick="app.showLogin()">Retour</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderDashboard() {
+                const userKey = `user-${this.currentUser}`;
+                const userResult = storage.get(userKey, true);
+                const userData = userResult.exists ? JSON.parse(userResult.value) : {};
+
+                // Calcul des stats pour le dashboard
+                const completedSessions = this.sessionHistory.filter(h => h.completed).length;
+                const thisMonth = new Date().getMonth();
+                const thisYear = new Date().getFullYear();
+                const sessionsThisMonth = this.sessionHistory.filter(h => {
+                    const date = new Date(h.completedAt);
+                    return h.completed && date.getMonth() === thisMonth && date.getFullYear() === thisYear;
+                }).length;
+
+                return `
+                    <div class="container">
+                        <div class="card">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex items-center gap-3">
+                                    ${this.userAvatar ? 
+                                        `<img src="${this.userAvatar}" class="profile-avatar" alt="Avatar">` : 
+                                        `<div class="default-avatar">👤</div>`
+                                    }
+                                    <div>
+                                        <h1 class="text-white" style="font-size: 2rem;">${this.currentUser}</h1>
+                                        <p class="text-cyan" style="font-size: 0.9rem;">${userData.age} ans • ${userData.sexe} • ${userData.taille}cm • ${userData.poids}kg</p>
+                                        <p class="text-white" style="opacity: 0.7; font-size: 0.85rem; margin-top: 0.25rem;">📚 Classe : ${securite.getNomClasse()}</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-warning" onclick="app.exportData()">💾 Exporter</button>
+                                    <button class="btn btn-warning" onclick="app.importData()">📥 Importer</button>
+                                    <button class="btn btn-secondary" onclick="app.logout()">Déconnexion</button>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2 mb-4" style="overflow-x: auto;">
+                                <button class="tab-btn ${this.currentTab === 'dashboard' ? 'active' : ''}" onclick="app.switchTab('dashboard')">📊 Dashboard</button>
+                                <button class="tab-btn ${this.currentTab === 'profil' ? 'active' : ''}" onclick="app.switchTab('profil')">👤 Mon Profil</button>
+                                <button class="tab-btn ${this.currentTab === 'rm' ? 'active' : ''}" onclick="app.switchTab('rm')">🎯 Calculateur 1RM</button>
+                                <button class="tab-btn ${this.currentTab === 'sessions' ? 'active' : ''}" onclick="app.switchTab('sessions')">📝 Mes Séances</button>
+                                <button class="tab-btn ${this.currentTab === 'timer' ? 'active' : ''}" onclick="app.switchTab('timer')">⏱️ Timer</button>
+                                <button class="tab-btn ${this.currentTab === 'historique' ? 'active' : ''}" onclick="app.switchTab('historique')">📅 Historique</button>
+                                <button class="tab-btn ${this.currentTab === 'cours' ? 'active' : ''}" onclick="app.switchTab('cours')">📚 Cours & Ressources</button>
+                            </div>
+
+                            ${this.currentTab === 'dashboard' ? this.renderDashboardTab(completedSessions, sessionsThisMonth) : ''}
+                            ${this.currentTab === 'profil' ? this.renderProfilTab() : ''}
+                            ${this.currentTab === 'rm' ? this.renderRMTab() : ''}
+                            ${this.currentTab === 'sessions' ? this.renderSessionsTab() : ''}
+                            ${this.currentTab === 'timer' ? this.renderTimerTab() : ''}
+                            ${this.currentTab === 'historique' ? this.renderHistoriqueTab() : ''}
+                            ${this.currentTab === 'cours' ? this.renderCoursTab() : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderDashboardTab(completedSessions, sessionsThisMonth) {
+                const stats = {
+                    total: this.sessions.length,
+                    force: this.sessions.filter(s => s.type === 'Force').length,
+                    endurance: this.sessions.filter(s => s.type === 'Endurance').length,
+                    equilibre: this.sessions.filter(s => s.type === 'Équilibre').length
+                };
+
+                return `
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(6, 182, 212, 0.3);">
+                            <div class="text-cyan" style="font-size: 2.5rem; font-weight: bold;">${stats.total}</div>
+                            <div class="text-white" style="opacity: 0.9;">Séances créées</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(20, 184, 166, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(16, 185, 129, 0.3);">
+                            <div style="color: #10b981; font-size: 2.5rem; font-weight: bold;">${completedSessions}</div>
+                            <div class="text-white" style="opacity: 0.9;">Séances effectuées</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(251, 146, 60, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(249, 115, 22, 0.3);">
+                            <div style="color: #fb923c; font-size: 2.5rem; font-weight: bold;">${sessionsThisMonth}</div>
+                            <div class="text-white" style="opacity: 0.9;">Ce mois-ci</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(6, 182, 212, 0.3);">
+                            <div class="text-cyan" style="font-size: 2.5rem; font-weight: bold;">${this.rmHistory.length}</div>
+                            <div class="text-white" style="opacity: 0.9;">Tests 1RM</div>
+                        </div>
+                    </div>
+
+                    <div class="tip-box">
+                        <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">💡 Conseil du jour</div>
+                        <div class="text-white" style="opacity: 0.9;">N'oubliez pas de bien vous échauffer avant chaque séance et de vous étirer après. La récupération est aussi importante que l'entraînement !</div>
+                    </div>
+                `;
+            }
+
+            renderProfilTab() {
+                const userKey = `user-${this.currentUser}`;
+                const userResult = storage.get(userKey, true);
+                const userData = userResult.exists ? JSON.parse(userResult.value) : {};
+
+                return `
+                    <div>
+                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">👤 Mon Profil</h2>
+                        
+                        <form id="profile-form">
+                            <div class="text-center mb-4">
+                                <input type="file" id="profile-avatar-input" accept="image/*" style="display: none;">
+                                <div class="avatar-upload" onclick="document.getElementById('profile-avatar-input').click()">
+                                    ${this.userAvatar ? 
+                                        `<img src="${this.userAvatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : 
+                                        `<span>📷</span>`
+                                    }
+                                </div>
+                                <p class="text-white" style="opacity: 0.7; font-size: 0.9rem;">Cliquez pour changer la photo</p>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="text-white mb-1" style="display: block;">Prénom</label>
+                                <input type="text" class="input" id="profile-username" value="${this.currentUser}" readonly style="opacity: 0.6; cursor: not-allowed;">
+                                <p class="text-white" style="opacity: 0.5; font-size: 0.8rem; margin-top: 0.25rem;">Le prénom ne peut pas être modifié</p>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-3 mb-2">
+                                <div>
+                                    <label class="text-white mb-1" style="display: block;">Âge</label>
+                                    <input type="number" class="input" id="profile-age" value="${userData.age}" min="10" max="100" required>
+                                </div>
+                                <div>
+                                    <label class="text-white mb-1" style="display: block;">Sexe</label>
+                                    <select class="input" id="profile-sexe" required>
+                                        <option value="Homme" ${userData.sexe === 'Homme' ? 'selected' : ''}>Homme</option>
+                                        <option value="Femme" ${userData.sexe === 'Femme' ? 'selected' : ''}>Femme</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <div>
+                                    <label class="text-white mb-1" style="display: block;">Taille (cm)</label>
+                                    <input type="number" class="input" id="profile-taille" value="${userData.taille}" min="100" max="250" required>
+                                </div>
+                                <div>
+                                    <label class="text-white mb-1" style="display: block;">Poids (kg)</label>
+                                    <input type="number" class="input" id="profile-poids" value="${userData.poids}" min="30" max="200" step="0.1" required>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success" style="width: 100%;">💾 Enregistrer les modifications</button>
+                        </form>
+                    </div>
+                `;
+            }
+
+            renderRMTab() {
+                const groupedTests = {};
+                this.rmHistory.forEach((test, index) => {
+                    const muscle = test.muscle || 'Autre';
+                    if (!groupedTests[muscle]) {
+                        groupedTests[muscle] = [];
+                    }
+                    groupedTests[muscle].push({ ...test, originalIndex: index });
+                });
+
+                return `
+                    <div>
+                        <h2 class="text-white mb-2" style="font-size: 1.5rem;">Calculateur de 1RM</h2>
+                        <p class="text-white mb-4" style="opacity: 0.8;">Calculez votre charge maximale sur une répétition</p>
+
+                        <form id="rm-form" class="mb-4">
+                            <div class="mb-2">
+                                <label class="text-white mb-1" style="display: block;">Groupe musculaire</label>
+                                <select class="input" id="rm-muscle" required>
+                                    <option value="">Choisir...</option>
+                                    <option value="Pectoraux">Pectoraux</option>
+                                    <option value="Dos">Dos</option>
+                                    <option value="Épaules">Épaules</option>
+                                    <option value="Biceps">Biceps</option>
+                                    <option value="Triceps">Triceps</option>
+                                    <option value="Jambes">Jambes</option>
+                                    <option value="Abdominaux">Abdominaux</option>
+                                    <option value="Autre">Autre</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="text-white mb-1" style="display: block;">Nom de l'exercice</label>
+                                <input type="text" class="input" id="rm-exercise" placeholder="Ex: Développé couché" required>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-3 mb-2">
+                                <div>
+                                    <label class="text-white mb-1" style="display: block;">Charge soulevée (kg)</label>
+                                    <input type="number" class="input" id="rm-weight" step="0.5" required>
+                                </div>
+                                <div>
+                                    <label class="text-white mb-1" style="display: block;">Nombre de répétitions</label>
+                                    <input type="number" class="input" id="rm-reps" min="1" max="12" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="text-white mb-1" style="display: block;">Date du test</label>
+                                <input type="date" class="input" id="rm-date" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Calculer et enregistrer</button>
+                        </form>
+
+                        <div id="rm-result" class="hidden"></div>
+
+                        ${Object.keys(groupedTests).length > 0 ? `
+                            <div class="mt-4">
+                                <h3 class="text-cyan mb-3" style="font-size: 1.3rem;">📊 Historique des tests par groupe musculaire</h3>
+                                ${Object.entries(groupedTests).map(([muscle, tests]) => `
+                                    <div class="mb-4">
+                                        <h4 class="text-white mb-2" style="font-size: 1.1rem; padding: 0.75rem; background: rgba(6, 182, 212, 0.2); border-radius: 0.5rem; border-left: 4px solid #06b6d4;">
+                                            💪 ${muscle}
+                                        </h4>
+                                        ${tests.reverse().map(test => `
+                                            <div class="rm-history-card">
+                                                <div class="flex justify-between items-center">
+                                                    <div style="flex: 1;">
+                                                        <h4 class="text-cyan" style="font-size: 1.1rem; margin-bottom: 0.5rem;">${test.exercise}</h4>
+                                                        <p class="text-white" style="opacity: 0.7; font-size: 0.9rem;">📅 ${test.date}</p>
+                                                        <div class="text-white mt-2" style="opacity: 0.7; font-size: 0.9rem;">
+                                                            Basé sur ${test.weight}kg × ${test.reps} répétition${test.reps > 1 ? 's' : ''}
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center" style="margin: 0 1rem;">
+                                                        <div style="color: #10b981; font-size: 1.8rem; font-weight: bold;">${test.rm} kg</div>
+                                                        <div class="text-white" style="opacity: 0.7; font-size: 0.85rem;">1RM estimé</div>
+                                                    </div>
+                                                    <div class="flex flex-col gap-2">
+                                                        <button class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;" onclick="app.editRM(${test.originalIndex})">✏️ Modifier</button>
+                                                        <button class="btn btn-danger" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;" onclick="app.deleteRM(${test.originalIndex})">🗑️ Supprimer</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        <div class="tip-box">
+                            <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">ℹ️ Comment utiliser ce calculateur ?</div>
+                            <ul style="list-style: none; padding: 0;">
+                                <li class="text-white" style="opacity: 0.9; padding: 0.25rem 0;">• Sélectionnez le groupe musculaire concerné</li>
+                                <li class="text-white" style="opacity: 0.9; padding: 0.25rem 0;">• Entrez une charge que vous pouvez soulever entre 1 et 12 fois</li>
+                                <li class="text-white" style="opacity: 0.9; padding: 0.25rem 0;">• Le calculateur estimera votre 1RM (charge maximale)</li>
+                                <li class="text-white" style="opacity: 0.9; padding: 0.25rem 0;">• Plus précis entre 3-8 répétitions</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderSessionsTab() {
+                return `
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-white" style="font-size: 1.5rem;">Mes Séances d'entraînement</h2>
+                            <button class="btn btn-primary" onclick="app.createNewSession()">➕ Nouvelle séance</button>
+                        </div>
+
+                        ${this.sessions.length === 0 ? `
+                            <div class="text-center" style="padding: 3rem 1rem;">
+                                <div style="font-size: 4rem; margin-bottom: 1rem;">📝</div>
+                                <p class="text-white" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Aucune séance créée</p>
+                                <p class="text-white" style="opacity: 0.7;">Commencez par créer votre première séance d'entraînement</p>
+                            </div>
+                        ` : `
+                            <div>
+                                ${this.sessions.map((session, index) => {
+                                    const lastCompletion = this.sessionHistory
+                                        .filter(h => h.sessionIndex === index && h.completed)
+                                        .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))[0];
+                                    
+                                    const completionCount = this.sessionHistory
+                                        .filter(h => h.sessionIndex === index && h.completed).length;
+                                    
+                                    return `
+                                    <div class="session-card ${lastCompletion ? 'completed' : ''}">
+                                        ${lastCompletion ? `
+                                            <div class="session-completed-badge">
+                                                ✅ Dernière : ${new Date(lastCompletion.completedAt).toLocaleDateString('fr-FR')}
+                                            </div>
+                                        ` : ''}
+                                        <div class="flex justify-between items-center mb-2">
+                                            <div style="flex: 1; cursor: pointer;" onclick="app.viewSession(${index})">
+                                                <h3 class="text-white" style="font-size: 1.2rem;">${session.nom}</h3>
+                                            </div>
+                                            <div class="flex gap-2 items-center">
+                                                <span class="badge badge-${session.type.toLowerCase()}">${session.type}</span>
+                                                <button class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;" onclick="app.editSession(${index})">✏️</button>
+                                                <button class="btn btn-danger" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;" onclick="app.deleteSession(${index})">🗑️</button>
+                                            </div>
+                                        </div>
+                                        <div style="cursor: pointer;" onclick="app.viewSession(${index})">
+                                            <div class="flex gap-2 mb-2" style="flex-wrap: wrap;">
+                                                ${session.muscles.map(m => `<span class="badge" style="background: rgba(6, 182, 212, 0.3); color: #67e8f9;">${m}</span>`).join('')}
+                                            </div>
+                                            <p class="text-white" style="opacity: 0.7; font-size: 0.9rem;">${session.exercices.length} exercice(s) • ${completionCount} fois effectuée${completionCount > 1 ? 's' : ''}</p>
+                                        </div>
+                                    </div>
+                                `}).join('')}
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+
+            renderTimerTab() {
+                return `
+                    <div>
+                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">⏱️ Timer & Chronomètre</h2>
+                        
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <button class="timer-preset ${this.timerMode === 'repos' ? 'active' : ''}" onclick="app.setTimerMode('repos')">
+                                ⏸️ Timer de Repos
+                            </button>
+                            <button class="timer-preset ${this.timerMode === 'chrono' ? 'active' : ''}" onclick="app.setTimerMode('chrono')">
+                                ⏱️ Chronomètre
+                            </button>
+                        </div>
+
+                        ${this.timerMode === 'repos' ? this.renderTimerRepos() : this.renderChronometre()}
+                    </div>
+                `;
+            }
+
+            renderTimerRepos() {
+                const minutes = Math.floor(this.timerSeconds / 60);
+                const seconds = this.timerSeconds % 60;
+                const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                return `
+                    <div class="timer-container">
+                        <h3 class="text-cyan mb-3" style="font-size: 1.3rem;">Timer de Repos entre Séries</h3>
+                        
+                        <div class="timer-display ${this.timerRunning ? 'running' : ''} ${this.timerSeconds === 0 && !this.timerRunning ? 'finished' : ''}" id="timer-display">
+                            ${display}
+                        </div>
+
+                        <div class="timer-controls">
+                            <button class="timer-preset" onclick="app.setTimerPreset(30)">30s</button>
+                            <button class="timer-preset" onclick="app.setTimerPreset(60)">1min</button>
+                            <button class="timer-preset" onclick="app.setTimerPreset(90)">1min30</button>
+                            <button class="timer-preset" onclick="app.setTimerPreset(120)">2min</button>
+                            <button class="timer-preset" onclick="app.setTimerPreset(180)">3min</button>
+                            <button class="timer-preset" onclick="app.setTimerPreset(300)">5min</button>
+                        </div>
+
+                        <div class="timer-input-group">
+                            <input type="number" class="timer-input" id="custom-minutes" placeholder="Min" min="0" max="59">
+                            <span class="text-white">:</span>
+                            <input type="number" class="timer-input" id="custom-seconds" placeholder="Sec" min="0" max="59">
+                            <button class="btn btn-primary" onclick="app.setCustomTimer()">Définir</button>
+                        </div>
+
+                        <div class="timer-controls" style="margin-top: 2rem;">
+                            <button class="btn ${this.timerRunning ? 'btn-warning' : 'btn-success'}" style="padding: 1rem 2rem; font-size: 1.1rem;" onclick="app.toggleTimer()">
+                                ${this.timerRunning ? '⏸️ Pause' : '▶️ Démarrer'}
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 1rem 2rem; font-size: 1.1rem;" onclick="app.resetTimer()">
+                                🔄 Reset
+                            </button>
+                        </div>
+
+                        <div class="tip-box" style="margin-top: 2rem;">
+                            <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">💡 Temps de repos par mobile :</div>
+                            <ul style="list-style: none; padding: 0;">
+                                <li class="text-white" style="opacity: 0.9; padding: 0.3rem 0;">• <strong>FORCE</strong> : 3 à 5 minutes</li>
+                                <li class="text-white" style="opacity: 0.9; padding: 0.3rem 0;">• <strong>ÉQUILIBRE</strong> : 1 à 2 minutes</li>
+                                <li class="text-white" style="opacity: 0.9; padding: 0.3rem 0;">• <strong>ENDURANCE</strong> : 30 sec à 1 minute</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderChronometre() {
+                const minutes = Math.floor(this.chronoSeconds / 60);
+                const seconds = this.chronoSeconds % 60;
+                const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                return `
+                    <div class="timer-container">
+                        <h3 class="text-cyan mb-3" style="font-size: 1.3rem;">Chronomètre</h3>
+                        <p class="text-white mb-3" style="opacity: 0.8;">Pour exercices en temps (gainage, planche, etc.)</p>
+                        
+                        <div class="timer-display ${this.chronoRunning ? 'running' : ''}" id="chrono-display">
+                            ${display}
+                        </div>
+
+                        <div class="timer-controls" style="margin-top: 2rem;">
+                            <button class="btn ${this.chronoRunning ? 'btn-warning' : 'btn-success'}" style="padding: 1rem 2rem; font-size: 1.1rem;" onclick="app.toggleChrono()">
+                                ${this.chronoRunning ? '⏸️ Pause' : '▶️ Démarrer'}
+                            </button>
+                            <button class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;" onclick="app.addLap()" ${!this.chronoRunning ? 'disabled' : ''}>
+                                🏁 Tour
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 1rem 2rem; font-size: 1.1rem;" onclick="app.resetChrono()">
+                                🔄 Reset
+                            </button>
+                        </div>
+
+                        ${this.chronoLaps.length > 0 ? `
+                            <div class="chrono-laps">
+                                <h4 class="text-cyan mb-2" style="font-size: 1rem;">📊 Tours enregistrés</h4>
+                                ${this.chronoLaps.map((lap, index) => `
+                                    <div class="lap-item">
+                                        <span>Tour ${index + 1}</span>
+                                        <span style="font-weight: 600;">${lap}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            renderHistoriqueTab() {
+                const sortedHistory = [...this.sessionHistory]
+                    .filter(h => h.completed)
+                    .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+
+                return `
+                    <div>
+                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">📅 Historique des Séances</h2>
+                        
+                        ${sortedHistory.length === 0 ? `
+                            <div class="text-center" style="padding: 3rem 1rem;">
+                                <div style="font-size: 4rem; margin-bottom: 1rem;">📅</div>
+                                <p class="text-white" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Aucune séance effectuée</p>
+                                <p class="text-white" style="opacity: 0.7;">Effectuez votre première séance pour commencer votre suivi !</p>
+                            </div>
+                        ` : `
+                            <div>
+                                ${sortedHistory.map(history => {
+                                    const session = this.sessions[history.sessionIndex];
+                                    if (!session) return '';
+                                    
+                                    const date = new Date(history.completedAt);
+                                    const dateStr = date.toLocaleDateString('fr-FR', { 
+                                        weekday: 'long', 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    });
+                                    
+                                    return `
+                                        <div class="session-history-item">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <div style="flex: 1;">
+                                                    <h3 class="text-cyan" style="font-size: 1.2rem; margin-bottom: 0.5rem;">${session.nom}</h3>
+                                                    <p class="text-white" style="opacity: 0.7; font-size: 0.9rem;">📅 ${dateStr}</p>
+                                                </div>
+                                                <span class="badge badge-${session.type.toLowerCase()}">${session.type}</span>
+                                            </div>
+                                            
+                                            ${history.notes ? `
+                                                <div style="margin-top: 1rem; padding: 1rem; background: rgba(6, 182, 212, 0.1); border-radius: 0.5rem; border-left: 3px solid #06b6d4;">
+                                                    <div class="text-cyan" style="font-weight: 600; margin-bottom: 0.5rem;">📝 Notes de séance :</div>
+                                                    <p class="text-white" style="opacity: 0.9; white-space: pre-wrap;">${history.notes}</p>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+
+            setTimerMode(mode) {
+                this.timerMode = mode;
+                this.render();
+            }
+
+            renderCoursTab() {
+                return `
+                    <div>
+                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">📚 Cours & Ressources Pédagogiques</h2>
+                        
+                        <div class="flex gap-2 mb-4" style="overflow-x: auto; padding-bottom: 0.5rem;">
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'principes' ? 'active' : ''}" onclick="app.switchCoursTab('principes')">💡 Principes</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'mobiles' ? 'active' : ''}" onclick="app.switchCoursTab('mobiles')">🎯 3 Mobiles</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'hygiene' ? 'active' : ''}" onclick="app.switchCoursTab('hygiene')">🧘 Hygiène de vie</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'anatomie' ? 'active' : ''}" onclick="app.switchCoursTab('anatomie')">🧬 Planches Anatomiques</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'pectoraux' ? 'active' : ''}" onclick="app.switchCoursTab('pectoraux')">💪 Pectoraux</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'dos' ? 'active' : ''}" onclick="app.switchCoursTab('dos')">🔺 Dos</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'epaules' ? 'active' : ''}" onclick="app.switchCoursTab('epaules')">🏔️ Épaules</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'bras' ? 'active' : ''}" onclick="app.switchCoursTab('bras')">💪 Bras</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'jambes' ? 'active' : ''}" onclick="app.switchCoursTab('jambes')">🦵 Bas du corps</button>
+                            <button class="sub-tab-btn ${this.currentCoursTab === 'abdos' ? 'active' : ''}" onclick="app.switchCoursTab('abdos')">🔥 Abdominaux</button>
+                        </div>
+
+                        ${this.renderCoursContent()}
+                    </div>
+                `;
+            }
+
+            renderCoursContent() {
+                if (this.currentCoursTab === 'principes') {
+                    return `
+                        <div class="content-section">
+                            <h3 class="text-cyan mb-4" style="font-size: 1.3rem;">Les Principes Fondamentaux de la Musculation</h3>
+                            
+                            ${coursData.principes.map(principe => `
+                                <div class="exercise-card">
+                                    <h4>${principe.titre}</h4>
+                                    <p class="text-white" style="opacity: 0.9; margin-bottom: 1rem; line-height: 1.6;">${principe.contenu}</p>
+                                    <div class="tip-box" style="margin-top: 1rem;">
+                                        <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">✨ Conseils pratiques :</div>
+                                        <ul>
+                                            ${principe.conseils.map(conseil => `<li>${conseil}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else if (this.currentCoursTab === 'mobiles') {
+                    return this.renderMobilesSection();
+                } else if (this.currentCoursTab === 'hygiene') {
+                    return this.renderHygieneSection();
+                } else if (this.currentCoursTab === 'anatomie') {
+                    return this.renderAnatomieSection();
+                } else if (this.currentCoursTab === 'pectoraux') {
+                    return this.renderExercicesSection(coursData.exercicesPectoraux, 'Pectoraux');
+                } else if (this.currentCoursTab === 'dos') {
+                    return this.renderExercicesSection(coursData.exercicesDos, 'Dos');
+                } else if (this.currentCoursTab === 'epaules') {
+                    return this.renderExercicesSection(coursData.exercicesEpaules, 'Épaules');
+                } else if (this.currentCoursTab === 'bras') {
+                    return this.renderExercicesSection(coursData.exercicesBras, 'Bras');
+                } else if (this.currentCoursTab === 'jambes') {
+                    return this.renderExercicesSection(coursData.exercicesJambes, 'Bas du corps');
+                } else if (this.currentCoursTab === 'abdos') {
+                    return this.renderExercicesSection(coursData.exercicesAbdos, 'Abdominaux');
+                }
+            }renderMobilesSection() {
+                return `
+                    <div class="content-section">
+                        <h3 class="text-cyan mb-4" style="font-size: 1.3rem;">🎯 Les 3 Mobiles en Musculation (CA5 - ALF/AFLP)</h3>
+                        
+                        <p class="text-white mb-4" style="opacity: 0.9; line-height: 1.6;">
+                            En musculation, on distingue 3 mobiles principaux correspondant à 3 objectifs différents. 
+                            Chaque mobile nécessite des paramètres d'entraînement spécifiques (charge, répétitions, séries, repos).
+                        </p>
+
+                        <h4 class="text-cyan mb-3" style="font-size: 1.1rem;">📋 Tableau des 3 Mobiles</h4>
+                        <table class="mobile-table">
+                            <thead>
+                                <tr>
+                                    <th>MOBILE</th>
+                                    <th>OBJECTIF</th>
+                                    <th>CHARGE (% CM)</th>
+                                    <th>RÉPÉTITIONS</th>
+                                    <th>SÉRIES</th>
+                                    <th>REPOS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${coursData.mobiles.map(mobile => `
+                                    <tr>
+                                        <td style="font-weight: 600; color: ${mobile.color};">${mobile.nom}</td>
+                                        <td>${mobile.objectif}</td>
+                                        <td>${mobile.charge}</td>
+                                        <td>${mobile.repetitions}</td>
+                                        <td>${mobile.series}</td>
+                                        <td>${mobile.repos}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+
+                        <h4 class="text-cyan mb-3 mt-4" style="font-size: 1.1rem;">⚡ Types de Contraction Musculaire</h4>
+                        <table class="mobile-table">
+                            <thead>
+                                <tr>
+                                    <th>TYPE</th>
+                                    <th>DÉFINITION</th>
+                                    <th>EXEMPLE</th>
+                                    <th>MOBILE ASSOCIÉ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${coursData.typesContraction.map(contraction => `
+                                    <tr>
+                                        <td style="font-weight: 600; color: #67e8f9;">${contraction.type}</td>
+                                        <td>${contraction.definition}</td>
+                                        <td>${contraction.exemple}</td>
+                                        <td>${contraction.mobile}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+
+                        <h4 class="text-cyan mb-3 mt-4" style="font-size: 1.1rem;">🏋️ Formes d'Entraînement par Mobile</h4>
+                        ${coursData.mobiles.map(mobile => `
+                            <div class="exercise-card">
+                                <h4 style="color: ${mobile.color};">${mobile.nom}</h4>
+                                <ul>
+                                    ${mobile.formes.map(forme => `<li>${forme}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `).join('')}
+
+                        <div class="tip-box" style="margin-top: 2rem;">
+                            <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">💡 Comment choisir son mobile ?</div>
+                            <ul style="list-style: none; padding: 0;">
+                                <li class="text-white" style="opacity: 0.9; padding: 0.3rem 0;">• <strong>FORCE</strong> : Pour devenir plus fort, soulever plus lourd (athlétisme, powerlifting)</li>
+                                <li class="text-white" style="opacity: 0.9; padding: 0.3rem 0;">• <strong>ÉQUILIBRE/VOLUME</strong> : Pour développer la masse musculaire (bodybuilding)</li>
+                                <li class="text-white" style="opacity: 0.9; padding: 0.3rem 0;">• <strong>ENDURANCE</strong> : Pour tenir plus longtemps, améliorer la résistance musculaire (sports d'endurance)</li>
+                            </ul>
+                        </div>
+
+                        <div class="warning-box" style="margin-top: 1rem;">
+                            <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">⚠️ CM = Charge Maximale (1RM)</div>
+                            <p class="text-white" style="opacity: 0.9;">
+                                La CM représente la charge maximale que vous pouvez soulever une seule fois sur un exercice donné. 
+                                Utilisez le calculateur 1RM pour estimer votre CM avant de définir vos charges d'entraînement.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderHygieneSection() {
+                return `
+                    <div class="content-section">
+                        <h3 class="text-cyan mb-4" style="font-size: 1.3rem;">🧘 Hygiène de Vie en Musculation</h3>
+                        
+                        <h4 class="text-cyan mb-3" style="font-size: 1.1rem;">✅ AVANT la séance</h4>
+                        ${coursData.hygiene.avant.map(item => `
+                            <div class="exercise-card">
+                                <h4>${item.titre}</h4>
+                                <p class="text-white" style="opacity: 0.9; line-height: 1.6;">${item.contenu}</p>
+                            </div>
+                        `).join('')}
+
+                        <h4 class="text-cyan mb-3 mt-4" style="font-size: 1.1rem;">💪 PENDANT la séance</h4>
+                        ${coursData.hygiene.pendant.map(item => `
+                            <div class="exercise-card">
+                                <h4>${item.titre}</h4>
+                                <p class="text-white" style="opacity: 0.9; line-height: 1.6;">${item.contenu}</p>
+                            </div>
+                        `).join('')}
+
+                        <h4 class="text-cyan mb-3 mt-4" style="font-size: 1.1rem;">🔄 APRÈS la séance</h4>
+                        ${coursData.hygiene.apres.map(item => `
+                            <div class="exercise-card">
+                                <h4>${item.titre}</h4>
+                                <p class="text-white" style="opacity: 0.9; line-height: 1.6;">${item.contenu}</p>
+                            </div>
+                        `).join('')}
+
+                        <div class="tip-box" style="margin-top: 2rem;">
+                            <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">⭐ L'essentiel à retenir</div>
+                            <ul style="list-style: none; padding: 0;">
+                                <li class="text-white" style="opacity: 0.9; padding: 0.3rem 0;">• L'hydratation est cruciale : buvez AVANT, PENDANT et APRÈS</li>
+                                <li class="text-white" style="opacity: 0.9; padding: 0.3rem 0;">• Échauffement et étirements ne sont PAS optionnels</li>
+                                <li class="text-white" style="opacity: 0.9; padding: 0.3rem 0;">• La récupération (repos + nutrition) est aussi importante que l'entraînement</li>
+                                <li class="text-white" style="opacity: 0.9; padding: 0.3rem 0;">• Le sommeil est votre meilleur allié pour progresser</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderAnatomieSection() {
+                return `
+                    <div class="content-section">
+                        <h3 class="text-cyan mb-4" style="font-size: 1.3rem;">🧬 Planches Anatomiques</h3>
+                        
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="anatomy-image-container">
+                                <img src="https://github.com/BastianMAS/livret-musculation-cap/blob/main/images/planche%20anatomique%20dos.PNG?raw=true" alt="Planche anatomique dos">
+                                <p class="text-white" style="font-size: 0.9rem; opacity: 0.8; margin-top: 0.5rem;">Vue de dos</p>
+                            </div>
+                            
+                            <div class="anatomy-image-container">
+                                <img src="https://github.com/BastianMAS/livret-musculation-cap/blob/main/images/planche%20anatomique%20face.PNG?raw=true" alt="Planche anatomique face">
+                                <p class="text-white" style="font-size: 0.9rem; opacity: 0.8; margin-top: 0.5rem;">Vue de face</p>
+                            </div>
+                        </div>
+
+                        <h3 class="text-cyan mb-3" style="font-size: 1.2rem; margin-top: 2rem;">📖 Anatomie Musculaire Détaillée</h3>
+                        
+                        ${this.musclesList.map(muscle => {
+                            const info = coursData.anatomie[muscle];
+                            return `
+                                <div class="muscle-info-card">
+                                    <h4>💪 ${muscle}</h4>
+                                    
+                                    <div class="muscle-info-section">
+                                        <h5>🎯 Rôle et fonction</h5>
+                                        <p>${info.role}</p>
+                                    </div>
+                                    
+                                    <div class="muscle-info-section">
+                                        <h5>🔗 Insertions anatomiques</h5>
+                                        <ul>
+                                            ${info.insertions.map(insertion => `<li>${insertion}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+
+            renderExercicesSection(exercices, titre) {
+                return `
+                    <div class="content-section">
+                        <h3 class="text-cyan mb-4" style="font-size: 1.3rem;">Exercices pour les ${titre}</h3>
+                        
+                        ${exercices.map(ex => `
+                            <div class="exercise-card">
+                                <h4>${ex.nom}</h4>
+                                <p class="text-white" style="opacity: 0.9; margin-bottom: 1rem; font-style: italic;">${ex.description}</p>
+                                
+                                ${ex.videos && ex.videos.length > 0 ? `
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <div class="text-white" style="font-weight: 600; margin-bottom: 0.75rem; color: #06b6d4;">🎥 Vidéos de démonstration :</div>
+                                        ${ex.videos.map(video => {
+                                            const videoId = this.extractYouTubeID(video.url);
+                                            return `
+                                                <div style="margin-bottom: 1rem;">
+                                                    <p class="text-white" style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 0.5rem;">${video.titre}</p>
+                                                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 0.75rem;">
+                                                        <iframe 
+                                                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+                                                            src="https://www.youtube.com/embed/${videoId}" 
+                                                            frameborder="0" 
+                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                                            allowfullscreen>
+                                                        </iframe>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                ` : ''}
+                                
+                                <div style="margin-bottom: 1rem;">
+                                    <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem; color: #10b981;">🎯 Technique d'exécution :</div>
+                                    <ul>
+                                        ${ex.technique.map(step => `<li>${step}</li>`).join('')}
+                                    </ul>
+                                </div>
+                                
+                                ${ex.variantes ? `
+                                    <div class="tip-box">
+                                        <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">🔄 Variantes :</div>
+                                        <p class="text-white" style="opacity: 0.9;">${ex.variantes.join(' • ')}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            extractYouTubeID(url) {
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
+                const match = url.match(regExp);
+                return (match && match[2].length === 11) ? match[2] : null;
+            }
+
+            switchCoursTab(tab) {
+                this.currentCoursTab = tab;
+                this.render();
+            }
+
+            renderSessionForm() {
+                const isEditing = this.currentSession !== null;
+                const session = isEditing ? this.sessions[this.currentSession] : { nom: '', type: '', muscles: [], exercices: [] };
+
+                return `
+                    <div class="container">
+                        <div class="card">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-white" style="font-size: 1.5rem;">${isEditing ? '✏️ Modifier la séance' : '➕ Nouvelle séance'}</h2>
+                                <button class="btn btn-secondary" onclick="app.cancelSession()">← Retour</button>
+                            </div>
+
+                            <form id="session-form">
+                                <div class="mb-4">
+                                    <label class="text-white mb-1" style="display: block;">Nom de la séance</label>
+                                    <input type="text" class="input" id="session-name" placeholder="Ex: Pectoraux & Triceps" value="${session.nom}" required>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="text-white mb-1" style="display: block;">Type de séance</label>
+                                    <select class="input" id="session-type" required>
+                                        <option value="">Choisir...</option>
+                                        <option value="Force" ${session.type === 'Force' ? 'selected' : ''}>Force</option>
+                                        <option value="Endurance" ${session.type === 'Endurance' ? 'selected' : ''}>Endurance</option>
+                                        <option value="Équilibre" ${session.type === 'Équilibre' ? 'selected' : ''}>Équilibre</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="text-white mb-1" style="display: block;">Groupes musculaires travaillés</label>
+                                    <div class="grid grid-cols-2 gap-2" id="muscles-grid">
+                                        <div class="muscle-btn ${session.muscles.includes('Pectoraux') ? 'selected' : ''}" onclick="app.toggleMuscle('Pectoraux')">💪 Pectoraux</div>
+                                        <div class="muscle-btn ${session.muscles.includes('Dos') ? 'selected' : ''}" onclick="app.toggleMuscle('Dos')">🔺 Dos</div>
+                                        <div class="muscle-btn ${session.muscles.includes('Épaules') ? 'selected' : ''}" onclick="app.toggleMuscle('Épaules')">🏔️ Épaules</div>
+                                        <div class="muscle-btn ${session.muscles.includes('Biceps') ? 'selected' : ''}" onclick="app.toggleMuscle('Biceps')">💪 Biceps</div>
+                                        <div class="muscle-btn ${session.muscles.includes('Triceps') ? 'selected' : ''}" onclick="app.toggleMuscle('Triceps')">💪 Triceps</div>
+                                        <div class="muscle-btn ${session.muscles.includes('Abdominaux') ? 'selected' : ''}" onclick="app.toggleMuscle('Abdominaux')">🔥 Abdominaux</div>
+                                        <div class="muscle-btn ${session.muscles.includes('Jambes') ? 'selected' : ''}" onclick="app.toggleMuscle('Jambes')">🦵 Jambes</div>
+                                        <div class="muscle-btn ${session.muscles.includes('Autre') ? 'selected' : ''}" onclick="app.toggleMuscle('Autre')">⚡ Autre</div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="text-white mb-1" style="display: block;">Exercices</label>
+                                    <div class="flex gap-2 mb-2">
+                                        <input type="text" class="input" id="exercice-name" placeholder="Nom de l'exercice" style="flex: 1;">
+                                        <button type="button" class="btn btn-primary" onclick="app.addExercice()">Ajouter</button>
+                                    </div>
+                                    <div id="exercices-list">
+                                        ${session.exercices.map((ex, index) => `
+                                            <div class="exercice-item flex justify-between items-center">
+                                                <span class="text-white">${ex}</span>
+                                                <button type="button" class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="app.removeExercice(${index})">🗑️</button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-success" style="width: 100%;">💾 ${isEditing ? 'Enregistrer les modifications' : 'Créer la séance'}</button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderSessionDetail() {
+                const session = this.sessions[this.currentSession];
+                const lastCompletion = this.sessionHistory
+                    .filter(h => h.sessionIndex === this.currentSession && h.completed)
+                    .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))[0];
+                
+                return `
+                    <div class="container">
+                        <div class="card">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-white" style="font-size: 1.5rem;">${session.nom}</h2>
+                                <button class="btn btn-secondary" onclick="app.backToSessions()">← Retour</button>
+                            </div>
+
+                            <div class="mb-4">
+                                <span class="badge badge-${session.type.toLowerCase()}" style="font-size: 1rem;">${session.type}</span>
+                            </div>
+
+                            <div class="mb-4">
+                                <h3 class="text-cyan mb-2" style="font-size: 1.2rem;">Muscles travaillés</h3>
+                                <div class="flex gap-2" style="flex-wrap: wrap;">
+                                    ${session.muscles.map(m => `<span class="badge" style="background: rgba(6, 182, 212, 0.3); color: #67e8f9;">${m}</span>`).join('')}
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h3 class="text-cyan mb-2" style="font-size: 1.2rem;">Exercices (${session.exercices.length})</h3>
+                                ${session.exercices.map((ex, index) => `
+                                    <div class="exercice-item">
+                                        <span class="text-white" style="font-weight: 600;">${index + 1}.</span>
+                                        <span class="text-white" style="margin-left: 0.5rem;">${ex}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            ${lastCompletion ? `
+                                <div class="tip-box" style="background: rgba(16, 185, 129, 0.1); border-left-color: #10b981;">
+                                    <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">✅ Dernière réalisation</div>
+                                    <p class="text-white" style="opacity: 0.9;">📅 ${new Date(lastCompletion.completedAt).toLocaleDateString('fr-FR', { 
+                                        weekday: 'long', 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric' 
+                                    })}</p>
+                                </div>
+                            ` : ''}
+
+                            <div class="session-completion-modal">
+                                <h3 class="text-cyan mb-3" style="font-size: 1.2rem;">✅ Marquer comme effectuée</h3>
+                                
+                                <div class="mb-3">
+                                    <label class="text-white mb-1" style="display: block;">📝 Notes de séance (optionnel)</label>
+                                    <textarea 
+                                        class="session-notes-area" 
+                                        id="session-notes" 
+                                        placeholder="Ex: Super séance ! J'ai augmenté de 5kg au développé couché. Les triceps ont bien brûlé..."
+                                    ></textarea>
+                                </div>
+
+                                <button class="btn btn-success" style="width: 100%;" onclick="app.markSessionCompleted()">
+                                    ✅ Valider la séance
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            switchTab(tab) {
+                this.currentTab = tab;
+                this.render();
+            }// DONNÉES DES COURS
+        const coursData = {
+            principes: [
+                {
+                    titre: "1. Principe de Surcharge Progressive",
+                    contenu: "Pour progresser en musculation, il faut constamment augmenter la charge, le volume ou l'intensité de l'entraînement. Le corps s'adapte aux stimuli qu'on lui impose : si on soulève toujours la même charge, il n'y a plus de progression.",
+                    conseils: [
+                        "Augmenter progressivement les charges de 2-5% par semaine",
+                        "Varier le nombre de répétitions et de séries",
+                        "Modifier la vitesse d'exécution ou les temps de repos"
+                    ]
+                },
+                {
+                    titre: "2. Principe de Spécificité",
+                    contenu: "Les adaptations du corps sont spécifiques au type d'entraînement réalisé. Si vous voulez développer votre force maximale, vous devez vous entraîner avec des charges lourdes. Pour l'endurance musculaire, privilégiez des charges légères avec beaucoup de répétitions.",
+                    conseils: [
+                        "Définir clairement son objectif (force, volume, endurance)",
+                        "Adapter le choix des exercices à son objectif",
+                        "Respecter les paramètres du mobile choisi"
+                    ]
+                },
+                {
+                    titre: "3. Principe de Récupération",
+                    contenu: "Le muscle ne se développe pas pendant l'entraînement mais pendant la phase de récupération. Un repos insuffisant empêche la progression et augmente le risque de blessure. Il faut respecter 48-72h de repos entre deux séances sollicitant les mêmes groupes musculaires.",
+                    conseils: [
+                        "Dormir 7-9h par nuit pour optimiser la récupéra
