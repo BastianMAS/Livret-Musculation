@@ -2315,7 +2315,63 @@
 
             renderSessionForm() {
                 const isEditing = this.currentSession !== null;
-                const session = isEditing ? this.sessions[this.currentSession] : {nom: '', type: 'Force', muscles: [], exercices: []};
+                const session = isEditing ? this.sessions[this.currentSession] : {
+                    nom: '', 
+                    type: 'Force', 
+                    muscles: [], 
+                    exercices: [],
+                    series: 5,
+                    repetitions: 5,
+                    intensite: 90,
+                    repos: 180,
+                    isPersonnalise: false
+                };
+                
+                const mobileInfo = {
+                    'Force': {
+                        color: '#ef4444',
+                        objectif: 'Développer la force maximale',
+                        charges: '85-100% de 1RM',
+                        reps: '1-5 répétitions',
+                        series: '3-6 séries',
+                        repos: '3-5 minutes',
+                        exemple: 'Développé couché : 5 séries de 3 reps à 90% (si 1RM = 100kg → 90kg)',
+                        conseil: 'Explosivité sur la phase concentrique, contrôle en excentrique'
+                    },
+                    'Équilibre': {
+                        color: '#3b82f6',
+                        objectif: 'Hypertrophie musculaire (prise de masse)',
+                        charges: '65-80% de 1RM',
+                        reps: '6-12 répétitions',
+                        series: '3-5 séries',
+                        repos: '60-90 secondes',
+                        exemple: 'Squat : 4 séries de 10 reps à 75% (si 1RM = 140kg → 105kg)',
+                        conseil: 'Tempo contrôlé, temps sous tension optimal pour hypertrophie'
+                    },
+                    'Endurance': {
+                        color: '#10b981',
+                        objectif: 'Endurance musculaire et définition',
+                        charges: '40-60% de 1RM',
+                        reps: '15-25+ répétitions',
+                        series: '2-4 séries',
+                        repos: '30-60 secondes',
+                        exemple: 'Leg extension : 3 séries de 20 reps à 50% (si 1RM = 80kg → 40kg)',
+                        conseil: 'Rythme soutenu, brûlure musculaire recherchée'
+                    },
+                    'Personnalisé': {
+                        color: '#a855f7',
+                        objectif: 'Programme sur mesure',
+                        charges: 'Au choix',
+                        reps: 'Au choix',
+                        series: 'Au choix',
+                        repos: 'Au choix',
+                        exemple: 'Vous définissez tous les paramètres',
+                        conseil: 'Adaptez selon vos objectifs spécifiques'
+                    }
+                };
+                
+                const currentMobileInfo = mobileInfo[session.type] || mobileInfo['Force'];
+                
                 return `
                     <div class="container">
                         <div class="card">
@@ -2324,17 +2380,143 @@
                                 <button class="btn btn-secondary" onclick="app.cancelSession()">← Retour</button>
                             </div>
                             <form id="session-form">
-                                <div class="mb-4"><label class="text-white mb-1" style="display: block;">Nom</label><input type="text" class="input" id="session-name" placeholder="Ex: Upper Push" value="${session.nom}" required></div>
-                                <div class="mb-4"><label class="text-white mb-1" style="display: block;">Type / Mobile</label><select class="input" id="session-type" required><option value="Force" ${session.type === 'Force' ? 'selected' : ''}>Force (85-100%, 1-5 rép.)</option><option value="Équilibre" ${session.type === 'Équilibre' ? 'selected' : ''}>Équilibre (65-80%, 6-12 rép.)</option><option value="Endurance" ${session.type === 'Endurance' ? 'selected' : ''}>Endurance (40-60%, 15-25+ rép.)</option></select></div>
-                                <div class="mb-4"><label class="text-white mb-2" style="display: block; font-size: 1.1rem;">Muscles ciblés</label><div class="grid grid-cols-2 gap-2">${this.musclesList.map(m => `<button type="button" class="muscle-btn ${this.musclesTemp.includes(m) ? 'selected' : ''}" onclick="app.toggleMuscle('${m}')">${m}</button>`).join('')}</div></div>
-                                <div class="mb-4"><label class="text-white mb-2" style="display: block; font-size: 1.1rem;">Exercices</label><div class="flex gap-2 mb-2"><input type="text" class="input" id="exercice-name" placeholder="Nom exercice" style="flex: 1;"><button type="button" class="btn btn-primary" onclick="app.addExercice()">➕</button></div>${this.exercicesTemp.length > 0 ? `<div>${this.exercicesTemp.map((ex, i) => `<div class="exercice-item flex justify-between items-center"><span class="text-white">${i + 1}. ${ex}</span><button type="button" class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="app.removeExercice(${i})">🗑️</button></div>`).join('')}</div>` : `<div class="text-center" style="padding: 2rem; opacity: 0.5;"><div class="text-white">Aucun exercice</div></div>`}</div>
-                                <button type="submit" class="btn btn-success" style="width: 100%;">💾 ${isEditing ? 'Enregistrer' : 'Créer'}</button>
+                                <div class="mb-4">
+                                    <label class="text-white mb-1" style="display: block;">Nom de la séance</label>
+                                    <input type="text" class="input" id="session-name" placeholder="Ex: Upper Push A" value="${session.nom}" required>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="text-white mb-2" style="display: block; font-size: 1.1rem;">Mobile d'entraînement</label>
+                                    <select class="input" id="session-type" onchange="app.updateMobileInfo()" required>
+                                        <option value="Force" ${session.type === 'Force' ? 'selected' : ''}>💪 Force</option>
+                                        <option value="Équilibre" ${session.type === 'Équilibre' ? 'selected' : ''}>⚖️ Équilibre (Hypertrophie)</option>
+                                        <option value="Endurance" ${session.type === 'Endurance' ? 'selected' : ''}>🏃 Endurance</option>
+                                        <option value="Personnalisé" ${session.type === 'Personnalisé' ? 'selected' : ''}>⚙️ Personnalisé</option>
+                                    </select>
+                                </div>
+                                
+                                <div id="mobile-info" class="mb-4" style="background: linear-gradient(135deg, ${currentMobileInfo.color}20 0%, ${currentMobileInfo.color}10 100%); border: 2px solid ${currentMobileInfo.color}; border-radius: 1rem; padding: 1.5rem;">
+                                    <div class="text-white" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">🎯 ${currentMobileInfo.objectif}</div>
+                                    <div class="grid grid-cols-2 gap-2 mb-3">
+                                        <div class="text-white" style="opacity: 0.9;"><strong>Charges :</strong> ${currentMobileInfo.charges}</div>
+                                        <div class="text-white" style="opacity: 0.9;"><strong>Répétitions :</strong> ${currentMobileInfo.reps}</div>
+                                        <div class="text-white" style="opacity: 0.9;"><strong>Séries :</strong> ${currentMobileInfo.series}</div>
+                                        <div class="text-white" style="opacity: 0.9;"><strong>Repos :</strong> ${currentMobileInfo.repos}</div>
+                                    </div>
+                                    <div class="text-white" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 0.75rem; margin-bottom: 0.75rem;">
+                                        <div style="font-weight: 600; margin-bottom: 0.5rem;">📝 Exemple :</div>
+                                        ${currentMobileInfo.exemple}
+                                    </div>
+                                    <div class="text-cyan" style="font-size: 0.9rem;">💡 ${currentMobileInfo.conseil}</div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="text-white" style="font-size: 1.1rem;">⚙️ Paramètres d'entraînement</label>
+                                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                            <input type="checkbox" id="mode-personnalise" ${session.isPersonnalise ? 'checked' : ''} onchange="app.togglePersonnalise()">
+                                            <span class="text-white" style="font-size: 0.9rem;">Personnaliser</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div id="parametres-container" style="${session.isPersonnalise || session.type === 'Personnalisé' ? '' : 'opacity: 0.5; pointer-events: none;'}">
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="text-white mb-1" style="display: block; font-size: 0.9rem;">Séries</label>
+                                                <input type="number" class="input" id="session-series" value="${session.series || 5}" min="1" max="10" ${session.isPersonnalise || session.type === 'Personnalisé' ? '' : 'disabled'}>
+                                            </div>
+                                            <div>
+                                                <label class="text-white mb-1" style="display: block; font-size: 0.9rem;">Répétitions</label>
+                                                <input type="number" class="input" id="session-repetitions" value="${session.repetitions || 5}" min="1" max="50" ${session.isPersonnalise || session.type === 'Personnalisé' ? '' : 'disabled'}>
+                                            </div>
+                                            <div>
+                                                <label class="text-white mb-1" style="display: block; font-size: 0.9rem;">Intensité (% 1RM)</label>
+                                                <input type="number" class="input" id="session-intensite" value="${session.intensite || 90}" min="30" max="100" ${session.isPersonnalise || session.type === 'Personnalisé' ? '' : 'disabled'}>
+                                            </div>
+                                            <div>
+                                                <label class="text-white mb-1" style="display: block; font-size: 0.9rem;">Repos (secondes)</label>
+                                                <input type="number" class="input" id="session-repos" value="${session.repos || 180}" min="15" max="600" step="15" ${session.isPersonnalise || session.type === 'Personnalisé' ? '' : 'disabled'}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="text-white mb-2" style="display: block; font-size: 1.1rem;">💪 Muscles ciblés</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        ${this.musclesList.map(m => `<button type="button" class="muscle-btn ${this.musclesTemp.includes(m) ? 'selected' : ''}" onclick="app.toggleMuscle('${m}')">${m}</button>`).join('')}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="text-white mb-2" style="display: block; font-size: 1.1rem;">🏋️ Exercices</label>
+                                    <div class="flex gap-2 mb-2">
+                                        <input type="text" class="input" id="exercice-name" placeholder="Nom de l'exercice" style="flex: 1;">
+                                        <button type="button" class="btn btn-primary" onclick="app.addExercice()">➕</button>
+                                    </div>
+                                    ${this.exercicesTemp.length > 0 ? `
+                                        <div>
+                                            ${this.exercicesTemp.map((ex, i) => `
+                                                <div class="exercice-item flex justify-between items-center">
+                                                    <span class="text-white">${i + 1}. ${ex}</span>
+                                                    <button type="button" class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="app.removeExercice(${i})">🗑️</button>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    ` : `
+                                        <div class="text-center" style="padding: 2rem; opacity: 0.5;">
+                                            <div class="text-white">Aucun exercice ajouté</div>
+                                        </div>
+                                    `}
+                                </div>
+                                
+                                <button type="submit" class="btn btn-success" style="width: 100%;">💾 ${isEditing ? 'Enregistrer les modifications' : 'Créer la séance'}</button>
                             </form>
                         </div>
                     </div>
                 `;
             }
-
+            
+            updateMobileInfo() {
+                const selectedType = document.getElementById('session-type').value;
+                const isPersonnalise = document.getElementById('mode-personnalise')?.checked || selectedType === 'Personnalisé';
+                
+                // Mettre à jour les valeurs par défaut selon le mobile
+                const defaults = {
+                    'Force': {series: 5, repetitions: 3, intensite: 90, repos: 180},
+                    'Équilibre': {series: 4, repetitions: 10, intensite: 75, repos: 75},
+                    'Endurance': {series: 3, repetitions: 20, intensite: 50, repos: 45},
+                    'Personnalisé': {series: 4, repetitions: 8, intensite: 70, repos: 90}
+                };
+                
+                const params = defaults[selectedType] || defaults['Force'];
+                
+                if (!isPersonnalise && selectedType !== 'Personnalisé') {
+                    document.getElementById('session-series').value = params.series;
+                    document.getElementById('session-repetitions').value = params.repetitions;
+                    document.getElementById('session-intensite').value = params.intensite;
+                    document.getElementById('session-repos').value = params.repos;
+                }
+                
+                this.render();
+            }
+            
+            togglePersonnalise() {
+                const isChecked = document.getElementById('mode-personnalise').checked;
+                const container = document.getElementById('parametres-container');
+                const inputs = container.querySelectorAll('input');
+                
+                if (isChecked) {
+                    container.style.opacity = '1';
+                    container.style.pointerEvents = 'auto';
+                    inputs.forEach(input => input.disabled = false);
+                } else {
+                    container.style.opacity = '0.5';
+                    container.style.pointerEvents = 'none';
+                    inputs.forEach(input => input.disabled = true);
+                    this.updateMobileInfo();
+                }
+            }
             renderSessionDetail() {
                 const session = this.sessions[this.currentSession];
                 if (!session) return '';
@@ -2619,27 +2801,46 @@
 
             saveSession(e) {
                 e.preventDefault();
-                const nom = document.getElementById('session-name').value;
-                const type = document.getElementById('session-type').value;
+                const nom = document.getElementById("session-name").value;
+                const type = document.getElementById("session-type").value;
+                const series = parseInt(document.getElementById("session-series").value) || 5;
+                const repetitions = parseInt(document.getElementById("session-repetitions").value) || 5;
+                const intensite = parseInt(document.getElementById("session-intensite").value) || 90;
+                const repos = parseInt(document.getElementById("session-repos").value) || 180;
+                const isPersonnalise = document.getElementById("mode-personnalise")?.checked || type === "Personnalisé";
+                
                 if (this.musclesTemp.length === 0) {
-                    alert('Sélectionnez au moins un muscle');
+                    alert("Sélectionnez au moins un muscle");
                     return;
                 }
                 if (this.exercicesTemp.length === 0) {
-                    alert('Ajoutez au moins un exercice');
+                    alert("Ajoutez au moins un exercice");
                     return;
                 }
-                const sessionData = {nom, type, muscles: this.musclesTemp, exercices: this.exercicesTemp};
+                
+                const sessionData = {
+                    nom, 
+                    type, 
+                    muscles: this.musclesTemp, 
+                    exercices: this.exercicesTemp,
+                    series,
+                    repetitions,
+                    intensite,
+                    repos,
+                    isPersonnalise
+                };
+                
                 if (this.currentSession !== null) {
                     this.sessions[this.currentSession] = sessionData;
                 } else {
                     this.sessions.push(sessionData);
                 }
+                
                 this.saveSessions();
                 this.checkBadges();
                 this.currentSession = null;
-                this.currentView = 'dashboard';
-                this.currentTab = 'sessions';
+                this.currentView = "dashboard";
+                this.currentTab = "sessions";
                 this.render();
             }
 
