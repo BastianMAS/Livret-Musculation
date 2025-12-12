@@ -167,6 +167,104 @@
             box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.4);
         }
 
+        .fab-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .fab-button:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 15px 40px rgba(6, 182, 212, 0.6);
+        }
+        
+        .fab-menu {
+            position: fixed;
+            bottom: 6rem;
+            right: 2rem;
+            background: rgba(30, 41, 59, 0.98);
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            min-width: 200px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .fab-menu-item {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 0.5rem;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .fab-menu-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .fab-menu-item:hover {
+            background: var(--primary-color);
+            transform: translateX(-5px);
+        }
+        
+        .search-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .search-modal {
+            background: var(--bg-medium);
+            border-radius: 1rem;
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+            margin-top: 5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+        
+        .search-result {
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .search-result:hover {
+            background: var(--primary-color);
+            transform: translateX(5px);
+        }
         .btn-link {
             background: transparent;
             color: var(--text-cyan);
@@ -1296,6 +1394,12 @@
                 this.calculatedCharges = {};
                 this.currentTheme = 'cyan';
                 this.badges = [];
+                this.objectifs = [];
+                this.currentStreak = 0;
+                this.longestStreak = 0;
+                this.fabMenuOpen = false;
+                this.searchOpen = false;
+                this.globalSearchQuery = "";
                 this.init();
                 this.initOfflineMode();
             }
@@ -1308,6 +1412,8 @@
                 this.loadCalculatedCharges();
                 this.loadTheme();
                 this.loadBadges();
+                this.loadObjectifs();
+                this.calculateStreaks();
                 this.checkBadges();
                 this.render();
             }
@@ -1471,624 +1577,611 @@
                     app.innerHTML = this.renderSessionDetail();
                     this.attachSessionDetailEvents();
                 }
+                
+                // Ajouter le bouton flottant et la recherche globale
+                if (this.currentView === 'dashboard') {
+                    app.innerHTML += this.renderFabButton();
+                }
+
+            saveObjectifs() {
+                storage.save('objectifs', this.objectifs);
             }
 
-            renderCodeAccess() {
-                return `
-                    <div class="container">
-                        <div class="card" style="max-width: 500px; margin: 4rem auto;">
-                            <div class="text-center mb-4">
-                                <div class="user-icon" style="margin: 0 auto 1.5rem;">🔒</div>
-                                <h1 class="text-white" style="font-size: 2rem; margin-bottom: 0.5rem;">Accès Protégé</h1>
-                                <p class="text-cyan">Entrez le code d'accès de votre classe</p>
-                            </div>
-                            <form id="code-form">
-                                <div class="mb-4">
-                                    <label class="text-white mb-1" style="display: block;">Code de classe</label>
-                                    <input type="password" class="input" id="code-input" placeholder="Ex: 1CAPECP25" required autofocus>
-                                </div>
-                                <button type="submit" class="btn btn-primary" style="width: 100%;">Valider</button>
-                            </form>
-                            <div id="code-error" class="hidden" style="margin-top: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.75rem;">
-                                <p class="text-white" style="text-align: center;">❌ Code incorrect</p>
-                            </div>
-                            <div class="tip-box" style="margin-top: 2rem;">
-                                <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">💡 Code oublié ?</div>
-                                <p class="text-white" style="opacity: 0.8; font-size: 0.9rem;">Demandez le code à votre professeur.</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
+            calculateStreaks() {
+                if (!this.sessionHistory || this.sessionHistory.length === 0) {
+                    this.currentStreak = 0;
+                    this.longestStreak = 0;
+                    return;
+                }
 
-            renderLogin() {
-                const users = [];
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key.startsWith('user-') && !key.includes('-sessions') && !key.includes('-rmHistory') && !key.includes('-avatar') && !key.includes('-sessionHistory') && !key.includes('-calculatedCharges') && !key.includes('-theme') && !key.includes('-badges')) {
-                        users.push(key.replace('user-', ''));
+                const completedDates = this.sessionHistory
+                    .filter(h => h.completed)
+                    .map(h => {
+                        const d = new Date(h.completedAt);
+                        return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+                    })
+                    .filter((v, i, a) => a.indexOf(v) === i)
+                    .sort((a, b) => b - a);
+
+                if (completedDates.length === 0) {
+                    this.currentStreak = 0;
+                    this.longestStreak = 0;
+                    return;
+                }
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const todayTime = today.getTime();
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayTime = yesterday.getTime();
+
+                let currentStreak = 0;
+                let longestStreak = 0;
+                let tempStreak = 1;
+
+                if (completedDates[0] === todayTime || completedDates[0] === yesterdayTime) {
+                    currentStreak = 1;
+                    let checkDate = completedDates[0];
+                    
+                    for (let i = 1; i < completedDates.length; i++) {
+                        const expectedPrevDay = checkDate - (24 * 60 * 60 * 1000);
+                        if (completedDates[i] === expectedPrevDay) {
+                            currentStreak++;
+                            checkDate = completedDates[i];
+                        } else {
+                            break;
+                        }
                     }
                 }
 
-                return `
-                    <div class="container">
-                        <div class="card" style="max-width: 450px; margin: 4rem auto;">
-                            <div class="text-center mb-4">
-                                <div class="user-icon" style="margin: 0 auto 1.5rem;">💪</div>
-                                <h1 class="text-white" style="font-size: 2rem; margin-bottom: 0.5rem;">Livret de Musculation</h1>
-                                <p class="text-cyan">Suivi personnalisé - ${securite.getNomClasse()}</p>
-                            </div>
-                            ${users.length > 0 ? `
-                                <div class="mb-4">
-                                    <label class="text-white mb-1" style="display: block;">Sélectionner un profil</label>
-                                    <select class="input" id="select-user">
-                                        <option value="">-- Choisir un profil --</option>
-                                        ${users.map(u => `<option value="${u}">${u}</option>`).join('')}
-                                    </select>
-                                </div>
-                                <button class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;" onclick="app.handleSelectUser()">Se connecter</button>
-                                <div class="text-center">
-                                    <button class="btn btn-link" onclick="app.showSignup()">Créer un nouveau profil</button>
-                                </div>
-                            ` : `
-                                <div class="text-center">
-                                    <p class="text-white mb-4" style="opacity: 0.8;">Aucun profil existant</p>
-                                    <button class="btn btn-success" style="width: 100%;" onclick="app.showSignup()">Créer mon profil</button>
-                                </div>
-                            `}
-                        </div>
-                    </div>
-                `;
+                for (let i = 0; i < completedDates.length - 1; i++) {
+                    const diff = completedDates[i] - completedDates[i + 1];
+                    if (diff === 24 * 60 * 60 * 1000) {
+                        tempStreak++;
+                    } else {
+                        longestStreak = Math.max(longestStreak, tempStreak);
+                        tempStreak = 1;
+                    }
+                }
+                longestStreak = Math.max(longestStreak, tempStreak);
+
+                this.currentStreak = currentStreak;
+                this.longestStreak = Math.max(longestStreak, currentStreak);
             }
 
-            renderSignup() {
-                return `
-                    <div class="container">
-                        <div class="card" style="max-width: 500px; margin: 2rem auto;">
-                            <div class="text-center mb-4">
-                                <h1 class="text-white" style="font-size: 2rem; margin-bottom: 0.5rem;">Créer mon profil</h1>
-                                <p class="text-cyan">Renseignez vos informations - ${securite.getNomClasse()}</p>
-                            </div>
-                            <form id="signup-form">
-                                <div class="text-center mb-4">
-                                    <input type="file" id="avatar-input" accept="image/*" style="display: none;">
-                                    <div class="avatar-upload" onclick="document.getElementById('avatar-input').click()">
-                                        <span id="avatar-preview">📷</span>
-                                    </div>
-                                    <p class="text-white" style="opacity: 0.7; font-size: 0.9rem;">Cliquez pour ajouter une photo</p>
-                                </div>
-                                <div class="mb-2">
-                                    <label class="text-white mb-1" style="display: block;">Prénom</label>
-                                    <input type="text" class="input" id="signup-username" placeholder="Votre prénom" required>
-                                </div>
-                                <div class="grid grid-cols-2 gap-3 mb-2">
-                                    <div>
-                                        <label class="text-white mb-1" style="display: block;">Âge</label>
-                                        <input type="number" class="input" id="signup-age" placeholder="Ex: 25" min="10" max="100" required>
-                                    </div>
-                                    <div>
-                                        <label class="text-white mb-1" style="display: block;">Sexe</label>
-                                        <select class="input" id="signup-sexe" required>
-                                            <option value="">Choisir...</option>
-                                            <option value="Homme">Homme</option>
-                                            <option value="Femme">Femme</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-3 mb-4">
-                                    <div>
-                                        <label class="text-white mb-1" style="display: block;">Taille (cm)</label>
-                                        <input type="number" class="input" id="signup-taille" placeholder="Ex: 175" min="100" max="250" required>
-                                    </div>
-                                    <div>
-                                        <label class="text-white mb-1" style="display: block;">Poids (kg)</label>
-                                        <input type="number" class="input" id="signup-poids" placeholder="Ex: 70" min="30" max="200" step="0.1" required>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-success" style="width: 100%; margin-bottom: 1rem;">Créer mon profil</button>
-                                <div class="text-center">
-                                    <button type="button" class="btn btn-link" onclick="app.showLogin()">Retour</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                `;
+            addObjectif(titre, type, cible, muscle = null, exercice = null) {
+                const newId = this.objectifs.length > 0 ? Math.max(...this.objectifs.map(o => o.id)) + 1 : 1;
+                const newObjectif = {
+                    id: newId,
+                    titre,
+                    type,
+                    cible,
+                    actuel: 0,
+                    completed: false,
+                    muscle,
+                    exercice,
+                    createdAt: new Date().toISOString()
+                };
+                this.objectifs.push(newObjectif);
+                this.saveObjectifs();
+                this.render();
             }
 
-            renderDashboard() {
-                const userKey = `user-${this.currentUser}`;
-                const userResult = storage.get(userKey, true);
-                const userData = userResult.exists ? JSON.parse(userResult.value) : {};
-                const completedSessions = this.sessionHistory.filter(h => h.completed).length;
+            deleteObjectif(id) {
+                if (confirm('Supprimer cet objectif ?')) {
+                    this.objectifs = this.objectifs.filter(o => o.id !== id);
+                    this.saveObjectifs();
+                    this.render();
+                }
+            }
+
+            updateObjectifProgress() {
                 const thisMonth = new Date().getMonth();
                 const thisYear = new Date().getFullYear();
                 const sessionsThisMonth = this.sessionHistory.filter(h => {
                     const date = new Date(h.completedAt);
                     return h.completed && date.getMonth() === thisMonth && date.getFullYear() === thisYear;
                 }).length;
-                const unlockedBadges = this.badges.filter(b => b.unlocked).length;
 
-                return `
-                    <div class="container">
-                        <div class="card">
-                            <div class="flex justify-between items-center mb-4">
-                                <div class="flex items-center gap-3">
-                                    ${this.userAvatar ? `<img src="${this.userAvatar}" class="profile-avatar" alt="Avatar">` : `<div class="default-avatar">👤</div>`}
-                                    <div>
-                                        <h1 class="text-white" style="font-size: 2rem;">${this.currentUser}</h1>
-                                        <p class="text-cyan" style="font-size: 0.9rem;">${userData.age} ans • ${userData.sexe} • ${userData.taille}cm • ${userData.poids}kg</p>
-                                        <p class="text-white" style="opacity: 0.7; font-size: 0.85rem; margin-top: 0.25rem;">📚 ${securite.getNomClasse()} • 🏆 ${unlockedBadges}/${this.badges.length} badges</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="btn btn-warning" onclick="app.exportData()">💾</button>
-                                    <button class="btn btn-warning" onclick="app.importData()">📥</button>
-                                    <button class="btn btn-secondary" onclick="app.logout()">Déconnexion</button>
-                                </div>
-                            </div>
-                            <div class="flex gap-2 mb-4" style="overflow-x: auto;">
-                                <button class="tab-btn ${this.currentTab === 'dashboard' ? 'active' : ''}" onclick="app.switchTab('dashboard')">📊 Dashboard</button>
-                                <button class="tab-btn ${this.currentTab === 'profil' ? 'active' : ''}" onclick="app.switchTab('profil')">👤 Profil</button>
-                                <button class="tab-btn ${this.currentTab === 'rm' ? 'active' : ''}" onclick="app.switchTab('rm')">🎯 1RM</button>
-                                <button class="tab-btn ${this.currentTab === 'charges' ? 'active' : ''}" onclick="app.switchTab('charges')">⚖️ Charges</button>
-                                <button class="tab-btn ${this.currentTab === 'progression' ? 'active' : ''}" onclick="app.switchTab('progression')">📊 Graphiques</button>
-                                <button class="tab-btn ${this.currentTab === 'sessions' ? 'active' : ''}" onclick="app.switchTab('sessions')">📝 Séances</button>
-                                <button class="tab-btn ${this.currentTab === 'timer' ? 'active' : ''}" onclick="app.switchTab('timer')">⏱️ Timer</button>
-                                <button class="tab-btn ${this.currentTab === 'historique' ? 'active' : ''}" onclick="app.switchTab('historique')">📅 Historique</button>
-                                <button class="tab-btn ${this.currentTab === 'badges' ? 'active' : ''}" onclick="app.switchTab('badges')">🏆 Badges</button>
-                                <button class="tab-btn ${this.currentTab === 'cours' ? 'active' : ''}" onclick="app.switchTab('cours')">📚 Cours</button>
-                            </div>
-                            ${this.currentTab === 'dashboard' ? this.renderDashboardTab(completedSessions, sessionsThisMonth) : ''}
-                            ${this.currentTab === 'profil' ? this.renderProfilTab() : ''}
-                            ${this.currentTab === 'rm' ? this.renderRMTab() : ''}
-                            ${this.currentTab === 'charges' ? this.renderChargesTab() : ''}
-                            ${this.currentTab === 'progression' ? this.renderProgressionTab() : ''}
-                            ${this.currentTab === 'sessions' ? this.renderSessionsTab() : ''}
-                            ${this.currentTab === 'timer' ? this.renderTimerTab() : ''}
-                            ${this.currentTab === 'historique' ? this.renderHistoriqueTab() : ''}
-                            ${this.currentTab === 'badges' ? this.renderBadgesTab() : ''}
-                            ${this.currentTab === 'cours' ? this.renderCoursTab() : ''}
-                        </div>
-                    </div>
-                `;
-            }
-
-            renderDashboardTab(completedSessions, sessionsThisMonth) {
-                const stats = {
-                    total: this.sessions.length,
-                    force: this.sessions.filter(s => s.type === 'Force').length,
-                    endurance: this.sessions.filter(s => s.type === 'Endurance').length,
-                    equilibre: this.sessions.filter(s => s.type === 'Équilibre').length
-                };
-                const unlockedBadges = this.badges.filter(b => b.unlocked).length;
-                const recentBadges = this.badges.filter(b => b.unlocked).sort((a, b) => new Date(b.unlockedAt) - new Date(a.unlockedAt)).slice(0, 3);
-
-                return `
-                    <div class="grid grid-cols-2 gap-3 mb-4">
-                        <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(6, 182, 212, 0.3);">
-                            <div class="text-cyan" style="font-size: 2.5rem; font-weight: bold;">${stats.total}</div>
-                            <div class="text-white" style="opacity: 0.9;">Séances créées</div>
-                        </div>
-                        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(20, 184, 166, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(16, 185, 129, 0.3);">
-                            <div style="color: #10b981; font-size: 2.5rem; font-weight: bold;">${completedSessions}</div>
-                            <div class="text-white" style="opacity: 0.9;">Séances effectuées</div>
-                        </div>
-                        <div style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(251, 146, 60, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(249, 115, 22, 0.3);">
-                            <div style="color: #fb923c; font-size: 2.5rem; font-weight: bold;">${sessionsThisMonth}</div>
-                            <div class="text-white" style="opacity: 0.9;">Ce mois-ci</div>
-                        </div>
-                        <div style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(168, 85, 247, 0.3);">
-                            <div style="color: #a855f7; font-size: 2.5rem; font-weight: bold;">${unlockedBadges}</div>
-                            <div class="text-white" style="opacity: 0.9;">Badges</div>
-                        </div>
-                    </div>
-                    ${recentBadges.length > 0 ? `
-                        <div class="tip-box" style="border-color: #a855f7; background: rgba(168, 85, 247, 0.1);">
-                            <div class="text-white" style="font-weight: 600; margin-bottom: 0.75rem;">🏆 Derniers badges</div>
-                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                                ${recentBadges.map(b => `<div style="display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 2rem;">${b.icon}</span><div><div class="text-white" style="font-weight: 600;">${b.name}</div></div></div>`).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                    <div class="tip-box">
-                        <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">💡 Conseil du jour</div>
-                        <div class="text-white" style="opacity: 0.9;">Échauffez-vous bien et étirez-vous après. La récupération est aussi importante que l'entraînement !</div>
-                    </div>
-                `;
-            }renderProfilTab() {
-                const userKey = `user-${this.currentUser}`;
-                const userResult = storage.get(userKey, true);
-                const userData = userResult.exists ? JSON.parse(userResult.value) : {};
-
-                return `
-                    <div>
-                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">🎨 Thème de couleur</h2>
-                        <div class="theme-selector mb-4">
-                            <button class="theme-btn theme-cyan ${this.currentTheme === 'cyan' ? 'active' : ''}" onclick="app.changeTheme('cyan')" title="Cyan"></button>
-                            <button class="theme-btn theme-blue ${this.currentTheme === 'blue' ? 'active' : ''}" onclick="app.changeTheme('blue')" title="Bleu"></button>
-                            <button class="theme-btn theme-green ${this.currentTheme === 'green' ? 'active' : ''}" onclick="app.changeTheme('green')" title="Vert"></button>
-                            <button class="theme-btn theme-purple ${this.currentTheme === 'purple' ? 'active' : ''}" onclick="app.changeTheme('purple')" title="Violet"></button>
-                            <button class="theme-btn theme-orange ${this.currentTheme === 'orange' ? 'active' : ''}" onclick="app.changeTheme('orange')" title="Orange"></button>
-                        </div>
-
-                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">👤 Mes informations</h2>
-                        <form id="profile-form">
-                            <div class="text-center mb-4">
-                                <input type="file" id="profile-avatar-input" accept="image/*" style="display: none;">
-                                <div style="cursor: pointer; display: inline-block;" onclick="document.getElementById('profile-avatar-input').click()">
-                                    ${this.userAvatar ? `<img src="${this.userAvatar}" class="profile-avatar" alt="Avatar">` : `<div class="default-avatar">👤</div>`}
-                                </div>
-                                <p class="text-white" style="opacity: 0.7; font-size: 0.9rem; margin-top: 0.5rem;">Cliquez pour changer la photo</p>
-                            </div>
-                            <div class="mb-2">
-                                <label class="text-white mb-1" style="display: block;">Prénom</label>
-                                <input type="text" class="input" value="${this.currentUser}" disabled>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3 mb-2">
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Âge</label>
-                                    <input type="number" class="input" id="profile-age" value="${userData.age}" min="10" max="100" required>
-                                </div>
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Sexe</label>
-                                    <select class="input" id="profile-sexe" required>
-                                        <option value="Homme" ${userData.sexe === 'Homme' ? 'selected' : ''}>Homme</option>
-                                        <option value="Femme" ${userData.sexe === 'Femme' ? 'selected' : ''}>Femme</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3 mb-4">
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Taille (cm)</label>
-                                    <input type="number" class="input" id="profile-taille" value="${userData.taille}" min="100" max="250" required>
-                                </div>
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Poids (kg)</label>
-                                    <input type="number" class="input" id="profile-poids" value="${userData.poids}" min="30" max="200" step="0.1" required>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-success" style="width: 100%;">💾 Enregistrer</button>
-                        </form>
-                    </div>
-                `;
-            }
-
-            renderRMTab() {
-                return `
-                    <div>
-                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">🎯 Calculateur de 1RM</h2>
-                        <form id="rm-form" class="mb-4">
-                            <div class="grid grid-cols-2 gap-3 mb-3">
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Groupe musculaire</label>
-                                    <select class="input" id="rm-muscle" required>
-                                        <option value="">Sélectionner...</option>
-                                        ${this.musclesList.map(m => `<option value="${m}">${m}</option>`).join('')}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Exercice</label>
-                                    <input type="text" class="input" id="rm-exercise" placeholder="Ex: Développé couché" required>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-3 gap-3 mb-3">
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Charge (kg)</label>
-                                    <input type="number" class="input" id="rm-weight" placeholder="Ex: 80" min="1" step="0.5" required>
-                                </div>
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Répétitions</label>
-                                    <input type="number" class="input" id="rm-reps" placeholder="Ex: 8" min="1" max="20" required>
-                                </div>
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Date</label>
-                                    <input type="date" class="input" id="rm-date" required>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">Calculer mon 1RM</button>
-                        </form>
-                        <div id="rm-result" class="hidden mb-4"></div>
-                        ${this.rmHistory.length > 0 ? `
-                            <h3 class="text-white mb-3" style="font-size: 1.2rem;">📊 Historique (${this.rmHistory.length})</h3>
-                            ${this.rmHistory.map((test, index) => `
-                                <div class="rm-history-card">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <div class="text-cyan" style="font-weight: 600; font-size: 1.1rem;">${test.exercise}</div>
-                                            <div class="text-white" style="opacity: 0.8; margin: 0.5rem 0;">${test.muscle}</div>
-                                            <div class="text-white" style="opacity: 0.7; font-size: 0.9rem;">${test.weight}kg × ${test.reps} rép. • ${new Date(test.date).toLocaleDateString('fr-FR')}</div>
-                                        </div>
-                                        <div>
-                                            <div style="color: #10b981; font-size: 2rem; font-weight: bold; text-align: center;">${test.rm}kg</div>
-                                            <div class="text-white" style="opacity: 0.7; font-size: 0.85rem; text-align: center;">1RM</div>
-                                            <div class="flex gap-2 mt-2">
-                                                <button class="btn btn-warning" style="padding: 0.5rem 1rem;" onclick="app.editRM(${index})">✏️</button>
-                                                <button class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="app.deleteRM(${index})">🗑️</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        ` : `
-                            <div class="text-center" style="padding: 3rem 1rem; opacity: 0.5;">
-                                <div style="font-size: 4rem; margin-bottom: 1rem;">📊</div>
-                                <div class="text-white">Aucun test effectué</div>
-                            </div>
-                        `}
-                    </div>
-                `;
-            }
-
-            renderChargesTab() {
-                return `
-                    <div>
-                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">⚖️ Calculateur de charges</h2>
-                        <div class="charges-calculator mb-4">
-                            <div class="mb-3">
-                                <label class="text-white mb-1" style="display: block; font-weight: 600;">Sélectionner un test 1RM</label>
-                                <select class="input" id="charges-rm-select" onchange="app.calculateCharges()">
-                                    <option value="">-- Choisir un test --</option>
-                                    ${this.rmHistory.map((test, index) => `<option value="${index}">${test.exercise} - ${test.rm}kg (${new Date(test.date).toLocaleDateString('fr-FR')})</option>`).join('')}
-                                </select>
-                            </div>
-                        </div>
-                        <div id="charges-result">
-                            ${this.calculatedCharges.rm ? `
-                                <div class="mb-4">
-                                    <div class="text-center mb-3">
-                                        <div class="text-cyan" style="font-size: 1.3rem; font-weight: 600;">${this.calculatedCharges.exercise}</div>
-                                        <div class="text-white" style="opacity: 0.8;">1RM: ${this.calculatedCharges.rm}kg</div>
-                                    </div>
-                                    <table class="charges-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Mobile</th>
-                                                <th>% du 1RM</th>
-                                                <th>Charge</th>
-                                                <th>Répétitions</th>
-                                                <th>Repos</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td style="color: #fb923c; font-weight: 600;">Force Maximale</td>
-                                                <td>85-100%</td>
-                                                <td class="charge-value">${Math.round(this.calculatedCharges.rm * 0.85)}-${this.calculatedCharges.rm}kg</td>
-                                                <td>1-5 rép.</td>
-                                                <td>3-5 min</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="color: #10b981; font-weight: 600;">Équilibre / Volume</td>
-                                                <td>65-80%</td>
-                                                <td class="charge-value">${Math.round(this.calculatedCharges.rm * 0.65)}-${Math.round(this.calculatedCharges.rm * 0.80)}kg</td>
-                                                <td>6-12 rép.</td>
-                                                <td>1-2 min</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="color: #06b6d4; font-weight: 600;">Endurance Musculaire</td>
-                                                <td>40-60%</td>
-                                                <td class="charge-value">${Math.round(this.calculatedCharges.rm * 0.40)}-${Math.round(this.calculatedCharges.rm * 0.60)}kg</td>
-                                                <td>15-25+ rép.</td>
-                                                <td>30s-1 min</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ` : `
-                                <div class="text-center" style="padding: 3rem 1rem; opacity: 0.5;">
-                                    <div style="font-size: 4rem; margin-bottom: 1rem;">⚖️</div>
-                                    <div class="text-white">Sélectionnez un test 1RM ci-dessus</div>
-                                </div>
-                            `}
-                        </div>
-                    </div>
-                `;
-            }
-
-            renderProgressionTab() {
-                if (this.rmHistory.length === 0) {
-                    return `
-                        <div>
-                            <h2 class="text-white mb-4" style="font-size: 1.5rem;">📊 Graphiques de progression</h2>
-                            <div class="text-center" style="padding: 3rem 1rem; opacity: 0.5;">
-                                <div style="font-size: 4rem; margin-bottom: 1rem;">📈</div>
-                                <div class="text-white">Aucune donnée à afficher</div>
-                                <div class="text-white" style="opacity: 0.7; font-size: 0.9rem; margin-top: 0.5rem;">Calculez vos premiers 1RM pour voir vos graphiques !</div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                const exerciseGroups = {};
-                this.rmHistory.forEach(test => {
-                    if (!exerciseGroups[test.exercise]) {
-                        exerciseGroups[test.exercise] = [];
+                this.objectifs.forEach(obj => {
+                    if (obj.type === 'seances') {
+                        obj.actuel = sessionsThisMonth;
+                        obj.completed = obj.actuel >= obj.cible;
+                    } else if (obj.type === 'streak') {
+                        obj.actuel = this.currentStreak;
+                        obj.completed = obj.actuel >= obj.cible;
+                    } else if (obj.type === 'rm' && obj.muscle && obj.exercice) {
+                        const tests = this.rmHistory.filter(t => t.muscle === obj.muscle && t.exercise === obj.exercice);
+                        if (tests.length >= 2) {
+                            const sorted = tests.sort((a, b) => new Date(b.date) - new Date(a.date));
+                            const latest = sorted[0].rm;
+                            const initial = sorted[sorted.length - 1].rm;
+                            obj.actuel = latest - initial;
+                            obj.completed = obj.actuel >= obj.cible;
+                        }
                     }
-                    exerciseGroups[test.exercise].push(test);
                 });
 
-                return `
-                    <div>
-                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">📊 Évolution de vos 1RM</h2>
-                        ${Object.entries(exerciseGroups).map(([exercise, tests]) => {
-                            const chartId = `chart-${exercise.replace(/\s+/g, '-').toLowerCase()}`;
-                            return `
-                                <div class="chart-container">
-                                    <h3 class="text-cyan mb-3" style="font-size: 1.2rem;">${exercise}</h3>
-                                    <canvas id="${chartId}"></canvas>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                `;
+                this.saveObjectifs();
             }
 
-            renderSessionsTab() {
+            renderObjectifsTab() {
+                this.updateObjectifProgress();
+                
+                const objectifsActifs = this.objectifs.filter(o => !o.completed);
+                const objectifsCompletes = this.objectifs.filter(o => o.completed);
+
                 return `
                     <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-white" style="font-size: 1.5rem;">📝 Mes séances (${this.sessions.length})</h2>
-                            <button class="btn btn-success" onclick="app.createNewSession()">➕ Nouvelle séance</button>
-                        </div>
-                        ${this.sessions.length > 0 ? `
+                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">🎯 Mes Objectifs</h2>
+                        
+                        <!-- Streaks -->
+                        <div class="mb-4" style="background: linear-gradient(135deg, rgba(251, 146, 60, 0.2) 0%, rgba(249, 115, 22, 0.2) 100%); border: 2px solid rgba(251, 146, 60, 0.4); border-radius: 1.5rem; padding: 2rem;">
+                            <h3 class="text-white mb-3" style="font-size: 1.3rem;">🔥 Séries en cours</h3>
                             <div class="grid grid-cols-2 gap-3">
-                                ${this.sessions.map((session, index) => {
-                                    const isCompleted = this.sessionHistory.some(h => h.sessionIndex === index && h.completed);
+                                <div class="text-center" style="background: rgba(15, 23, 42, 0.6); padding: 1.5rem; border-radius: 1rem;">
+                                    <div style="color: #fb923c; font-size: 3rem; font-weight: bold;">${this.currentStreak}</div>
+                                    <div class="text-white" style="opacity: 0.9;">Jours consécutifs</div>
+                                    ${this.currentStreak > 0 ? '<div class="text-cyan mt-2">🔥 Continue !</div>' : '<div class="text-white mt-2" style="opacity: 0.6;">Commence une série</div>'}
+                                </div>
+                                <div class="text-center" style="background: rgba(15, 23, 42, 0.6); padding: 1.5rem; border-radius: 1rem;">
+                                    <div style="color: #fb923c; font-size: 3rem; font-weight: bold;">${this.longestStreak}</div>
+                                    <div class="text-white" style="opacity: 0.9;">Record personnel</div>
+                                    ${this.currentStreak === this.longestStreak && this.currentStreak > 0 ? '<div class="text-cyan mt-2">🏆 Nouveau record !</div>' : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Objectifs actifs -->
+                        ${objectifsActifs.length > 0 ? `
+                            <div class="mb-4">
+                                <h3 class="text-white mb-3" style="font-size: 1.2rem;">🎯 En cours (${objectifsActifs.length})</h3>
+                                ${objectifsActifs.map(obj => {
+                                    const progress = Math.min((obj.actuel / obj.cible) * 100, 100);
                                     return `
-                                        <div class="session-card ${isCompleted ? 'completed' : ''}" onclick="app.viewSession(${index})">
-                                            ${isCompleted ? '<div class="session-completed-badge">✓ Effectuée</div>' : ''}
-                                            <h3 class="text-white mb-2" style="font-size: 1.2rem;">${session.nom}</h3>
-                                            <div class="mb-2"><span class="badge badge-${session.type.toLowerCase()}">${session.type}</span></div>
-                                            <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">💪 ${session.muscles.join(', ')}</div>
-                                            <div class="text-white" style="opacity: 0.7; font-size: 0.85rem; margin-top: 0.5rem;">📋 ${session.exercices.length} exercice${session.exercices.length > 1 ? 's' : ''}</div>
+                                        <div class="exercise-card" style="position: relative;">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <h4 class="text-white" style="margin: 0;">${obj.titre}</h4>
+                                                <button class="btn btn-danger" style="padding: 0.25rem 0.75rem; font-size: 0.9rem;" onclick="app.deleteObjectif(${obj.id})">🗑️</button>
+                                            </div>
+                                            <div class="mb-2">
+                                                <div class="progress-bar">
+                                                    <div class="progress-fill" style="width: ${progress}%;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-white" style="opacity: 0.9;">${obj.actuel} / ${obj.cible}</span>
+                                                <span class="text-cyan" style="font-weight: 600;">${Math.round(progress)}%</span>
+                                            </div>
                                         </div>
                                     `;
                                 }).join('')}
                             </div>
                         ` : `
-                            <div class="text-center" style="padding: 3rem 1rem; opacity: 0.5;">
-                                <div style="font-size: 4rem; margin-bottom: 1rem;">📝</div>
-                                <div class="text-white">Aucune séance créée</div>
-                                <div class="text-white" style="opacity: 0.7; font-size: 0.9rem; margin-top: 0.5rem;">Créez votre première séance !</div>
+                            <div class="tip-box mb-4">
+                                <div class="text-white" style="opacity: 0.7;">Aucun objectif actif. Crée-en un ci-dessous !</div>
                             </div>
                         `}
-                    </div>
-                `;
-            }
 
-            renderTimerTab() {
-                return `
-                    <div>
-                        <div class="flex gap-2 mb-4" style="justify-content: center;">
-                            <button class="sub-tab-btn ${this.timerMode === 'repos' ? 'active' : ''}" onclick="app.setTimerMode('repos')">⏱️ Timer Repos</button>
-                            <button class="sub-tab-btn ${this.timerMode === 'chrono' ? 'active' : ''}" onclick="app.setTimerMode('chrono')">⏲️ Chronomètre</button>
-                        </div>
-                        ${this.timerMode === 'repos' ? `
-                            <div class="timer-container">
-                                <h2 class="text-white mb-3" style="font-size: 1.5rem;">⏱️ Timer de Repos</h2>
-                                <div class="timer-display ${this.timerRunning ? 'running' : ''} ${this.timerSeconds === 0 ? 'finished' : ''}" id="timer-display">
-                                    ${Math.floor(this.timerSeconds / 60).toString().padStart(2, '0')}:${(this.timerSeconds % 60).toString().padStart(2, '0')}
-                                </div>
-                                <div class="timer-controls">
-                                    <button class="timer-preset ${this.timerSeconds === 30 && !this.timerRunning ? 'active' : ''}" onclick="app.setTimerPreset(30)">30s</button>
-                                    <button class="timer-preset ${this.timerSeconds === 60 && !this.timerRunning ? 'active' : ''}" onclick="app.setTimerPreset(60)">1min</button>
-                                    <button class="timer-preset ${this.timerSeconds === 90 && !this.timerRunning ? 'active' : ''}" onclick="app.setTimerPreset(90)">1min30</button>
-                                    <button class="timer-preset ${this.timerSeconds === 120 && !this.timerRunning ? 'active' : ''}" onclick="app.setTimerPreset(120)">2min</button>
-                                    <button class="timer-preset ${this.timerSeconds === 180 && !this.timerRunning ? 'active' : ''}" onclick="app.setTimerPreset(180)">3min</button>
-                                </div>
-                                <div class="timer-input-group">
-                                    <input type="number" class="timer-input" id="custom-minutes" placeholder="Min" min="0" max="59">
-                                    <span class="text-white">:</span>
-                                    <input type="number" class="timer-input" id="custom-seconds" placeholder="Sec" min="0" max="59">
-                                    <button class="btn btn-primary" onclick="app.setCustomTimer()">OK</button>
-                                </div>
-                                <div class="flex gap-3" style="justify-content: center; margin-top: 2rem;">
-                                    <button class="btn ${this.timerRunning ? 'btn-warning' : 'btn-success'}" style="min-width: 120px;" onclick="app.toggleTimer()">
-                                        ${this.timerRunning ? '⏸️ Pause' : '▶️ Démarrer'}
-                                    </button>
-                                    <button class="btn btn-secondary" onclick="app.resetTimer()">🔄 Reset</button>
-                                </div>
-                            </div>
-                        ` : `
-                            <div class="timer-container">
-                                <h2 class="text-white mb-3" style="font-size: 1.5rem;">⏲️ Chronomètre</h2>
-                                <div class="timer-display ${this.chronoRunning ? 'running' : ''}" id="chrono-display">
-                                    ${Math.floor(this.chronoSeconds / 60).toString().padStart(2, '0')}:${(this.chronoSeconds % 60).toString().padStart(2, '0')}
-                                </div>
-                                <div class="flex gap-3" style="justify-content: center; margin-top: 2rem;">
-                                    <button class="btn ${this.chronoRunning ? 'btn-warning' : 'btn-success'}" style="min-width: 120px;" onclick="app.toggleChrono()">
-                                        ${this.chronoRunning ? '⏸️ Pause' : '▶️ Démarrer'}
-                                    </button>
-                                    ${this.chronoRunning ? `<button class="btn btn-primary" onclick="app.addLap()">📍 Tour</button>` : ''}
-                                    <button class="btn btn-secondary" onclick="app.resetChrono()">🔄 Reset</button>
-                                </div>
-                                ${this.chronoLaps.length > 0 ? `
-                                    <div class="chrono-laps">
-                                        <h3 class="text-white mb-2" style="font-size: 1.1rem;">📍 Tours (${this.chronoLaps.length})</h3>
-                                        ${this.chronoLaps.map((lap, index) => `
-                                            <div class="lap-item">
-                                                <span>Tour ${index + 1}</span>
-                                                <span style="font-weight: 600;">${lap}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `}
-                    </div>
-                `;
-            }
-
-            renderHistoriqueTab() {
-                const completedHistory = this.sessionHistory.filter(h => h.completed);
-                return `
-                    <div>
-                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">📅 Historique des séances (${completedHistory.length})</h2>
-                        ${completedHistory.length > 0 ? `
-                            ${completedHistory.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt)).map(entry => {
-                                const session = this.sessions[entry.sessionIndex];
-                                if (!session) return '';
-                                return `
-                                    <div class="session-history-item">
-                                        <div class="flex justify-between items-center mb-2">
+                        <!-- Objectifs complétés -->
+                        ${objectifsCompletes.length > 0 ? `
+                            <div class="mb-4">
+                                <h3 class="text-white mb-3" style="font-size: 1.2rem;">✅ Complétés (${objectifsCompletes.length})</h3>
+                                ${objectifsCompletes.map(obj => `
+                                    <div class="exercise-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.1) 100%); border: 1px solid rgba(16, 185, 129, 0.3);">
+                                        <div class="flex justify-between items-start">
                                             <div>
-                                                <div class="text-cyan" style="font-weight: 600; font-size: 1.1rem;">${session.nom}</div>
-                                                <div class="text-white" style="opacity: 0.7; font-size: 0.85rem;">${new Date(entry.completedAt).toLocaleDateString('fr-FR', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}</div>
+                                                <h4 class="text-white" style="margin: 0 0 0.5rem 0;">✅ ${obj.titre}</h4>
+                                                <div style="color: #10b981; font-weight: 600;">${obj.actuel} / ${obj.cible} - 100%</div>
                                             </div>
-                                            <span class="badge badge-${session.type.toLowerCase()}">${session.type}</span>
+                                            <button class="btn btn-danger" style="padding: 0.25rem 0.75rem; font-size: 0.9rem;" onclick="app.deleteObjectif(${obj.id})">🗑️</button>
                                         </div>
-                                        ${entry.notes ? `<div class="text-white" style="opacity: 0.8; font-size: 0.9rem; margin-top: 0.5rem;">💬 ${entry.notes}</div>` : ''}
                                     </div>
-                                `;
-                            }).join('')}
-                        ` : `
-                            <div class="text-center" style="padding: 3rem 1rem; opacity: 0.5;">
-                                <div style="font-size: 4rem; margin-bottom: 1rem;">📅</div>
-                                <div class="text-white">Aucune séance effectuée</div>
-                            </div>
-                        `}
-                    </div>
-                `;
-            }
-
-            renderPhotosTab() {
-                return `
-                    <div>
-                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">📸 Photos Avant / Après</h2>
-                        <div class="photo-gallery">
-                            <div class="photo-item">
-                                <h3 class="text-white mb-2" style="font-size: 1.1rem;">📷 AVANT</h3>
-                                ${this.progressPhotos.before ? `
-                                    <img src="${this.progressPhotos.before}" alt="Avant">
-                                    <button class="btn btn-danger" style="width: 100%;" onclick="app.deletePhoto('before')">🗑️ Supprimer</button>
-                                ` : `
-                                    <input type="file" id="photo-before-input" accept="image/*" style="display: none;">
-                                    <div class="photo-placeholder" onclick="document.getElementById('photo-before-input').click()">📷</div>
-                                    <button class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;" onclick="document.getElementById('photo-before-input').click()">➕ Ajouter</button>
-                                `}
-                            </div>
-                            <div class="photo-item">
-                                <h3 class="text-white mb-2" style="font-size: 1.1rem;">📷 APRÈS</h3>
-                                ${this.progressPhotos.after ? `
-                                    <img src="${this.progressPhotos.after}" alt="Après">
-                                    <button class="btn btn-danger" style="width: 100%;" onclick="app.deletePhoto('after')">🗑️ Supprimer</button>
-                                ` : `
-                                    <input type="file" id="photo-after-input" accept="image/*" style="display: none;">
-                                    <div class="photo-placeholder" onclick="document.getElementById('photo-after-input').click()">📷</div>
-                                    <button class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;" onclick="document.getElementById('photo-after-input').click()">➕ Ajouter</button>
-                                `}
-                            </div>
-                        </div>
-                        ${this.progressPhotos.before && this.progressPhotos.after ? `
-                            <div class="tip-box" style="border-color: #10b981; background: rgba(16, 185, 129, 0.1);">
-                                <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">🎉 Bravo !</div>
-                                <div class="text-white" style="opacity: 0.9;">Vous avez ajouté vos photos avant/après. Continuez vos efforts !</div>
+                                `).join('')}
                             </div>
                         ` : ''}
+
+                        <!-- Ajouter un objectif -->
+                        <div class="exercise-card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(8, 145, 178, 0.1) 100%); border: 2px dashed rgba(6, 182, 212, 0.5);">
+                            <h3 class="text-white mb-3" style="font-size: 1.2rem;">➕ Créer un objectif</h3>
+                            <form id="objectif-form" onsubmit="app.handleAddObjectif(event)">
+                                <div class="mb-3">
+                                    <label class="text-white mb-1" style="display: block;">Type d'objectif</label>
+                                    <select class="input" id="objectif-type" onchange="app.updateObjectifForm()">
+                                        <option value="seances">📅 Nombre de séances ce mois</option>
+                                        <option value="streak">🔥 Série de jours consécutifs</option>
+                                        <option value="rm">💪 Augmenter un 1RM</option>
+                                    </select>
+                                </div>
+                                <div id="objectif-rm-fields" style="display: none;">
+                                    <div class="grid grid-cols-2 gap-2 mb-3">
+                                        <div>
+                                            <label class="text-white mb-1" style="display: block; font-size: 0.9rem;">Muscle</label>
+                                            <select class="input" id="objectif-muscle">
+                                                ${this.musclesList.map(m => `<option value="${m}">${m}</option>`).join('')}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="text-white mb-1" style="display: block; font-size: 0.9rem;">Exercice</label>
+                                            <input type="text" class="input" id="objectif-exercice" placeholder="Ex: Développé Couché">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-white mb-1" style="display: block;">Objectif cible</label>
+                                    <input type="number" class="input" id="objectif-cible" min="1" required>
+                                </div>
+                                <button type="submit" class="btn btn-success" style="width: 100%;">➕ Créer l'objectif</button>
+                            </form>
+                        </div>
+
+                        <div class="tip-box mt-4">
+                            <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">💡 Conseils</div>
+                            <ul style="margin: 0; padding-left: 1.5rem;">
+                                <li class="text-white" style="opacity: 0.9; margin-bottom: 0.5rem;">Fixe-toi des objectifs réalistes et progressifs</li>
+                                <li class="text-white" style="opacity: 0.9; margin-bottom: 0.5rem;">Les séries motivent énormément - essaie de maintenir une régularité</li>
+                                <li class="text-white" style="opacity: 0.9;">Célèbre chaque victoire, même les petites !</li>
+                            </ul>
+                        </div>
                     </div>
                 `;
             }
 
+            updateObjectifForm() {
+                const type = document.getElementById('objectif-type').value;
+                const rmFields = document.getElementById('objectif-rm-fields');
+                const cibleInput = document.getElementById('objectif-cible');
+                
+                if (type === 'rm') {
+                    rmFields.style.display = 'block';
+                    cibleInput.placeholder = 'Progression en kg (ex: 5)';
+                } else if (type === 'seances') {
+                    rmFields.style.display = 'none';
+                    cibleInput.placeholder = 'Nombre de séances (ex: 10)';
+                } else if (type === 'streak') {
+                    rmFields.style.display = 'none';
+                    cibleInput.placeholder = 'Nombre de jours (ex: 7)';
+                }
+            }
+
+            handleAddObjectif(e) {
+                e.preventDefault();
+                const type = document.getElementById('objectif-type').value;
+                const cible = parseInt(document.getElementById('objectif-cible').value);
+                
+                let titre = '';
+                let muscle = null;
+                let exercice = null;
+                
+                if (type === 'seances') {
+                    titre = `${cible} séances ce mois`;
+                } else if (type === 'streak') {
+                    titre = `Série de ${cible} jours`;
+                } else if (type === 'rm') {
+                    muscle = document.getElementById('objectif-muscle').value;
+                    exercice = document.getElementById('objectif-exercice').value;
+                    if (!exercice) {
+                        alert('Remplis le nom de l\'exercice');
+                        return;
+                    }
+                    titre = `Augmenter ${exercice} de ${cible}kg`;
+
+            toggleFabMenu() {
+                this.fabMenuOpen = !this.fabMenuOpen;
+                this.render();
+            }
+
+            quickStartSession() {
+                if (this.sessions.length === 0) {
+                    alert('Créez d\'abord une séance dans l\'onglet Séances');
+                    this.currentView = 'dashboard';
+                    this.currentTab = 'sessions';
+                    this.fabMenuOpen = false;
+                    this.render();
+                    return;
+                }
+                
+                // Proposer les 3 dernières séances
+                const recentSessions = [...this.sessions].slice(-3);
+                const choice = prompt(`Quelle séance veux-tu faire ?\n${recentSessions.map((s, i) => `${i+1}. ${s.nom} (${s.type})`).join('\n')}\n\nTape le numéro (ou 0 pour voir toutes les séances)`);
+                
+                if (choice === '0') {
+                    this.currentView = 'dashboard';
+                    this.currentTab = 'sessions';
+                    this.fabMenuOpen = false;
+                    this.render();
+                } else if (choice && parseInt(choice) > 0 && parseInt(choice) <= recentSessions.length) {
+                    const sessionIndex = this.sessions.indexOf(recentSessions[parseInt(choice) - 1]);
+                    this.currentSession = sessionIndex;
+                    this.currentView = 'session-detail';
+                    this.fabMenuOpen = false;
+                    this.render();
+                }
+            }
+
+            quickAddRM() {
+                this.currentView = 'dashboard';
+                this.currentTab = 'rm';
+                this.fabMenuOpen = false;
+                this.render();
+                setTimeout(() => {
+                    document.getElementById('rm-muscle')?.focus();
+                }, 100);
+            }
+
+            openGlobalSearch() {
+                this.searchOpen = true;
+                this.fabMenuOpen = false;
+                this.render();
+                setTimeout(() => {
+                    document.getElementById('global-search-input')?.focus();
+                }, 100);
+            }
+
+            closeGlobalSearch() {
+                this.searchOpen = false;
+                this.globalSearchQuery = '';
+                this.render();
+            }
+
+
+            deleteSessionHistory(index) {
+                if (confirm('Supprimer cette entrée de l\'historique ?')) {
+                    this.sessionHistory.splice(index, 1);
+                    this.saveSessionHistory();
+                    this.calculateStreaks();
+                    this.updateObjectifProgress();
+                    this.render();
+                }
+            }
+
+            editSessionHistory(index) {
+                const entry = this.sessionHistory[index];
+                const newNotes = prompt('Modifier les notes :', entry.notes || '');
+                if (newNotes !== null) {
+                    entry.notes = newNotes;
+                    this.saveSessionHistory();
+                    this.render();
+                }
+            }
+
+            renderFabButton() {
+                if (this.currentView !== 'dashboard') return '';
+                
+                return `
+                    ${this.fabMenuOpen ? `
+                        <div class="fab-menu">
+                            <button class="fab-menu-item" onclick="app.quickStartSession()">
+                                🏋️ Démarrer une séance
+                            </button>
+                            <button class="fab-menu-item" onclick="app.quickAddRM()">
+                                💪 Ajouter un 1RM
+                            </button>
+                            <button class="fab-menu-item" onclick="app.openGlobalSearch()">
+                                🔍 Rechercher
+                            </button>
+                            <button class="fab-menu-item" onclick="app.toggleFabMenu()">
+                                ❌ Fermer
+                            </button>
+                        </div>
+                    ` : ''}
+                    <button class="fab-button" onclick="app.toggleFabMenu()">
+                        ${this.fabMenuOpen ? '✕' : '⚡'}
+                    </button>
+                `;
+            }
+
+            renderGlobalSearch() {
+                if (!this.searchOpen) return '';
+
+                const results = this.performGlobalSearch();
+
+                return `
+                    <div class="search-overlay" onclick="if(event.target === this) app.closeGlobalSearch()">
+                        <div class="search-modal" onclick="event.stopPropagation()">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-white" style="font-size: 1.5rem;">🔍 Recherche globale</h2>
+                                <button class="btn btn-secondary" onclick="app.closeGlobalSearch()">✕</button>
+                            </div>
+                            
+                            <div class="search-input-wrapper mb-4">
+                                <span class="search-icon">🔍</span>
+                                <input 
+                                    type="text" 
+                                    id="global-search-input"
+                                    class="search-input" 
+                                    placeholder="Rechercher séances, exercices, 1RM..." 
+                                    value="${this.globalSearchQuery}"
+                                    oninput="app.globalSearchQuery = this.value; app.render();"
+                                    onkeydown="if(event.key==='Escape') app.closeGlobalSearch()"
+            performGlobalSearch() {
+                const query = this.globalSearchQuery.toLowerCase();
+                if (!query) return [];
+
+                const results = [];
+
+                // Recherche dans les séances
+                this.sessions.forEach((session, idx) => {
+                    if (session.nom.toLowerCase().includes(query) || 
+                        session.type.toLowerCase().includes(query) ||
+                        session.muscles.some(m => m.toLowerCase().includes(query)) ||
+                        session.exercices.some(e => e.toLowerCase().includes(query))) {
+                        results.push({
+                            type: 'séance',
+                            titre: session.nom,
+                            description: `${session.type} - ${session.muscles.join(', ')}`,
+                            actionType: 'session',
+                            actionData: idx
+                        });
+                    }
+                });
+
+                // Recherche dans les tests 1RM
+                this.rmHistory.forEach((test, idx) => {
+                    if (test.muscle.toLowerCase().includes(query) || 
+                        test.exercise.toLowerCase().includes(query)) {
+                        results.push({
+                            type: '1RM',
+                            titre: `${test.exercise} - ${test.rm}kg`,
+                            description: `${test.muscle} - ${test.date}`,
+                            actionType: 'rm',
+                            actionData: null
+                        });
+                    }
+                });
+
+                // Recherche dans les exercices (cours)
+                const allExercises = [
+                    ...coursData.exercicesPectoraux,
+                    ...coursData.exercicesDos,
+                    ...coursData.exercicesEpaules,
+                    ...coursData.exercicesBras,
+                    ...coursData.exercicesBasDuCorps,
+                    ...coursData.exercicesAbdos
+                ];
+
+                allExercises.forEach(ex => {
+                    if (ex.nom.toLowerCase().includes(query) || 
+                        ex.description.toLowerCase().includes(query)) {
+                        results.push({
+                            type: 'exercice',
+                            titre: ex.nom,
+                            description: ex.description,
+                            actionType: 'exercice',
+                            actionData: query
+                        });
+                    }
+                });
+
+                return results.slice(0, 10);
+            }
+
+            executeSearchAction(actionType, actionData) {
+                if (actionType === 'session') {
+                    this.currentSession = actionData;
+                    this.currentView = 'session-detail';
+                    this.closeGlobalSearch();
+                } else if (actionType === 'rm') {
+                    this.currentView = 'dashboard';
+                    this.currentTab = 'rm';
+                    this.closeGlobalSearch();
+                } else if (actionType === 'exercice') {
+                    this.currentView = 'dashboard';
+                    this.currentTab = 'cours';
+                    this.currentCoursTab = 'exercices';
+                    this.searchQuery = actionData;
+                    this.closeGlobalSearch();
+                }
+            }
+
+            renderGlobalSearch() {
+                if (!this.searchOpen) return '';
+
+                const results = this.performGlobalSearch();
+
+                return `
+                    <div class="search-overlay" onclick="if(event.target === this) app.closeGlobalSearch()">
+                        <div class="search-modal" onclick="event.stopPropagation()">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-white" style="font-size: 1.5rem;">🔍 Recherche globale</h2>
+                                <button class="btn btn-secondary" onclick="app.closeGlobalSearch()">✕</button>
+                            </div>
+                            
+                            <div class="search-input-wrapper mb-4">
+                                <span class="search-icon">🔍</span>
+                                <input 
+                                    type="text" 
+                                    id="global-search-input"
+                                    class="search-input" 
+                                    placeholder="Rechercher séances, exercices, 1RM..." 
+                                    value="${this.globalSearchQuery}"
+                                    oninput="app.globalSearchQuery = this.value; app.render();"
+                                    onkeydown="if(event.key==='Escape') app.closeGlobalSearch()"
+                                >
+                            </div>
+
+                            ${results.length > 0 ? `
+                                <div>
+                                    <div class="text-white mb-2" style="opacity: 0.7;">${results.length} résultat${results.length > 1 ? 's' : ''}</div>
+                                    ${results.map((result, idx) => `
+                                        <div class="search-result" onclick="app.executeSearchAction('${result.actionType}', ${result.actionData !== null ? result.actionData : 'null'})">
+                                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                                <div style="flex: 1;">
+                                                    <div class="text-white" style="font-weight: 600; margin-bottom: 0.25rem;">${result.titre}</div>
+                                                    <div class="text-white" style="opacity: 0.7; font-size: 0.9rem;">${result.description}</div>
+                                                </div>
+                                                <span class="badge" style="background: var(--primary-color); font-size: 0.8rem;">${result.type}</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : this.globalSearchQuery ? `
+                                <div class="text-center" style="padding: 3rem; opacity: 0.5;">
+                                    <div style="font-size: 3rem;">🔍</div>
+                                    <div class="text-white" style="margin-top: 1rem;">Aucun résultat</div>
+                                </div>
+                            ` : `
+                                <div class="text-center" style="padding: 3rem; opacity: 0.5;">
+                                    <div style="font-size: 3rem;">💡</div>
+                                    <div class="text-white" style="margin-top: 1rem;">Tape pour chercher partout dans l'app</div>
+                                </div>
+                            `}
+
+                            <div class="tip-box mt-4">
+                                <div class="text-white" style="font-size: 0.9rem; opacity: 0.7;">
+                                    💡 Astuce : Appuie sur <kbd style="background: rgba(255,255,255,0.1); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">Echap</kbd> pour fermer
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+                                >
+                            </div>
+
+                            ${results.length > 0 ? `
+                                <div>
+                                    <div class="text-white mb-2" style="opacity: 0.7;">${results.length} résultat${results.length > 1 ? 's' : ''}</div>
+                                    ${results.map(result => `
+                                        <div class="search-result" onclick='${result.action.toString().replace(/^.*{|}$/g, '')}'>
+                                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                                <div style="flex: 1;">
+                                                    <div class="text-white" style="font-weight: 600; margin-bottom: 0.25rem;">${result.titre}</div>
+                                                    <div class="text-white" style="opacity: 0.7; font-size: 0.9rem;">${result.description}</div>
+                                                </div>
+                                                <span class="badge" style="background: var(--primary-color); font-size: 0.8rem;">${result.type}</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : this.globalSearchQuery ? `
+                                <div class="text-center" style="padding: 3rem; opacity: 0.5;">
+                                    <div style="font-size: 3rem;">🔍</div>
+                                    <div class="text-white" style="margin-top: 1rem;">Aucun résultat</div>
+                                </div>
+                            ` : `
+                                <div class="text-center" style="padding: 3rem; opacity: 0.5;">
+                                    <div style="font-size: 3rem;">💡</div>
+                                    <div class="text-white" style="margin-top: 1rem;">Tape pour chercher partout dans l'app</div>
+                                </div>
+                            `}
+
+                            <div class="tip-box mt-4">
+                                <div class="text-white" style="font-size: 0.9rem; opacity: 0.7;">
+                                    💡 Astuce : Appuie sur <kbd style="background: rgba(255,255,255,0.1); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">Echap</kbd> pour fermer
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+                }
+                
+                this.addObjectif(titre, type, cible, muscle, exercice);
+                document.getElementById('objectif-form').reset();
+                this.updateObjectifForm();
+            }
             renderBadgesTab() {
                 const unlockedCount = this.badges.filter(b => b.unlocked).length;
                 const totalCount = this.badges.length;
@@ -2862,6 +2955,8 @@
                 this.sessionHistory.push(historyEntry);
                 this.saveSessionHistory();
                 this.checkBadges();
+                this.calculateStreaks();
+                this.updateObjectifProgress();
                 alert('✅ Séance validée !');
                 this.backToSessions();
             }
