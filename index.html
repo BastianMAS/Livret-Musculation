@@ -1527,6 +1527,7 @@
                 this.searchQuery = '';
                 this.activeFilters = [];
                 this.calculatedCharges = {};
+                this.selectedPercentage = 75;
                 this.currentTheme = 'cyan';
                 this.badges = [];
                 this.objectifs = [];
@@ -2077,6 +2078,8 @@
             }
 
             renderChargesTab() {
+                const selectedPercentage = this.selectedPercentage || 75; // Défaut 75%
+                
                 return `
                     <div>
                         <h2 class="text-white mb-4" style="font-size: 1.5rem;">⚖️ Calculateur de charges</h2>
@@ -2085,51 +2088,108 @@
                                 <label class="text-white mb-1" style="display: block; font-weight: 600;">Sélectionner un test 1RM</label>
                                 <select class="input" id="charges-rm-select" onchange="app.calculateCharges()">
                                     <option value="">-- Choisir un test --</option>
-                                    ${this.rmHistory.map((test, index) => `<option value="${index}">${test.exercise} - ${test.rm}kg (${new Date(test.date).toLocaleDateString('fr-FR')})</option>`).join('')}
+                                    ${this.rmHistory.map((test, index) => `<option value="${index}" ${this.calculatedCharges.selectedIndex === index ? 'selected' : ''}>${test.exercise} - ${test.rm}kg (${new Date(test.date).toLocaleDateString('fr-FR')})</option>`).join('')}
                                 </select>
                             </div>
                         </div>
+                        
                         <div id="charges-result">
                             ${this.calculatedCharges.rm ? `
                                 <div class="mb-4">
-                                    <div class="text-center mb-3">
+                                    <div class="text-center mb-4">
                                         <div class="text-cyan" style="font-size: 1.3rem; font-weight: 600;">${this.calculatedCharges.exercise}</div>
                                         <div class="text-white" style="opacity: 0.8;">1RM: ${this.calculatedCharges.rm}kg</div>
                                     </div>
+                                    
+                                    <!-- Curseur de pourcentage -->
+                                    <div style="background: rgba(15, 23, 42, 0.8); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 2px solid var(--primary-color);">
+                                        <div class="text-center mb-3">
+                                            <div class="text-white mb-2" style="font-size: 1.1rem; font-weight: 600;">🎚️ Ajuster le pourcentage</div>
+                                            <div class="text-cyan" style="font-size: 2.5rem; font-weight: bold;">${selectedPercentage}%</div>
+                                            <div class="text-white mt-2" style="font-size: 1.8rem; font-weight: 600; color: var(--accent-color);">
+                                                ${Math.round(this.calculatedCharges.rm * selectedPercentage / 100)} kg
+                                            </div>
+                                        </div>
+                                        <input 
+                                            type="range" 
+                                            min="10" 
+                                            max="120" 
+                                            value="${selectedPercentage}" 
+                                            class="input" 
+                                            id="percentage-slider"
+                                            oninput="app.updatePercentage(this.value)"
+                                            style="width: 100%; height: 40px; cursor: pointer; accent-color: var(--primary-color);"
+                                        >
+                                        <div class="flex justify-between text-white" style="opacity: 0.7; font-size: 0.9rem; margin-top: 0.5rem;">
+                                            <span>10%</span>
+                                            <span>50%</span>
+                                            <span>75%</span>
+                                            <span>100%</span>
+                                            <span>120%</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Tableau des mobiles -->
+                                    <h3 class="text-white mb-3" style="font-size: 1.2rem;">📊 Zones d'entraînement par mobile</h3>
                                     <table class="charges-table">
                                         <thead>
                                             <tr>
                                                 <th>Mobile</th>
-                                                <th>% du 1RM</th>
-                                                <th>Charge</th>
-                                                <th>Répétitions</th>
+                                                <th>Zone %</th>
+                                                <th>Fourchette de charge</th>
+                                                <th>Reps</th>
                                                 <th>Repos</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td style="color: #fb923c; font-weight: 600;">Force Maximale</td>
+                                            <tr style="background: ${selectedPercentage >= 85 && selectedPercentage <= 100 ? 'rgba(239, 68, 68, 0.2)' : 'transparent'};">
+                                                <td style="color: #ef4444; font-weight: 600;">💪 Force Max</td>
                                                 <td>85-100%</td>
                                                 <td class="charge-value">${Math.round(this.calculatedCharges.rm * 0.85)}-${this.calculatedCharges.rm}kg</td>
                                                 <td>1-5 rép.</td>
                                                 <td>3-5 min</td>
                                             </tr>
-                                            <tr>
-                                                <td style="color: #10b981; font-weight: 600;">Équilibre / Volume</td>
+                                            <tr style="background: ${selectedPercentage >= 30 && selectedPercentage <= 60 ? 'rgba(247, 147, 22, 0.2)' : 'transparent'};">
+                                                <td style="color: #f97316; font-weight: 600;">⚡ Force Explosive</td>
+                                                <td>30-60%</td>
+                                                <td class="charge-value">${Math.round(this.calculatedCharges.rm * 0.30)}-${Math.round(this.calculatedCharges.rm * 0.60)}kg</td>
+                                                <td>3-6 rép.</td>
+                                                <td>2-4 min</td>
+                                            </tr>
+                                            <tr style="background: ${selectedPercentage >= 65 && selectedPercentage <= 80 ? 'rgba(59, 130, 246, 0.2)' : 'transparent'};">
+                                                <td style="color: #3b82f6; font-weight: 600;">🏋️ Hypertrophie</td>
                                                 <td>65-80%</td>
                                                 <td class="charge-value">${Math.round(this.calculatedCharges.rm * 0.65)}-${Math.round(this.calculatedCharges.rm * 0.80)}kg</td>
                                                 <td>6-12 rép.</td>
-                                                <td>1-2 min</td>
+                                                <td>60-90 sec</td>
                                             </tr>
-                                            <tr>
-                                                <td style="color: #06b6d4; font-weight: 600;">Endurance Musculaire</td>
+                                            <tr style="background: ${selectedPercentage >= 60 && selectedPercentage <= 75 ? 'rgba(168, 85, 247, 0.2)' : 'transparent'};">
+                                                <td style="color: #a855f7; font-weight: 600;">🔥 Endurance Force</td>
+                                                <td>60-75%</td>
+                                                <td class="charge-value">${Math.round(this.calculatedCharges.rm * 0.60)}-${Math.round(this.calculatedCharges.rm * 0.75)}kg</td>
+                                                <td>12-20 rép.</td>
+                                                <td>60-90 sec</td>
+                                            </tr>
+                                            <tr style="background: ${selectedPercentage >= 40 && selectedPercentage <= 60 ? 'rgba(16, 185, 129, 0.2)' : 'transparent'};">
+                                                <td style="color: #10b981; font-weight: 600;">🏃 Endurance Muscu</td>
                                                 <td>40-60%</td>
                                                 <td class="charge-value">${Math.round(this.calculatedCharges.rm * 0.40)}-${Math.round(this.calculatedCharges.rm * 0.60)}kg</td>
-                                                <td>15-25+ rép.</td>
-                                                <td>30s-1 min</td>
+                                                <td>20-30+ rép.</td>
+                                                <td>30-60 sec</td>
+                                            </tr>
+                                            <tr style="background: ${selectedPercentage >= 10 && selectedPercentage <= 120 ? 'rgba(168, 85, 247, 0.1)' : 'transparent'};">
+                                                <td style="color: #a855f7; font-weight: 600;">⚙️ Personnalisé</td>
+                                                <td>10-120%</td>
+                                                <td class="charge-value">${Math.round(this.calculatedCharges.rm * 0.10)}-${Math.round(this.calculatedCharges.rm * 1.20)}kg</td>
+                                                <td>Variable</td>
+                                                <td>Variable</td>
                                             </tr>
                                         </tbody>
                                     </table>
+                                    
+                                    <div class="text-white mt-3" style="opacity: 0.7; font-size: 0.9rem; text-align: center; background: rgba(6, 182, 212, 0.1); padding: 1rem; border-radius: 0.75rem;">
+                                        💡 <strong>Astuce :</strong> Le curseur te permet de trouver la charge exacte pour n'importe quel pourcentage entre 10% et 120% de ton 1RM
+                                    </div>
                                 </div>
                             ` : `
                                 <div class="text-center" style="padding: 3rem 1rem; opacity: 0.5;">
@@ -3371,10 +3431,46 @@
                     this.calculatedCharges = {};
                 } else {
                     const test = this.rmHistory[index];
-                    this.calculatedCharges = {exercise: test.exercise, rm: test.rm};
+                    this.calculatedCharges = {
+                        exercise: test.exercise, 
+                        rm: test.rm,
+                        selectedIndex: index
+                    };
                     this.saveCalculatedCharges();
                 }
                 this.render();
+            }
+
+            updatePercentage(value) {
+                this.selectedPercentage = parseInt(value);
+                // Mettre à jour uniquement l'affichage sans recharger toute la page
+                const percentageDisplay = document.querySelector('.text-cyan[style*="font-size: 2.5rem"]');
+                const chargeDisplay = percentageDisplay.nextElementSibling;
+                
+                if (percentageDisplay && chargeDisplay && this.calculatedCharges.rm) {
+                    percentageDisplay.textContent = `${this.selectedPercentage}%`;
+                    chargeDisplay.textContent = `${Math.round(this.calculatedCharges.rm * this.selectedPercentage / 100)} kg`;
+                    
+                    // Mettre à jour les highlights des lignes du tableau
+                    const rows = document.querySelectorAll('.charges-table tbody tr');
+                    const ranges = [
+                        [85, 100], // Force Max
+                        [30, 60],  // Force Explosive
+                        [65, 80],  // Hypertrophie
+                        [60, 75],  // Endurance Force
+                        [40, 60],  // Endurance Muscu
+                        [10, 120]  // Personnalisé
+                    ];
+                    
+                    rows.forEach((row, index) => {
+                        const [min, max] = ranges[index];
+                        if (this.selectedPercentage >= min && this.selectedPercentage <= max) {
+                            row.style.background = row.children[0].style.color.replace('rgb', 'rgba').replace(')', ', 0.2)');
+                        } else {
+                            row.style.background = 'transparent';
+                        }
+                    });
+                }
             }
 
             initCharts() {
