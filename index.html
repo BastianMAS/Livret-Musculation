@@ -51,6 +51,65 @@
             --accent-color: #fbbf24;
         }
 
+        /* ===============================================
+           STYLES MODE COACH - Historique éditable
+           =============================================== */
+        .coach-mode-banner {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .edit-form {
+            background: rgba(15, 23, 42, 0.9);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+            --primary-color: #f97316;
+            --primary-dark: #ea580c;
+            --secondary-color: #fb923c;
+            --accent-color: #fbbf24;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-medium) 100%);
@@ -968,6 +1027,11 @@
     <script>// PARTIE 2/4 - DONNÉES ET SÉCURITÉ
         
         // SYSTÈME DE STOCKAGE LOCAL
+                // ===============================================
+        // MODE COACH - Variable globale
+        // ===============================================
+        let IS_COACH_MODE = false;
+
         const storage = {
             save: (key, value) => {
                 try {
@@ -1094,7 +1158,11 @@
                         "SOUSA MAELYS",
                         "STRAPPE SOFIA"
                     ]
-                }
+                },
+                "COACH_MODE_25_26": {
+                    code: "COACH2025",
+                    nom: "MODE COACH 25-26",
+                    eleves: ["COACH"]                }
             },
 
             codeActuel: null,
@@ -1103,6 +1171,10 @@
                 for (let classe in this.classes) {
                     if (this.classes[classe].code === code) {
                         this.codeActuel = classe;
+                        // Activer le mode coach si c'est le code COACH
+                        if (code === "COACH2025") {
+                            IS_COACH_MODE = true;
+                        }
                         return true;
                     }
                 }
@@ -1113,6 +1185,9 @@
                 if (!this.codeActuel) return false;
                 const classe = this.classes[this.codeActuel];
                 if (!classe) return false;
+                
+                // Pour le mode coach, accepter n'importe quel nom
+                if (IS_COACH_MODE) return true;
                 
                 const nomNormalise = nom.toLowerCase().trim();
                 return classe.eleves.some(eleve => 
@@ -1130,14 +1205,21 @@
                 if (this.codeActuel) {
                     localStorage.setItem('code-valide', 'true');
                     localStorage.setItem('classe-active', this.codeActuel);
+                    if (IS_COACH_MODE) {
+                        localStorage.setItem('coach-mode', 'true');
+                    }
                 }
             },
             
             estDejaConnecte: function() {
                 const codeValide = localStorage.getItem('code-valide');
                 const classeActive = localStorage.getItem('classe-active');
+                const coachMode = localStorage.getItem('coach-mode');
                 if (codeValide === 'true' && classeActive) {
                     this.codeActuel = classeActive;
+                    if (coachMode === 'true') {
+                        IS_COACH_MODE = true;
+                    }
                     return true;
                 }
                 return false;
@@ -1146,6 +1228,8 @@
             revoquerAcces: function() {
                 localStorage.removeItem('code-valide');
                 localStorage.removeItem('classe-active');
+                localStorage.removeItem('coach-mode');
+                IS_COACH_MODE = false;
                 this.codeActuel = null;
             }
         };
@@ -1237,7 +1321,8 @@
                 "Triceps": {role: "Extension coude. 2/3 du volume du bras.", insertions: ["3 chefs: long, latéral, médial", "Omoplate, humérus → Ulna"]},
                 "Quadriceps": {role: "Extension genou, flexion hanche. Plus puissant muscle.", insertions: ["4 chefs: droit fémoral + 3 vastes", "Bassin, fémur → Rotule → Tibia"]},
                 "Ischio-jambiers": {role: "Flexion genou, extension hanche. Antagonistes quadriceps.", insertions: ["3 muscles", "Ischion → Tibia, fibula"]},
-                "Fessiers": {role: "Extension, abduction, rotation hanche. Muscle le plus puissant.", insertions: ["Grand, moyen, petit fessier", "Iliaque, sacrum → Fémur"]}
+                "Fessiers": {role: "Extension, abduction, rotation hanche. Muscle le plus puissant.", insertions: ["Grand, moyen, petit fessier", "Iliaque, sacrum → Fémur"]},
+                "Adducteurs": {role: "Adduction de la hanche (rapproche jambes). Stabilisation du bassin.", insertions: ["5 muscles: court, long, grand, pectiné, gracile", "Pubis → Fémur"]}
             },
 
             exercicesPectoraux: [
@@ -1278,6 +1363,8 @@
                 {nom: "Soulevé de Terre", description: "Saisir barre sol, se redresser.", technique: ["Dos droit", "Pousser talons", "Hanches/épaules ensemble", "Barre le long jambes"], variantes: ["Roumain", "Sumo", "Trap bar"], video: "https://www.youtube.com/watch?v=fne6CyCgGDw"},
                 {nom: "Fente Bulgare", description: "Pied arrière surélevé, descendre en fente.", technique: ["Genou avant axe cheville", "Descente verticale", "Poids sur talon avant", "Équilibre"], variantes: ["Haltères", "Barre", "Sans charge"], video: "https://www.youtube.com/watch?v=nbee7NZjZWU"},
                 {nom: "Hip Thrust", description: "Dos sur banc, pousser hanches vers haut avec barre.", technique: ["Épaules sur banc", "Pieds largeur hanches", "Extension complète hanches", "Serrer fessiers haut"], variantes: ["Une jambe", "Bande élastique", "Lesté"], video: "https://www.youtube.com/watch?v=Dj3ZIsic-Ng"},
+                {nom: "Abducteur Machine", description: "Assis, écarter jambes contre résistance machine (travail fessiers moyen/petit).", technique: ["Dos contre dossier", "Écarter au maximum", "Contracter fessiers", "Retour contrôlé"], variantes: ["Débout câble", "Bande élastique", "Allongé latéral"], video: "https://www.youtube.com/shorts/yaaNq6AY--U"},
+                {nom: "Adducteur Machine", description: "Assis, rapprocher jambes contre résistance machine.", technique: ["Dos contre dossier", "Rapprocher jambes complètement", "Contracter adducteurs", "Retour contrôlé"], variantes: ["Débout câble", "Bande élastique", "Copenhagen plank"], video: "https://www.youtube.com/shorts/6zLpLB5vXjU"},
                 {nom: "Presse Inclinée", description: "Allongé sur presse, pousser plateforme avec jambes.", technique: ["Pieds largeur épaules", "Genoux alignés pieds", "Descente 90°", "Pousser talons"], variantes: ["Pieds hauts (ischio)", "Pieds bas (quadri)", "Une jambe"], videos: ["https://www.youtube.com/shorts/HjgE-d4cMU0", "https://www.youtube.com/shorts/05XSMArzND8"]},
                 {nom: "Leg Curl", description: "Allongé/assis, fléchir jambes ramener poids.", technique: ["Contracter ischio-jambiers", "Amplitude complète", "Pas cambrer", "Contrôler retour"], variantes: ["Allongé", "Assis", "Debout un pied"], video: "https://www.youtube.com/shorts/D1lq3jegNQI"},
                 {nom: "Leg Extension", description: "Assis, étendre jambes pousser poids.", technique: ["Dos contre dossier", "Extension complète", "Contracter quadriceps", "Descente contrôlée"], variantes: ["2 jambes", "Une jambe", "Pieds vers intérieur/extérieur"], video: "https://www.youtube.com/shorts/xSBbJnpZ3Js"},
@@ -1299,7 +1386,7 @@
                 this.rmHistory = [];
                 this.currentSession = null;
                 this.userAvatar = null;
-                this.musclesList = ['Pectoraux', 'Grand dorsal', 'Trapèzes', 'Deltoïdes', 'Biceps', 'Triceps', 'Abdominaux', 'Quadriceps', 'Ischio-jambiers', 'Fessiers', 'Mollets'];
+                this.musclesList = ['Pectoraux', 'Grand dorsal', 'Trapèzes', 'Deltoïdes', 'Biceps', 'Triceps', 'Abdominaux', 'Quadriceps', 'Ischio-jambiers', 'Fessiers', 'Mollets', 'Adducteurs'];
                 this.currentCoursTab = 'principes';
                 this.exercicesTemp = [];
                 this.musclesTemp = [];
@@ -1336,6 +1423,7 @@
                 this.loadObjectifs();
                 this.calculateStreaks();
                 this.checkBadges();
+                                this.editingHistoryId = null;
                 this.render();
             }
 
@@ -1638,6 +1726,11 @@
                 return `
                     <div class="container">
                         <div class="card">
+                        ${IS_COACH_MODE ? `
+                            <div class="coach-mode-banner">
+                                🎓 MODE COACH ACTIVÉ - Historique éditable
+                            </div>
+                        ` : ''}
                             <div class="flex justify-between items-center mb-4">
                                 <div class="flex items-center gap-3">
                                     ${this.userAvatar ? `<img src="${this.userAvatar}" class="profile-avatar" alt="Avatar">` : `<div class="default-avatar">👤</div>`}
@@ -2064,18 +2157,38 @@
                 return `
                     <div>
                         <h2 class="text-white mb-4" style="font-size: 1.5rem;">📅 Historique des séances (${completedHistory.length})</h2>
+                        ${IS_COACH_MODE ? `
+                            <div class="text-white mb-3" style="opacity: 0.8; background: rgba(245, 158, 11, 0.1); padding: 1rem; border-radius: 0.75rem; border-left: 4px solid #f59e0b;">
+                                <strong>🎓 Mode Coach :</strong> Vous pouvez éditer et supprimer les entrées de l'historique
+                            </div>
+                        ` : ''}
                         ${completedHistory.length > 0 ? `
                             ${completedHistory.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt)).map(entry => {
                                 const session = this.sessions[entry.sessionIndex];
-                                if (!session) return '';
+                                
+                                // Si on est en mode édition pour cette entrée
+                                if (this.editingHistoryId === entry.id) {
+                                    return this.renderHistoryEditForm(entry, session);
+                                }
+                                
+                                // Affichage normal
+                                const sessionName = session ? session.nom : (entry.sessionName || 'Séance');
+                                const sessionType = session ? session.type : (entry.type || 'Force');
+                                
                                 return `
                                     <div class="session-history-item">
                                         <div class="flex justify-between items-center mb-2">
-                                            <div>
-                                                <div class="text-cyan" style="font-weight: 600; font-size: 1.1rem;">${session.nom}</div>
+                                            <div style="flex: 1;">
+                                                <div class="text-cyan" style="font-weight: 600; font-size: 1.1rem;">${sessionName}</div>
                                                 <div class="text-white" style="opacity: 0.7; font-size: 0.85rem;">${new Date(entry.completedAt).toLocaleDateString('fr-FR', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}</div>
                                             </div>
-                                            <span class="badge badge-${session.type.toLowerCase()}">${session.type}</span>
+                                            <div class="flex gap-2 items-center">
+                                                <span class="badge badge-${sessionType.toLowerCase()}">${sessionType}</span>
+                                                ${IS_COACH_MODE ? `
+                                                    <button class="edit-btn" onclick="app.editHistory('${entry.id}')">✏️</button>
+                                                    <button class="delete-btn" onclick="app.deleteHistory('${entry.id}')">🗑️</button>
+                                                ` : ''}
+                                            </div>
                                         </div>
                                         ${entry.notes ? `<div class="text-white" style="opacity: 0.8; font-size: 0.9rem; margin-top: 0.5rem;">💬 ${entry.notes}</div>` : ''}
                                     </div>
@@ -2087,6 +2200,48 @@
                                 <div class="text-white">Aucune séance effectuée</div>
                             </div>
                         `}
+                        ${IS_COACH_MODE ? `
+                            <button class="btn btn-primary mt-4" onclick="app.addDemoHistory()" style="width: 100%;">
+                                ➕ Ajouter une séance de démonstration
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            renderHistoryEditForm(entry, session) {
+                const sessionName = session ? session.nom : (entry.sessionName || '');
+                const sessionType = session ? session.type : (entry.type || 'Force');
+                
+                return `
+                    <div class="session-history-item">
+                        <div class="edit-form">
+                            <h3 class="text-cyan mb-3" style="font-size: 1.2rem;">✏️ Édition de la séance</h3>
+                            <div class="mb-3">
+                                <label class="text-white mb-2" style="display: block;">Nom de la séance</label>
+                                <input type="text" id="edit-name" class="input" value="${sessionName}" placeholder="Nom de la séance">
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-white mb-2" style="display: block;">Type</label>
+                                <select id="edit-type" class="input">
+                                    <option value="Force" ${sessionType === 'Force' ? 'selected' : ''}>Force</option>
+                                    <option value="Équilibre" ${sessionType === 'Équilibre' ? 'selected' : ''}>Équilibre</option>
+                                    <option value="Endurance" ${sessionType === 'Endurance' ? 'selected' : ''}>Endurance</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-white mb-2" style="display: block;">Date</label>
+                                <input type="datetime-local" id="edit-date" class="input" value="${new Date(entry.completedAt).toISOString().slice(0, 16)}">
+                            </div>
+                            <div class="mb-4">
+                                <label class="text-white mb-2" style="display: block;">Notes</label>
+                                <textarea id="edit-notes" class="input" rows="3" placeholder="Notes sur la séance">${entry.notes || ''}</textarea>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="btn btn-primary" onclick="app.saveHistoryEdit('${entry.id}')" style="flex: 1;">💾 Enregistrer</button>
+                                <button class="btn btn-warning" onclick="app.cancelHistoryEdit()" style="flex: 1;">❌ Annuler</button>
+                            </div>
+                        </div>
                     </div>
                 `;
             }
@@ -2606,6 +2761,10 @@
                         role: "Extension, abduction, rotation hanche. Muscle le plus puissant.",
                         insertions: ["Grand, moyen, petit fessier", "Iliaque, sacrum → Fémur"]
                     },
+                    "Adducteurs": {
+                        role: "Adduction de la hanche (rapproche jambes). Stabilisation du bassin.",
+                        insertions: ["5 muscles: court, long, grand, pectiné, gracile", "Pubis → Fémur"]
+                    },
                     "Mollets": {
                         role: "Flexion plantaire cheville. Propulsion marche/course.",
                         insertions: ["Gastrocnémien (2 chefs) + Soléaire", "Fémur, tibia → Calcanéus (tendon d'Achille)"]
@@ -2843,7 +3002,70 @@
                     document.getElementById('session-repos').value = params.repos;
                 }
                 
-                this.render();
+                // Mettre à jour l'affichage du mobile info sans recharger toute la page
+                const mobileInfo = {
+                    'Force': {
+                        color: '#ef4444',
+                        objectif: 'Développer la force maximale',
+                        charges: '85-100% de 1RM',
+                        reps: '1-5 répétitions',
+                        series: '3-6 séries',
+                        repos: '3-5 minutes',
+                        exemple: 'Développé couché : 5 séries de 3 reps à 90% (si 1RM = 100kg → 90kg)',
+                        conseil: 'Explosivité sur la phase concentrique, contrôle en excentrique'
+                    },
+                    'Équilibre': {
+                        color: '#3b82f6',
+                        objectif: 'Hypertrophie musculaire (prise de masse)',
+                        charges: '65-80% de 1RM',
+                        reps: '6-12 répétitions',
+                        series: '3-5 séries',
+                        repos: '60-90 secondes',
+                        exemple: 'Squat : 4 séries de 10 reps à 75% (si 1RM = 140kg → 105kg)',
+                        conseil: 'Tempo contrôlé, temps sous tension optimal pour hypertrophie'
+                    },
+                    'Endurance': {
+                        color: '#10b981',
+                        objectif: 'Endurance musculaire et définition',
+                        charges: '40-60% de 1RM',
+                        reps: '15-25+ répétitions',
+                        series: '2-4 séries',
+                        repos: '30-60 secondes',
+                        exemple: 'Leg extension : 3 séries de 20 reps à 50% (si 1RM = 80kg → 40kg)',
+                        conseil: 'Rythme soutenu, brûlure musculaire recherchée'
+                    },
+                    'Personnalisé': {
+                        color: '#a855f7',
+                        objectif: 'Programme sur mesure',
+                        charges: 'Au choix',
+                        reps: 'Au choix',
+                        series: 'Au choix',
+                        repos: 'Au choix',
+                        exemple: 'Vous définissez tous les paramètres',
+                        conseil: 'Adaptez selon vos objectifs spécifiques'
+                    }
+                };
+                
+                const currentInfo = mobileInfo[selectedType] || mobileInfo['Force'];
+                const mobileInfoDiv = document.getElementById('mobile-info');
+                if (mobileInfoDiv) {
+                    mobileInfoDiv.style.background = `linear-gradient(135deg, ${currentInfo.color}20 0%, ${currentInfo.color}10 100%)`;
+                    mobileInfoDiv.style.border = `2px solid ${currentInfo.color}`;
+                    mobileInfoDiv.innerHTML = `
+                        <div class="text-white" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">🎯 ${currentInfo.objectif}</div>
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <div class="text-white" style="opacity: 0.9;"><strong>Charges :</strong> ${currentInfo.charges}</div>
+                            <div class="text-white" style="opacity: 0.9;"><strong>Répétitions :</strong> ${currentInfo.reps}</div>
+                            <div class="text-white" style="opacity: 0.9;"><strong>Séries :</strong> ${currentInfo.series}</div>
+                            <div class="text-white" style="opacity: 0.9;"><strong>Repos :</strong> ${currentInfo.repos}</div>
+                        </div>
+                        <div class="text-white" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 0.75rem; margin-bottom: 0.75rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">📝 Exemple :</div>
+                            ${currentInfo.exemple}
+                        </div>
+                        <div class="text-cyan" style="font-size: 0.9rem;">💡 ${currentInfo.conseil}</div>
+                    `;
+                }
             }
             
             togglePersonnalise() {
@@ -3470,6 +3692,73 @@
                 this.chronoRunning = false;
                 this.chronoSeconds = 0;
                 this.chronoLaps = [];
+                this.render();
+            }
+
+            // ===============================================
+            // MÉTHODES MODE COACH - Édition de l'historique
+            // ===============================================
+            
+            editHistory(id) {
+                if (!IS_COACH_MODE) return;
+                this.editingHistoryId = id;
+                this.render();
+            }
+
+            saveHistoryEdit(id) {
+                if (!IS_COACH_MODE) return;
+                
+                const entry = this.sessionHistory.find(h => h.id === id);
+                if (!entry) return;
+                
+                // Récupérer les valeurs du formulaire
+                const newName = document.getElementById('edit-name').value;
+                const newType = document.getElementById('edit-type').value;
+                const newDate = document.getElementById('edit-date').value;
+                const newNotes = document.getElementById('edit-notes').value;
+                
+                // Mettre à jour l'entrée
+                entry.sessionName = newName;
+                entry.type = newType;
+                entry.completedAt = new Date(newDate).toISOString();
+                entry.notes = newNotes;
+                
+                // Sauvegarder
+                this.saveSessionHistory();
+                this.editingHistoryId = null;
+                this.render();
+            }
+
+            cancelHistoryEdit() {
+                this.editingHistoryId = null;
+                this.render();
+            }
+
+            deleteHistory(id) {
+                if (!IS_COACH_MODE) return;
+                
+                if (confirm('Êtes-vous sûr de vouloir supprimer cette entrée de l\'historique ?')) {
+                    this.sessionHistory = this.sessionHistory.filter(h => h.id !== id);
+                    this.saveSessionHistory();
+                    this.render();
+                }
+            }
+
+            addDemoHistory() {
+                if (!IS_COACH_MODE) return;
+                
+                const demoEntry = {
+                    id: Date.now().toString(),
+                    sessionName: 'Séance de démonstration',
+                    sessionIndex: 0,
+                    type: 'Force',
+                    completed: true,
+                    completedAt: new Date().toISOString(),
+                    notes: 'Ceci est une séance d\'exemple ajoutée en mode coach pour tester l\'édition de l\'historique.'
+                };
+                
+                this.sessionHistory.push(demoEntry);
+                this.saveSessionHistory();
                 this.render();
             }
         }
