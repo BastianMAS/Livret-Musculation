@@ -1514,6 +1514,7 @@
                 this.currentCoursTab = 'principes';
                 this.exercicesTemp = [];
                 this.musclesTemp = [];
+                this.exercicesDetaillesTemp = []; // Nouveau système
                 this.timerMode = 'repos';
                 this.timerSeconds = 60;
                 this.timerRunning = false;
@@ -1533,6 +1534,11 @@
                 this.objectifs = [];
                 this.currentStreak = 0;
                 this.longestStreak = 0;
+                this.exercicesDetails = []; // Nouvelle structure pour les exercices détaillés
+                this.currentExerciceForm = {}; // Formulaire d'exercice en cours
+                this.sessionStep = 1; // Étape actuelle (1=infos, 2=exercices, 3=validation)
+                this.sessionNomTemp = ''; // Nom temporaire de la séance
+                this.sessionMobileTemp = 'Hypertrophie'; // Mobile temporaire
                 this.init();
                 this.initOfflineMode();
             }
@@ -1613,6 +1619,83 @@
             }
 
             saveCalculatedCharges() { storage.save('calculatedCharges', this.calculatedCharges); }
+
+            loadUserData() {
+                if (!this.currentUser) return;
+                this.loadSessions();
+                this.loadRMHistory();
+                this.loadUserAvatar();
+                this.loadSessionHistory();
+                this.loadCalculatedCharges();
+                this.loadTheme();
+                this.loadBadges();
+                this.loadObjectifs();
+                this.updateStreak();
+            }
+
+            updateStreak() {
+                if (!this.sessionHistory || this.sessionHistory.length === 0) {
+                    this.currentStreak = 0;
+                    this.longestStreak = 0;
+                    return;
+                }
+
+                // Obtenir les dates uniques des séances complétées, triées
+                const completedDates = this.sessionHistory
+                    .filter(h => h.completed)
+                    .map(h => {
+                        const date = new Date(h.completedAt);
+                        return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+                    })
+                    .filter((value, index, self) => self.indexOf(value) === index)
+                    .sort((a, b) => b - a);
+
+                if (completedDates.length === 0) {
+                    this.currentStreak = 0;
+                    this.longestStreak = 0;
+                    return;
+                }
+
+                // Calculer la série actuelle
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const todayTime = today.getTime();
+                const oneDayMs = 24 * 60 * 60 * 1000;
+
+                this.currentStreak = 0;
+                let currentDate = todayTime;
+
+                for (let i = 0; i < completedDates.length; i++) {
+                    const dateTime = completedDates[i];
+                    const diff = Math.abs(currentDate - dateTime);
+                    
+                    if (diff === 0) {
+                        this.currentStreak++;
+                        currentDate -= oneDayMs;
+                    } else if (diff === oneDayMs) {
+                        this.currentStreak++;
+                        currentDate = dateTime - oneDayMs;
+                    } else {
+                        break;
+                    }
+                }
+
+                // Calculer la plus longue série de tous les temps
+                let maxStreak = 0;
+                let tempStreak = 1;
+
+                for (let i = 0; i < completedDates.length - 1; i++) {
+                    const diff = completedDates[i] - completedDates[i + 1];
+                    if (diff === oneDayMs) {
+                        tempStreak++;
+                        maxStreak = Math.max(maxStreak, tempStreak);
+                    } else {
+                        tempStreak = 1;
+                    }
+                }
+
+                this.longestStreak = Math.max(maxStreak, this.currentStreak);
+            }
 
             loadTheme() {
                 if (!this.currentUser) return;
@@ -1710,6 +1793,10 @@
                 } else if (this.currentView === 'session-detail') {
                     app.innerHTML = this.renderSessionDetail();
                     this.attachSessionDetailEvents();
+                } else if (this.currentView === 'session-live') {
+                    app.innerHTML = this.renderSessionLive();
+                } else if (this.currentView === 'session-bilan') {
+                    app.innerHTML = this.renderSessionBilan();
                 }
             }
 
@@ -1722,13 +1809,20 @@
                                 <h1 class="text-white" style="font-size: 2rem; margin-bottom: 0.5rem;">Accès Protégé</h1>
                                 <p class="text-cyan">Entrez le code d'accès de votre classe</p>
                             </div>
-                            <form id="code-form">
+                            <div>
                                 <div class="mb-4">
                                     <label class="text-white mb-1" style="display: block;">Code de classe</label>
-                                    <input type="password" class="input" id="code-input" placeholder="Ex: 1CAPECP25" required autofocus>
+                                    <input 
+                                        type="password" 
+                                        class="input" 
+                                        id="code-input" 
+                                        placeholder="Ex: 1CAPECP25" 
+                                        autofocus
+                                        onkeypress="if(event.key === 'Enter') app.submitCode()"
+                                    >
                                 </div>
-                                <button type="submit" class="btn btn-primary" style="width: 100%;">Valider</button>
-                            </form>
+                                <button type="button" class="btn btn-primary" style="width: 100%;" onclick="app.submitCode()">Valider</button>
+                            </div>
                             <div id="code-error" class="hidden" style="margin-top: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.75rem;">
                                 <p class="text-white" style="text-align: center;">❌ Code incorrect</p>
                             </div>
@@ -1789,7 +1883,7 @@
                                 <h1 class="text-white" style="font-size: 2rem; margin-bottom: 0.5rem;">Créer mon profil</h1>
                                 <p class="text-cyan">Renseignez vos informations - ${securite.getNomClasse()}</p>
                             </div>
-                            <form id="signup-form">
+                            <div>
                                 <div class="text-center mb-4">
                                     <input type="file" id="avatar-input" accept="image/*" style="display: none;">
                                     <div class="avatar-upload" onclick="document.getElementById('avatar-input').click()">
@@ -1799,16 +1893,16 @@
                                 </div>
                                 <div class="mb-2">
                                     <label class="text-white mb-1" style="display: block;">Prénom</label>
-                                    <input type="text" class="input" id="signup-username" placeholder="Votre prénom" required>
+                                    <input type="text" class="input" id="signup-username" placeholder="Votre prénom">
                                 </div>
                                 <div class="grid grid-cols-2 gap-3 mb-2">
                                     <div>
                                         <label class="text-white mb-1" style="display: block;">Âge</label>
-                                        <input type="number" class="input" id="signup-age" placeholder="Ex: 25" min="10" max="100" required>
+                                        <input type="number" class="input" id="signup-age" placeholder="Ex: 25" min="10" max="100">
                                     </div>
                                     <div>
                                         <label class="text-white mb-1" style="display: block;">Sexe</label>
-                                        <select class="input" id="signup-sexe" required>
+                                        <select class="input" id="signup-sexe">
                                             <option value="">Choisir...</option>
                                             <option value="Homme">Homme</option>
                                             <option value="Femme">Femme</option>
@@ -1818,18 +1912,18 @@
                                 <div class="grid grid-cols-2 gap-3 mb-4">
                                     <div>
                                         <label class="text-white mb-1" style="display: block;">Taille (cm)</label>
-                                        <input type="number" class="input" id="signup-taille" placeholder="Ex: 175" min="100" max="250" required>
+                                        <input type="number" class="input" id="signup-taille" placeholder="Ex: 175" min="100" max="250">
                                     </div>
                                     <div>
                                         <label class="text-white mb-1" style="display: block;">Poids (kg)</label>
-                                        <input type="number" class="input" id="signup-poids" placeholder="Ex: 70" min="30" max="200" step="0.1" required>
+                                        <input type="number" class="input" id="signup-poids" placeholder="Ex: 70" min="30" max="200" step="0.1">
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-success" style="width: 100%; margin-bottom: 1rem;">Créer mon profil</button>
+                                <button type="button" class="btn btn-success" style="width: 100%; margin-bottom: 1rem;" onclick="app.submitSignup()">Créer mon profil</button>
                                 <div class="text-center">
                                     <button type="button" class="btn btn-link" onclick="app.showLogin()">Retour</button>
                                 </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1878,7 +1972,6 @@
                                 <button class="tab-btn ${this.currentTab === 'charges' ? 'active' : ''}" onclick="app.switchTab('charges')">⚖️ Charges</button>
                                 <button class="tab-btn ${this.currentTab === 'progression' ? 'active' : ''}" onclick="app.switchTab('progression')">📊 Graphiques</button>
                                 <button class="tab-btn ${this.currentTab === 'sessions' ? 'active' : ''}" onclick="app.switchTab('sessions')">📝 Séances</button>
-                                <button class="tab-btn ${this.currentTab === 'timer' ? 'active' : ''}" onclick="app.switchTab('timer')">⏱️ Timer</button>
                                 <button class="tab-btn ${this.currentTab === 'historique' ? 'active' : ''}" onclick="app.switchTab('historique')">📅 Historique</button>
                                 <button class="tab-btn ${this.currentTab === 'badges' ? 'active' : ''}" onclick="app.switchTab('badges')">🏆 Badges</button>
                                 <button class="tab-btn ${this.currentTab === 'objectifs' ? 'active' : ''}" onclick="app.switchTab('objectifs')">🎯 Objectifs</button>
@@ -2251,13 +2344,21 @@
                             <div class="grid grid-cols-2 gap-3">
                                 ${this.sessions.map((session, index) => {
                                     const isCompleted = this.sessionHistory.some(h => h.sessionIndex === index && h.completed);
+                                    
+                                    // Gérer ancienne et nouvelle structure
+                                    const exercices = session.exercicesDetailles || session.exercices || [];
+                                    const nbExercices = exercices.length;
+                                    const muscles = session.exercicesDetailles 
+                                        ? [...new Set(session.exercicesDetailles.map(e => e.muscle))]
+                                        : (session.muscles || []);
+                                    
                                     return `
                                         <div class="session-card ${isCompleted ? 'completed' : ''}" onclick="app.viewSession(${index})">
                                             ${isCompleted ? '<div class="session-completed-badge">✓ Effectuée</div>' : ''}
                                             <h3 class="text-white mb-2" style="font-size: 1.2rem;">${session.nom}</h3>
-                                            <div class="mb-2"><span class="badge badge-${session.type.toLowerCase()}">${session.type}</span></div>
-                                            <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">💪 ${session.muscles.join(', ')}</div>
-                                            <div class="text-white" style="opacity: 0.7; font-size: 0.85rem; margin-top: 0.5rem;">📋 ${session.exercices.length} exercice${session.exercices.length > 1 ? 's' : ''}</div>
+                                            <div class="mb-2"><span class="badge badge-${session.type.toLowerCase().replace(/ /g, '-')}">${session.type}</span></div>
+                                            <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">💪 ${muscles.join(', ')}</div>
+                                            <div class="text-white" style="opacity: 0.7; font-size: 0.85rem; margin-top: 0.5rem;">📋 ${nbExercices} exercice${nbExercices > 1 ? 's' : ''}</div>
                                         </div>
                                     `;
                                 }).join('')}
@@ -3108,82 +3209,18 @@
 
             renderSessionForm() {
                 const isEditing = this.currentSession !== null;
-                const session = isEditing ? this.sessions[this.currentSession] : {
-                    nom: '', 
-                    type: 'Force', 
-                    muscles: [], 
-                    exercices: [],
-                    series: 5,
-                    repetitions: 5,
-                    intensite: 90,
-                    repos: 180,
-                    isPersonnalise: false
-                };
                 
-                const mobileInfo = {
-                    'Force Maximale': {
-                        color: '#ef4444',
-                        objectif: 'Développer la force maximale',
-                        charges: '85-100% de 1RM',
-                        reps: '1-5 répétitions',
-                        series: '4-6 séries',
-                        repos: '3-5 minutes',
-                        exemple: 'Développé couché : 5 séries de 3 reps à 90% (si 1RM = 100kg → 90kg)',
-                        conseil: 'Explosivité sur la phase concentrique, contrôle en excentrique'
-                    },
-                    'Force Explosive': {
-                        color: '#f97316',
-                        objectif: 'Développer la puissance et l\'explosivité',
-                        charges: '30-60% de 1RM',
-                        reps: '3-6 répétitions',
-                        series: '4-6 séries',
-                        repos: '2-4 minutes',
-                        exemple: 'Squat jump : 5 séries de 5 sauts à 40% (si 1RM = 150kg → 60kg)',
-                        conseil: 'Vitesse et explosivité maximales, technique parfaite'
-                    },
-                    'Hypertrophie': {
-                        color: '#3b82f6',
-                        objectif: 'Prise de masse musculaire',
-                        charges: '65-80% de 1RM',
-                        reps: '6-12 répétitions',
-                        series: '3-5 séries',
-                        repos: '60-90 secondes',
-                        exemple: 'Squat : 4 séries de 10 reps à 75% (si 1RM = 140kg → 105kg)',
-                        conseil: 'Tempo contrôlé, temps sous tension optimal'
-                    },
-                    'Endurance de Force': {
-                        color: '#a855f7',
-                        objectif: 'Maintenir la force sur la durée',
-                        charges: '60-75% de 1RM',
-                        reps: '12-20 répétitions',
-                        series: '3-4 séries',
-                        repos: '60-90 secondes',
-                        exemple: 'Leg Press : 4 séries de 15 reps à 70% (si 1RM = 300kg → 210kg)',
-                        conseil: 'Rythme constant, résistance à la fatigue'
-                    },
-                    'Endurance Musculaire': {
-                        color: '#10b981',
-                        objectif: 'Endurance locale et définition',
-                        charges: '40-60% de 1RM',
-                        reps: '20-30+ répétitions',
-                        series: '2-4 séries',
-                        repos: '30-60 secondes',
-                        exemple: 'Curl biceps : 3 séries de 25 reps à 50% (si 1RM = 20kg → 10kg)',
-                        conseil: 'Rythme soutenu, rechercher la congestion'
-                    },
-                    'Personnalisé': {
-                        color: '#a855f7',
-                        objectif: 'Programme sur mesure',
-                        charges: 'Au choix',
-                        reps: 'Au choix',
-                        series: 'Au choix',
-                        repos: 'Au choix',
-                        exemple: 'Vous définissez tous les paramètres',
-                        conseil: 'Adaptez selon vos objectifs spécifiques'
+                // Si édition, charger les données
+                if (isEditing) {
+                    const session = this.sessions[this.currentSession];
+                    if (this.sessionStep === 1) {
+                        this.sessionNomTemp = session.nom;
+                        this.sessionMobileTemp = session.type;
                     }
-                };
-                
-                const currentMobileInfo = mobileInfo[session.type] || mobileInfo['Force Maximale'];
+                    if (this.exercicesDetails.length === 0) {
+                        this.exercicesDetails = session.exercicesDetails || [];
+                    }
+                }
                 
                 return `
                     <div class="container">
@@ -3192,510 +3229,484 @@
                                 <h2 class="text-white" style="font-size: 1.5rem;">${isEditing ? '✏️ Modifier' : '➕ Créer'} une séance</h2>
                                 <button class="btn btn-secondary" onclick="app.cancelSession()">← Retour</button>
                             </div>
-                            <form id="session-form">
-                                <div class="mb-4">
-                                    <label class="text-white mb-1" style="display: block;">Nom de la séance</label>
-                                    <input type="text" class="input" id="session-name" placeholder="Ex: Upper Push A" value="${session.nom}" required>
+                            
+                            <!-- Indicateur d'étapes -->
+                            <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem;">
+                                <div style="flex: 1; text-align: center;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; font-weight: 600; ${this.sessionStep >= 1 ? 'background: var(--primary-color); color: #0f172a;' : 'background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5);'}">1</div>
+                                    <div class="text-white" style="font-size: 0.85rem; opacity: ${this.sessionStep >= 1 ? '1' : '0.5'}">Infos</div>
                                 </div>
-                                
-                                <div class="mb-4">
-                                    <label class="text-white mb-2" style="display: block; font-size: 1.1rem;">Mobile d'entraînement</label>
-                                    <select class="input" id="session-type" onchange="app.updateMobileInfo()" required>
-                                        <option value="Force Maximale" ${session.type === 'Force Maximale' ? 'selected' : ''}>💪 Force Maximale</option>
-                                        <option value="Force Explosive" ${session.type === 'Force Explosive' ? 'selected' : ''}>⚡ Force Explosive</option>
-                                        <option value="Hypertrophie" ${session.type === 'Hypertrophie' ? 'selected' : ''}>🏋️ Hypertrophie</option>
-                                        <option value="Endurance de Force" ${session.type === 'Endurance de Force' ? 'selected' : ''}>🔥 Endurance de Force</option>
-                                        <option value="Endurance Musculaire" ${session.type === 'Endurance Musculaire' ? 'selected' : ''}>🏃 Endurance Musculaire</option>
-                                        <option value="Personnalisé" ${session.type === 'Personnalisé' ? 'selected' : ''}>⚙️ Personnalisé</option>
-                                    </select>
+                                <div style="flex: 1; text-align: center;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; font-weight: 600; ${this.sessionStep >= 2 ? 'background: var(--primary-color); color: #0f172a;' : 'background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5);'}">2</div>
+                                    <div class="text-white" style="font-size: 0.85rem; opacity: ${this.sessionStep >= 2 ? '1' : '0.5'}">Exercices</div>
                                 </div>
-                                
-                                <div id="mobile-info" class="mb-4" style="background: linear-gradient(135deg, ${currentMobileInfo.color}20 0%, ${currentMobileInfo.color}10 100%); border: 2px solid ${currentMobileInfo.color}; border-radius: 1rem; padding: 1.5rem;">
-                                    <div class="text-white" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">🎯 ${currentMobileInfo.objectif}</div>
-                                    <div class="grid grid-cols-2 gap-2 mb-3">
-                                        <div class="text-white" style="opacity: 0.9;"><strong>Charges :</strong> ${currentMobileInfo.charges}</div>
-                                        <div class="text-white" style="opacity: 0.9;"><strong>Répétitions :</strong> ${currentMobileInfo.reps}</div>
-                                        <div class="text-white" style="opacity: 0.9;"><strong>Séries :</strong> ${currentMobileInfo.series}</div>
-                                        <div class="text-white" style="opacity: 0.9;"><strong>Repos :</strong> ${currentMobileInfo.repos}</div>
-                                    </div>
-                                    <div class="text-white" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 0.75rem; margin-bottom: 0.75rem;">
-                                        <div style="font-weight: 600; margin-bottom: 0.5rem;">📝 Exemple :</div>
-                                        ${currentMobileInfo.exemple}
-                                    </div>
-                                    <div class="text-cyan" style="font-size: 0.9rem;">💡 ${currentMobileInfo.conseil}</div>
+                                <div style="flex: 1; text-align: center;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; font-weight: 600; ${this.sessionStep >= 3 ? 'background: var(--primary-color); color: #0f172a;' : 'background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5);'}">3</div>
+                                    <div class="text-white" style="font-size: 0.85rem; opacity: ${this.sessionStep >= 3 ? '1' : '0.5'}">Validation</div>
                                 </div>
-                                
-                                <div class="mb-4">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <label class="text-white" style="font-size: 1.1rem;">⚙️ Paramètres d'entraînement</label>
-                                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                            <input type="checkbox" id="mode-personnalise" ${session.isPersonnalise ? 'checked' : ''} onchange="app.togglePersonnalise()">
-                                            <span class="text-white" style="font-size: 0.9rem;">Personnaliser</span>
-                                        </label>
-                                    </div>
-                                    
-                                    <div id="parametres-container" style="${session.isPersonnalise || session.type === 'Personnalisé' ? '' : 'opacity: 0.5; pointer-events: none;'}">
-                                        <div class="grid grid-cols-2 gap-3">
-                                            <div>
-                                                <label class="text-white mb-1" style="display: block; font-size: 0.9rem;">Séries</label>
-                                                <input type="number" class="input" id="session-series" value="${session.series || 5}" min="1" max="10" ${session.isPersonnalise || session.type === 'Personnalisé' ? '' : 'disabled'}>
-                                            </div>
-                                            <div>
-                                                <label class="text-white mb-1" style="display: block; font-size: 0.9rem;">Répétitions</label>
-                                                <input type="number" class="input" id="session-repetitions" value="${session.repetitions || 5}" min="1" max="50" ${session.isPersonnalise || session.type === 'Personnalisé' ? '' : 'disabled'}>
-                                            </div>
-                                            <div>
-                                                <label class="text-white mb-1" style="display: block; font-size: 0.9rem;">Intensité (% 1RM)</label>
-                                                <input type="number" class="input" id="session-intensite" value="${session.intensite || 90}" min="30" max="100" ${session.isPersonnalise || session.type === 'Personnalisé' ? '' : 'disabled'}>
-                                            </div>
-                                            <div>
-                                                <label class="text-white mb-1" style="display: block; font-size: 0.9rem;">Repos (secondes)</label>
-                                                <input type="number" class="input" id="session-repos" value="${session.repos || 180}" min="15" max="600" step="15" ${session.isPersonnalise || session.type === 'Personnalisé' ? '' : 'disabled'}>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label class="text-white mb-2" style="display: block; font-size: 1.1rem;">💪 Muscles ciblés</label>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        ${this.musclesList.map(m => `<button type="button" class="muscle-btn ${this.musclesTemp.includes(m) ? 'selected' : ''}" onclick="app.toggleMuscle('${m}')">${m}</button>`).join('')}
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label class="text-white mb-2" style="display: block; font-size: 1.1rem;">🏋️ Exercices</label>
-                                    <div class="flex gap-2 mb-2">
-                                        <input 
-                                            type="text" 
-                                            class="input" 
-                                            id="exercice-name" 
-                                            placeholder="Nom de l'exercice" 
-                                            style="flex: 1;"
-                                            onkeypress="if(event.key === 'Enter') { event.preventDefault(); app.addExercice(); }"
-                                        >
-                                        <button type="button" class="btn btn-primary" onclick="app.addExercice()">➕ Ajouter</button>
-                                    </div>
-                                    ${this.exercicesTemp.length > 0 ? `
-                                        <div style="background: rgba(6, 182, 212, 0.1); padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(6, 182, 212, 0.3);">
-                                            <div class="text-cyan mb-2" style="font-weight: 600;">📋 ${this.exercicesTemp.length} exercice${this.exercicesTemp.length > 1 ? 's' : ''} ajouté${this.exercicesTemp.length > 1 ? 's' : ''}</div>
-                                            ${this.exercicesTemp.map((ex, i) => `
-                                                <div class="exercice-item flex justify-between items-center" style="background: rgba(15, 23, 42, 0.6); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">
-                                                    <span class="text-white" style="font-weight: 500;">${i + 1}. ${ex}</span>
-                                                    <button type="button" class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="app.removeExercice(${i})">🗑️</button>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                    ` : `
-                                        <div class="text-center" style="padding: 2rem; opacity: 0.5; background: rgba(15, 23, 42, 0.3); border-radius: 0.75rem; border: 2px dashed rgba(255,255,255,0.2);">
-                                            <div class="text-white" style="font-size: 1.1rem;">👆 Ajoutez vos exercices ci-dessus</div>
-                                            <div class="text-white" style="opacity: 0.7; font-size: 0.9rem; margin-top: 0.5rem;">Vous pouvez en ajouter autant que vous voulez !</div>
-                                        </div>
-                                    `}
-                                </div>
-                                
-                                <button type="submit" class="btn btn-success" style="width: 100%;">💾 ${isEditing ? 'Enregistrer les modifications' : 'Créer la séance'}</button>
-                            </form>
+                            </div>
+                            
+                            ${this.renderSessionStep()}
                         </div>
                     </div>
                 `;
             }
-            
-            updateMobileInfo() {
-                const selectedType = document.getElementById('session-type').value;
-                const isPersonnalise = document.getElementById('mode-personnalise')?.checked || selectedType === 'Personnalisé';
-                
-                // Mettre à jour les valeurs par défaut selon le mobile
-                const defaults = {
-                    'Force Maximale': {series: 5, repetitions: 3, intensite: 90, repos: 180},
-                    'Force Explosive': {series: 5, repetitions: 5, intensite: 45, repos: 150},
-                    'Hypertrophie': {series: 4, repetitions: 10, intensite: 75, repos: 75},
-                    'Endurance de Force': {series: 4, repetitions: 15, intensite: 70, repos: 75},
-                    'Endurance Musculaire': {series: 3, repetitions: 25, intensite: 50, repos: 45},
-                    'Personnalisé': {series: 4, repetitions: 8, intensite: 70, repos: 90}
-                };
-                
-                const params = defaults[selectedType] || defaults['Force Maximale'];
-                
-                if (!isPersonnalise && selectedType !== 'Personnalisé') {
-                    document.getElementById('session-series').value = params.series;
-                    document.getElementById('session-repetitions').value = params.repetitions;
-                    document.getElementById('session-intensite').value = params.intensite;
-                    document.getElementById('session-repos').value = params.repos;
-                }
-                
-                // Mettre à jour l'affichage du mobile info sans recharger toute la page
-                const mobileInfo = {
-                    'Force Maximale': {
-                        color: '#ef4444',
-                        objectif: 'Développer la force maximale',
-                        charges: '85-100% de 1RM',
-                        reps: '1-5 répétitions',
-                        series: '4-6 séries',
-                        repos: '3-5 minutes',
-                        exemple: 'Développé couché : 5 séries de 3 reps à 90% (si 1RM = 100kg → 90kg)',
-                        conseil: 'Explosivité sur la phase concentrique, contrôle en excentrique'
-                    },
-                    'Force Explosive': {
-                        color: '#f97316',
-                        objectif: 'Développer la puissance et l\'explosivité',
-                        charges: '30-60% de 1RM',
-                        reps: '3-6 répétitions',
-                        series: '4-6 séries',
-                        repos: '2-4 minutes',
-                        exemple: 'Squat jump : 5 séries de 5 sauts à 40% (si 1RM = 150kg → 60kg)',
-                        conseil: 'Vitesse et explosivité maximales, technique parfaite'
-                    },
-                    'Hypertrophie': {
-                        color: '#3b82f6',
-                        objectif: 'Prise de masse musculaire',
-                        charges: '65-80% de 1RM',
-                        reps: '6-12 répétitions',
-                        series: '3-5 séries',
-                        repos: '60-90 secondes',
-                        exemple: 'Squat : 4 séries de 10 reps à 75% (si 1RM = 140kg → 105kg)',
-                        conseil: 'Tempo contrôlé, temps sous tension optimal'
-                    },
-                    'Endurance de Force': {
-                        color: '#a855f7',
-                        objectif: 'Maintenir la force sur la durée',
-                        charges: '60-75% de 1RM',
-                        reps: '12-20 répétitions',
-                        series: '3-4 séries',
-                        repos: '60-90 secondes',
-                        exemple: 'Leg Press : 4 séries de 15 reps à 70% (si 1RM = 300kg → 210kg)',
-                        conseil: 'Rythme constant, résistance à la fatigue'
-                    },
-                    'Endurance Musculaire': {
-                        color: '#10b981',
-                        objectif: 'Endurance locale et définition',
-                        charges: '40-60% de 1RM',
-                        reps: '20-30+ répétitions',
-                        series: '2-4 séries',
-                        repos: '30-60 secondes',
-                        exemple: 'Curl biceps : 3 séries de 25 reps à 50% (si 1RM = 20kg → 10kg)',
-                        conseil: 'Rythme soutenu, rechercher la congestion'
-                    },
-                    'Personnalisé': {
-                        color: '#a855f7',
-                        objectif: 'Programme sur mesure',
-                        charges: 'Au choix',
-                        reps: 'Au choix',
-                        series: 'Au choix',
-                        repos: 'Au choix',
-                        exemple: 'Vous définissez tous les paramètres',
-                        conseil: 'Adaptez selon vos objectifs spécifiques'
-                    }
-                };
-                
-                const currentInfo = mobileInfo[selectedType] || mobileInfo['Force Maximale'];
-                const mobileInfoDiv = document.getElementById('mobile-info');
-                if (mobileInfoDiv) {
-                    mobileInfoDiv.style.background = `linear-gradient(135deg, ${currentInfo.color}20 0%, ${currentInfo.color}10 100%)`;
-                    mobileInfoDiv.style.border = `2px solid ${currentInfo.color}`;
-                    mobileInfoDiv.innerHTML = `
-                        <div class="text-white" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">🎯 ${currentInfo.objectif}</div>
-                        <div class="grid grid-cols-2 gap-2 mb-3">
-                            <div class="text-white" style="opacity: 0.9;"><strong>Charges :</strong> ${currentInfo.charges}</div>
-                            <div class="text-white" style="opacity: 0.9;"><strong>Répétitions :</strong> ${currentInfo.reps}</div>
-                            <div class="text-white" style="opacity: 0.9;"><strong>Séries :</strong> ${currentInfo.series}</div>
-                            <div class="text-white" style="opacity: 0.9;"><strong>Repos :</strong> ${currentInfo.repos}</div>
-                        </div>
-                        <div class="text-white" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 0.75rem; margin-bottom: 0.75rem;">
-                            <div style="font-weight: 600; margin-bottom: 0.5rem;">📝 Exemple :</div>
-                            ${currentInfo.exemple}
-                        </div>
-                        <div class="text-cyan" style="font-size: 0.9rem;">💡 ${currentInfo.conseil}</div>
-                    `;
-                }
-            }
-            
-            togglePersonnalise() {
-                const isChecked = document.getElementById('mode-personnalise').checked;
-                const container = document.getElementById('parametres-container');
-                const inputs = container.querySelectorAll('input');
-                
-                if (isChecked) {
-                    container.style.opacity = '1';
-                    container.style.pointerEvents = 'auto';
-                    inputs.forEach(input => input.disabled = false);
+
+            renderSessionStep() {
+                if (this.sessionStep === 1) {
+                    return this.renderStep1();
+                } else if (this.sessionStep === 2) {
+                    return this.renderStep2();
                 } else {
-                    container.style.opacity = '0.5';
-                    container.style.pointerEvents = 'none';
-                    inputs.forEach(input => input.disabled = true);
-                    this.updateMobileInfo();
+                    return this.renderStep3();
                 }
             }
-            renderSessionDetail() {
-                const session = this.sessions[this.currentSession];
-                if (!session) return '';
+
+            renderStep1() {
                 return `
-                    <div class="container">
-                        <div class="card">
-                            <div class="flex justify-between items-center mb-4"><h2 class="text-white" style="font-size: 1.5rem;">${session.nom}</h2><button class="btn btn-secondary" onclick="app.backToSessions()">← Retour</button></div>
-                            <div class="mb-4"><span class="badge badge-${session.type.toLowerCase()}" style="font-size: 1rem; padding: 0.5rem 1rem;">${session.type}</span></div>
-                            <div class="mb-4"><h3 class="text-white mb-2" style="font-size: 1.2rem;">💪 Muscles</h3><div class="text-white" style="opacity: 0.9;">${session.muscles.join(', ')}</div></div>
-                            <div class="mb-4"><h3 class="text-white mb-2" style="font-size: 1.2rem;">📋 Exercices (${session.exercices.length})</h3>${session.exercices.map((ex, i) => `<div class="exercice-item"><span class="text-white" style="font-weight: 600;">${i + 1}. ${ex}</span></div>`).join('')}</div>
-                            <div class="session-completion-modal mb-4"><h3 class="text-white mb-3" style="font-size: 1.1rem;">✅ Marquer comme effectuée</h3><label class="text-white mb-2" style="display: block;">📝 Notes (optionnel)</label><textarea id="session-notes" class="session-notes-area" placeholder="Ressentis, performances..."></textarea><button class="btn btn-success" style="width: 100%; margin-top: 1rem;" onclick="app.markSessionCompleted()">✅ Valider</button></div>
-                            <div class="flex gap-2"><button class="btn btn-warning" style="flex: 1;" onclick="app.editSession(${this.currentSession})">✏️</button><button class="btn btn-danger" style="flex: 1;" onclick="app.deleteSession(${this.currentSession})">🗑️</button></div>
+                    <div style="background: rgba(6, 182, 212, 0.1); padding: 2rem; border-radius: 1rem; border: 2px solid var(--primary-color);">
+                        <h3 class="text-cyan mb-4" style="font-size: 1.3rem;">📋 Étape 1 : Informations de la séance</h3>
+                        
+                        <div class="mb-4">
+                            <label class="text-white mb-2" style="display: block; font-weight: 600; font-size: 1.1rem;">Nom de la séance *</label>
+                            <input 
+                                type="text" 
+                                class="input" 
+                                id="session-name-step1" 
+                                placeholder="Ex: Upper Push A, Jambes Force, FullBody..." 
+                                value="${this.sessionNomTemp}"
+                                style="font-size: 1.1rem;"
+                            >
+                            <div class="text-white" style="opacity: 0.6; font-size: 0.85rem; margin-top: 0.5rem;">
+                                💡 Choisis un nom clair pour retrouver facilement ta séance
+                            </div>
                         </div>
+                        
+                        <div class="mb-4">
+                            <label class="text-white mb-2" style="display: block; font-weight: 600; font-size: 1.1rem;">Mobile d'entraînement *</label>
+                            <select class="input" id="session-mobile-step1" style="font-size: 1.1rem;">
+                                <option value="Force Maximale" ${this.sessionMobileTemp === 'Force Maximale' ? 'selected' : ''}>💪 Force Maximale</option>
+                                <option value="Force Explosive" ${this.sessionMobileTemp === 'Force Explosive' ? 'selected' : ''}>⚡ Force Explosive</option>
+                                <option value="Hypertrophie" ${this.sessionMobileTemp === 'Hypertrophie' ? 'selected' : ''}>🏋️ Hypertrophie</option>
+                                <option value="Endurance de Force" ${this.sessionMobileTemp === 'Endurance de Force' ? 'selected' : ''}>🔥 Endurance de Force</option>
+                                <option value="Endurance Musculaire" ${this.sessionMobileTemp === 'Endurance Musculaire' ? 'selected' : ''}>🏃 Endurance Musculaire</option>
+                                <option value="Personnalisé" ${this.sessionMobileTemp === 'Personnalisé' ? 'selected' : ''}>⚙️ Personnalisé</option>
+                            </select>
+                            <div class="text-white" style="opacity: 0.6; font-size: 0.85rem; margin-top: 0.5rem;">
+                                ℹ️ Le mobile est indicatif, tu personnaliseras chaque exercice à l'étape suivante
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="btn btn-success" onclick="app.validateStep1()" style="width: 100%; font-size: 1.2rem; padding: 1rem;">
+                            ✅ Valider et passer aux exercices →
+                        </button>
                     </div>
                 `;
             }
 
-            switchTab(tab) {
-                this.currentTab = tab;
-                if (tab === 'progression') setTimeout(() => this.initCharts(), 100);
-                this.render();
+            renderStep2() {
+                return `
+                    <!-- Résumé verrouillé -->
+                    <div style="background: rgba(6, 182, 212, 0.15); padding: 1rem; border-radius: 0.75rem; margin-bottom: 2rem; border-left: 4px solid var(--primary-color);">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-cyan" style="font-weight: 600; font-size: 1.1rem;">📝 ${this.sessionNomTemp}</div>
+                                <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">${this.sessionMobileTemp}</div>
+                            </div>
+                            <button type="button" class="btn btn-secondary" onclick="app.backToStep1()" style="padding: 0.5rem 1rem;">✏️ Modifier</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Formulaire d'ajout d'exercice -->
+                    <div style="background: rgba(168, 85, 247, 0.1); padding: 1.5rem; border-radius: 1rem; border: 2px solid #a855f7; margin-bottom: 2rem;">
+                        <h3 class="text-cyan mb-3" style="font-size: 1.2rem;">💪 Ajouter un exercice</h3>
+                        
+                        <div class="mb-3">
+                            <label class="text-white mb-1" style="display: block; font-weight: 600;">1. Groupe musculaire</label>
+                            <select class="input" id="exercice-muscle" onchange="app.updateExercicesList()">
+                                <option value="">-- Choisir --</option>
+                                ${this.musclesList.map(m => `<option value="${m}">${m}</option>`).join('')}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3" id="exercice-select-container" style="display: none;">
+                            <label class="text-white mb-1" style="display: block; font-weight: 600;">2. Exercice</label>
+                            <select class="input" id="exercice-name-select" onchange="app.toggleCustomExercice()">
+                                <option value="">-- Choisir --</option>
+                            </select>
+                            <input 
+                                type="text" 
+                                class="input" 
+                                id="exercice-name-custom" 
+                                placeholder="Nom de l'exercice personnalisé" 
+                                style="display: none; margin-top: 0.5rem;"
+                            >
+                        </div>
+                        
+                        <div id="exercice-details-container" style="display: none;">
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">3. Séries</label>
+                                    <input type="number" class="input" id="exercice-series" value="4" min="1" max="10">
+                                </div>
+                                <div>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">4. Répétitions</label>
+                                    <input type="number" class="input" id="exercice-reps" value="10" min="1" max="50">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">5. Charge théorique (kg)</label>
+                                    <input type="number" class="input" id="exercice-charge-theo" placeholder="Auto si 1RM" step="0.5">
+                                </div>
+                                <div>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">6. Charge réelle (kg)</label>
+                                    <input type="number" class="input" id="exercice-charge-reelle" placeholder="À charger" step="0.5">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">7. Tempo (optionnel)</label>
+                                    <input type="text" class="input" id="exercice-tempo" placeholder="Ex: 3-1-1">
+                                </div>
+                                <div>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">8. Récup (sec)</label>
+                                    <input type="number" class="input" id="exercice-recup" value="90" min="0" max="600">
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="btn btn-primary" onclick="app.addExerciceDetail()" style="width: 100%;">
+                                ➕ Ajouter cet exercice
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Liste des exercices ajoutés -->
+                    ${this.exercicesDetails.length > 0 ? `
+                        <div style="background: rgba(16, 185, 129, 0.1); padding: 1.5rem; border-radius: 1rem; border: 2px solid #10b981; margin-bottom: 2rem;">
+                            <h3 class="text-cyan mb-3" style="font-size: 1.2rem;">📝 Exercices de la séance (${this.exercicesDetails.length})</h3>
+                            ${this.exercicesDetails.map((ex, index) => `
+                                <div style="background: rgba(15, 23, 42, 0.8); padding: 1rem; border-radius: 0.75rem; margin-bottom: 1rem; border-left: 4px solid var(--primary-color);">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <div class="text-white" style="font-weight: 600; font-size: 1.1rem;">${index + 1}. ${ex.nom}</div>
+                                        <button type="button" class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="app.removeExerciceDetail(${index})">🗑️</button>
+                                    </div>
+                                    <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">
+                                        <span style="color: var(--primary-color);">💪 ${ex.muscle}</span> • 
+                                        ${ex.series}×${ex.reps} • 
+                                        ${ex.chargeReelle ? ex.chargeReelle + 'kg' : 'PDC'} • 
+                                        ${ex.recup}s repos
+                                        ${ex.tempo ? ' • Tempo: ' + ex.tempo : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <button type="button" class="btn btn-success" onclick="app.validateStep2()" style="width: 100%; font-size: 1.2rem; padding: 1rem;">
+                            ✅ Terminer et valider la séance →
+                        </button>
+                    ` : `
+                        <div class="text-center" style="padding: 2rem; opacity: 0.5; background: rgba(15, 23, 42, 0.3); border-radius: 1rem; border: 2px dashed rgba(255,255,255,0.2);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                            <div class="text-white" style="font-size: 1.1rem;">Aucun exercice ajouté</div>
+                            <div class="text-white" style="opacity: 0.7; font-size: 0.9rem; margin-top: 0.5rem;">Ajoute au moins un exercice pour continuer</div>
+                        </div>
+                    `}
+                `;
             }
 
-            switchCoursTab(tab) {
-                this.currentCoursTab = tab;
-                this.searchQuery = '';
-                this.activeFilters = [];
-                this.render();
+            renderStep3() {
+                return `
+                    <div style="text-align: center; padding: 3rem;">
+                        <div style="font-size: 5rem; margin-bottom: 1rem;">✅</div>
+                        <h3 class="text-white mb-3" style="font-size: 1.5rem;">Séance créée avec succès !</h3>
+                        <div class="text-cyan mb-4">${this.sessionNomTemp}</div>
+                        <div class="text-white mb-4" style="opacity: 0.8;">${this.exercicesDetails.length} exercice${this.exercicesDetails.length > 1 ? 's' : ''} ajouté${this.exercicesDetails.length > 1 ? 's' : ''}</div>
+                        <button type="button" class="btn btn-primary" onclick="app.goToSessions()" style="width: 100%; max-width: 300px; margin: 0 auto;">
+                            📝 Voir mes séances
+                        </button>
+                    </div>
+                `;
             }
 
-            toggleFilter(filter) {
-                const index = this.activeFilters.indexOf(filter);
-                if (index > -1) this.activeFilters.splice(index, 1);
-                else this.activeFilters.push(filter);
-                this.render();
-            }
+            // ========== FONCTIONS DE GESTION DES ÉTAPES ==========
 
-            updateSearchQuery(query) {
-                this.searchQuery = query;
-                this.render();
-            }
-
-            changeTheme(theme) {
-                this.currentTheme = theme;
-                this.applyTheme(theme);
-                this.saveTheme();
-                this.render();
-            }
-
-
-
-            calculateCharges() {
-                const select = document.getElementById('charges-rm-select');
-                const index = parseInt(select.value);
-                if (isNaN(index)) {
-                    this.calculatedCharges = {};
-                } else {
-                    const test = this.rmHistory[index];
-                    this.calculatedCharges = {
-                        exercise: test.exercise, 
-                        rm: test.rm,
-                        selectedIndex: index
-                    };
-                    this.saveCalculatedCharges();
-                }
-                this.render();
-            }
-
-            updatePercentage(value) {
-                this.selectedPercentage = parseInt(value);
-                // Mettre à jour uniquement l'affichage sans recharger toute la page
-                const percentageDisplay = document.querySelector('.text-cyan[style*="font-size: 2.5rem"]');
-                const chargeDisplay = percentageDisplay.nextElementSibling;
+            validateStep1() {
+                const nom = document.getElementById('session-name-step1').value.trim();
+                const mobile = document.getElementById('session-mobile-step1').value;
                 
-                if (percentageDisplay && chargeDisplay && this.calculatedCharges.rm) {
-                    percentageDisplay.textContent = `${this.selectedPercentage}%`;
-                    chargeDisplay.textContent = `${Math.round(this.calculatedCharges.rm * this.selectedPercentage / 100)} kg`;
-                    
-                    // Mettre à jour les highlights des lignes du tableau
-                    const rows = document.querySelectorAll('.charges-table tbody tr');
-                    const ranges = [
-                        [85, 100], // Force Max
-                        [30, 60],  // Force Explosive
-                        [65, 80],  // Hypertrophie
-                        [60, 75],  // Endurance Force
-                        [40, 60],  // Endurance Muscu
-                        [10, 120]  // Personnalisé
-                    ];
-                    
-                    rows.forEach((row, index) => {
-                        const [min, max] = ranges[index];
-                        if (this.selectedPercentage >= min && this.selectedPercentage <= max) {
-                            row.style.background = row.children[0].style.color.replace('rgb', 'rgba').replace(')', ', 0.2)');
-                        } else {
-                            row.style.background = 'transparent';
-                        }
-                    });
-                }
-            }
-
-            initCharts() {
-                if (this.rmHistory.length === 0) return;
-                const exerciseGroups = {};
-                this.rmHistory.forEach(test => {
-                    if (!exerciseGroups[test.exercise]) exerciseGroups[test.exercise] = [];
-                    exerciseGroups[test.exercise].push(test);
-                });
-                Object.entries(exerciseGroups).forEach(([exercise, tests]) => {
-                    const sortedTests = tests.sort((a, b) => new Date(a.date) - new Date(b.date));
-                    const chartId = `chart-${exercise.replace(/\s+/g, '-').toLowerCase()}`;
-                    const canvas = document.getElementById(chartId);
-                    if (!canvas) return;
-                    new Chart(canvas, {
-                        type: 'line',
-                        data: {
-                            labels: sortedTests.map(t => new Date(t.date).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'})),
-                            datasets: [{label: '1RM (kg)', data: sortedTests.map(t => t.rm), borderColor: 'rgb(6, 182, 212)', backgroundColor: 'rgba(6, 182, 212, 0.1)', tension: 0.4, fill: true, pointRadius: 6, pointHoverRadius: 8, pointBackgroundColor: 'rgb(6, 182, 212)', pointBorderColor: '#fff', pointBorderWidth: 2}]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: true,
-                            plugins: {legend: {display: true, labels: {color: '#e2e8f0', font: {size: 14}}}, tooltip: {backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#67e8f9', bodyColor: '#e2e8f0', borderColor: 'rgb(6, 182, 212)', borderWidth: 1, padding: 12, displayColors: false, callbacks: {label: (c) => `1RM : ${c.parsed.y}kg`}}},
-                            scales: {y: {beginAtZero: false, ticks: {color: '#94a3b8', font: {size: 12}, callback: (v) => v + 'kg'}, grid: {color: 'rgba(148, 163, 184, 0.1)'}}, x: {ticks: {color: '#94a3b8', font: {size: 12}}, grid: {color: 'rgba(148, 163, 184, 0.1)'}}}
-                        }
-                    });
-                });
-            }setTimerMode(mode) {
-                this.timerMode = mode;
-                this.render();
-            }
-
-            showSignup() {
-                this.currentView = 'signup';
-                this.render();
-            }
-
-            showLogin() {
-                this.currentView = 'login';
-                this.render();
-            }
-
-            handleSelectUser() {
-                const username = document.getElementById('select-user').value;
-                if (username) {
-                    this.currentUser = username;
-                    this.currentView = 'dashboard';
-                    this.init();
-                } else {
-                    alert('Veuillez sélectionner un profil');
-                }
-            }
-
-            handleSignup(e) {
-                e.preventDefault();
-                const username = document.getElementById('signup-username').value.trim();
-                const age = document.getElementById('signup-age').value;
-                const sexe = document.getElementById('signup-sexe').value;
-                const taille = document.getElementById('signup-taille').value;
-                const poids = document.getElementById('signup-poids').value;
-
-                if (!securite.verifierUtilisateur(username)) {
-                    alert('❌ Accès refusé : Ce prénom n\'est pas autorisé.\n\nContactez votre professeur.');
+                if (!nom) {
+                    alert('⚠️ Entre un nom pour la séance');
                     return;
                 }
+                
+                // Sauvegarder les données temporaires
+                this.sessionNomTemp = nom;
+                this.sessionMobileTemp = mobile;
+                
+                // Passer à l'étape 2
+                this.sessionStep = 2;
+                this.render();
+                
+                console.log('✅ Étape 1 validée:', nom, mobile);
+            }
 
-                const userKey = `user-${username}`;
-                if (localStorage.getItem(userKey)) {
-                    alert('Ce profil existe déjà');
+            backToStep1() {
+                this.sessionStep = 1;
+                this.render();
+            }
+
+            validateStep2() {
+                if (this.exercicesDetails.length === 0) {
+                    alert('⚠️ Ajoute au moins un exercice');
                     return;
                 }
-
-                const userData = {age, sexe, taille, poids};
-                localStorage.setItem(userKey, JSON.stringify(userData));
-                this.currentUser = username;
-                this.currentView = 'dashboard';
-                this.init();
-            }
-
-            updateProfile(e) {
-                e.preventDefault();
-                const age = document.getElementById('profile-age').value;
-                const sexe = document.getElementById('profile-sexe').value;
-                const taille = document.getElementById('profile-taille').value;
-                const poids = document.getElementById('profile-poids').value;
-                const userKey = `user-${this.currentUser}`;
-                localStorage.setItem(userKey, JSON.stringify({age, sexe, taille, poids}));
-                alert('✅ Profil mis à jour !');
-                this.render();
-            }
-
-            logout() {
-                const message = 'Que voulez-vous faire ?\n\n' +
-                               '✅ OK = Changer de profil (garder le code de classe)\n' +
-                               '❌ Annuler = Verrouiller complètement (redemander le code)';
                 
-                if (confirm(message)) {
-                    // Changer de profil : on garde le code mais on retourne à la saisie du nom
-                    this.currentView = 'login';
-                    // Ne pas révoquer l'accès, juste réinitialiser l'utilisateur
+                // Créer la séance
+                const session = {
+                    nom: this.sessionNomTemp,
+                    type: this.sessionMobileTemp,
+                    exercicesDetails: [...this.exercicesDetails],
+                    dateCreation: new Date().toISOString()
+                };
+                
+                // Sauvegarder
+                const isEditing = this.currentSession !== null;
+                if (isEditing) {
+                    this.sessions[this.currentSession] = session;
+                    console.log('✏️ Séance modifiée');
                 } else {
-                    // Verrouiller : tout supprimer, retour au code d'accès
-                    securite.revoquerAcces();
-                    IS_COACH_MODE = false;
-                    this.currentView = 'code-access';
+                    this.sessions.push(session);
+                    console.log('➕ Nouvelle séance créée');
                 }
                 
-                // Réinitialiser les données de l'utilisateur
-                this.currentUser = null;
-                this.sessions = [];
-                this.rmHistory = [];
-                this.userAvatar = null;
-                this.sessionHistory = [];
-                this.calculatedCharges = {};
-                this.badges = [];
-                this.objectifs = [];
-                this.currentStreak = 0;
-                this.longestStreak = 0;
-                
-                this.render();
-            }
-
-            calculateRM(e) {
-                e.preventDefault();
-                const muscle = document.getElementById('rm-muscle').value;
-                const exercise = document.getElementById('rm-exercise').value;
-                const weight = parseFloat(document.getElementById('rm-weight').value);
-                const reps = parseInt(document.getElementById('rm-reps').value);
-                const date = document.getElementById('rm-date').value;
-                const rm = Math.round(weight * (1 + reps / 30));
-                this.rmHistory.push({muscle, exercise, weight, reps, date, rm});
-                this.saveRMHistory();
+                this.saveSessions();
                 this.checkBadges();
-                document.getElementById('rm-result').innerHTML = `
-                    <div class="rm-history-card">
-                        <div class="text-center">
-                            <div style="color: #10b981; font-size: 2.5rem; font-weight: bold; margin-bottom: 0.5rem;">${rm} kg</div>
-                            <div class="text-white" style="font-size: 1.2rem; margin-bottom: 1rem;">1RM estimé pour ${exercise}</div>
-                            <div class="text-white" style="opacity: 0.7;">Basé sur ${weight}kg × ${reps} rép.</div>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('rm-result').classList.remove('hidden');
-                setTimeout(() => this.render(), 2000);
+                
+                // Passer à l'étape 3 (confirmation)
+                this.sessionStep = 3;
+                this.render();
+                
+                console.log('✅ Étape 2 validée, séance sauvegardée');
             }
 
-            editRM(index) {
-                const test = this.rmHistory[index];
-                document.getElementById('rm-muscle').value = test.muscle;
-                document.getElementById('rm-exercise').value = test.exercise;
-                document.getElementById('rm-weight').value = test.weight;
-                document.getElementById('rm-reps').value = test.reps;
-                document.getElementById('rm-date').value = test.date;
-                this.rmHistory.splice(index, 1);
-                this.saveRMHistory();
+            goToSessions() {
+                // Réinitialiser
+                this.currentSession = null;
+                this.exercicesDetails = [];
+                this.sessionStep = 1;
+                this.sessionNomTemp = '';
+                this.sessionMobileTemp = 'Hypertrophie';
+                
+                // Retour aux séances
+                this.currentView = 'dashboard';
+                this.currentTab = 'sessions';
                 this.render();
             }
 
-            deleteRM(index) {
-                if (confirm('Supprimer ce test ?')) {
-                    this.rmHistory.splice(index, 1);
-                    this.saveRMHistory();
-                    this.checkBadges();
+            getExercicesByMuscle(muscle) {
+                const exercicesMap = {
+                    'Pectoraux': coursData.exercicesPectoraux,
+                    'Grand dorsal': coursData.exercicesDos,
+                    'Trapèzes': coursData.exercicesDos,
+                    'Deltoïdes': coursData.exercicesEpaules,
+                    'Biceps': coursData.exercicesBras,
+                    'Triceps': coursData.exercicesBras,
+                    'Abdominaux': coursData.exercicesAbdos,
+                    'Quadriceps': coursData.exercicesBasDuCorps,
+                    'Ischio-jambiers': coursData.exercicesBasDuCorps,
+                    'Fessiers': coursData.exercicesBasDuCorps,
+                    'Mollets': coursData.exercicesBasDuCorps,
+                    'Adducteurs': coursData.exercicesBasDuCorps
+                };
+                
+                const exercices = exercicesMap[muscle] || [];
+                return exercices.map(ex => ex.nom);
+            }
+
+            updateExercicesList() {
+                const muscle = document.getElementById('exercice-muscle').value;
+                const selectContainer = document.getElementById('exercice-select-container');
+                const select = document.getElementById('exercice-name-select');
+                
+                if (!muscle) {
+                    selectContainer.style.display = 'none';
+                    document.getElementById('exercice-details-container').style.display = 'none';
+                    return;
+                }
+                
+                // Afficher le select d'exercices
+                selectContainer.style.display = 'block';
+                
+                // Remplir la liste des exercices
+                const exercices = this.getExercicesByMuscle(muscle);
+                select.innerHTML = `
+                    <option value="">-- Choisir un exercice --</option>
+                    ${exercices.map(ex => `<option value="${ex}">${ex}</option>`).join('')}
+                    <option value="CUSTOM">✏️ Autre (exercice personnalisé)</option>
+                `;
+            }
+
+            toggleCustomExercice() {
+                const select = document.getElementById('exercice-name-select');
+                const customInput = document.getElementById('exercice-name-custom');
+                const detailsContainer = document.getElementById('exercice-details-container');
+                
+                if (select.value === 'CUSTOM') {
+                    customInput.style.display = 'block';
+                    customInput.focus();
+                } else {
+                    customInput.style.display = 'none';
+                }
+                
+                // Afficher les détails si un exercice est sélectionné
+                if (select.value) {
+                    detailsContainer.style.display = 'block';
+                } else {
+                    detailsContainer.style.display = 'none';
+                }
+            }
+
+            addExerciceDetail() {
+                const muscle = document.getElementById('exercice-muscle').value;
+                const selectValue = document.getElementById('exercice-name-select').value;
+                const customValue = document.getElementById('exercice-name-custom').value.trim();
+                const series = parseInt(document.getElementById('exercice-series').value);
+                const reps = parseInt(document.getElementById('exercice-reps').value);
+                const chargeTheo = parseFloat(document.getElementById('exercice-charge-theo').value) || null;
+                const chargeReelle = parseFloat(document.getElementById('exercice-charge-reelle').value) || null;
+                const tempo = document.getElementById('exercice-tempo').value.trim() || null;
+                const recup = parseInt(document.getElementById('exercice-recup').value);
+                
+                // Validation
+                if (!muscle) {
+                    alert('⚠️ Sélectionne un groupe musculaire');
+                    return;
+                }
+                
+                const nomExercice = selectValue === 'CUSTOM' ? customValue : selectValue;
+                if (!nomExercice) {
+                    alert('⚠️ Choisis un exercice');
+                    return;
+                }
+                
+                // Créer l'objet exercice
+                const exercice = {
+                    muscle,
+                    nom: nomExercice,
+                    series,
+                    reps,
+                    chargeTheo,
+                    chargeReelle,
+                    tempo,
+                    recup,
+                    completed: false
+                };
+                
+                this.exercicesDetails.push(exercice);
+                
+                // Réinitialiser le formulaire d'exercice sans recharger
+                document.getElementById('exercice-muscle').value = '';
+                document.getElementById('exercice-name-select').innerHTML = '<option value="">-- Choisir un exercice --</option>';
+                document.getElementById('exercice-name-custom').value = '';
+                document.getElementById('exercice-series').value = '4';
+                document.getElementById('exercice-reps').value = '10';
+                document.getElementById('exercice-charge-theo').value = '';
+                document.getElementById('exercice-charge-reelle').value = '';
+                document.getElementById('exercice-tempo').value = '';
+                document.getElementById('exercice-recup').value = '90';
+                document.getElementById('exercice-select-container').style.display = 'none';
+                document.getElementById('exercice-name-custom').style.display = 'none';
+                document.getElementById('exercice-details-container').style.display = 'none';
+                
+                // Recharger pour afficher la liste mise à jour
+                this.render();
+                
+                console.log('✅ Exercice ajouté:', nomExercice);
+            }
+
+            removeExerciceDetail(index) {
+                if (confirm('Supprimer cet exercice de la séance ?')) {
+                    this.exercicesDetails.splice(index, 1);
                     this.render();
                 }
             }
 
+            editExerciceDetail(index) {
+                // TODO: Implémenter l'édition (pour l'instant juste supprimer et re-ajouter)
+                alert('✏️ Pour modifier : supprime l\'exercice et ajoute-le à nouveau avec les bonnes valeurs');
+            }
+
+            finalizeSession() {
+                const nom = document.getElementById('session-name-input').value.trim();
+                const type = document.getElementById('session-mobile-input').value;
+                
+                if (!nom) {
+                    alert('⚠️ Entre un nom pour la séance');
+                    return;
+                }
+                
+                if (this.exercicesDetails.length === 0) {
+                    alert('⚠️ Ajoute au moins un exercice');
+                    return;
+                }
+                
+                // Créer la séance avec la nouvelle structure
+                const session = {
+                    nom,
+                    type,
+                    exercicesDetails: [...this.exercicesDetails],
+                    dateCreation: new Date().toISOString()
+                };
+                
+                // Sauvegarder
+                if (this.currentSession !== null) {
+                    this.sessions[this.currentSession] = session;
+                    console.log('✏️ Séance modifiée');
+                } else {
+                    this.sessions.push(session);
+                    console.log('➕ Nouvelle séance créée');
+                }
+                
+                this.saveSessions();
+                this.checkBadges();
+                
+                // Réinitialiser
+                this.currentSession = null;
+                this.exercicesDetails = [];
+                
+                // Retour au dashboard
+                this.currentView = 'dashboard';
+                this.currentTab = 'sessions';
+                this.render();
+                
+                console.log('✅ Séance sauvegardée avec succès !');
+            }
+
+            cancelSession() {
+                if (this.exercicesDetails && this.exercicesDetails.length > 0) {
+                    if (!confirm('Tu as des exercices non sauvegardés. Quitter quand même ?')) {
+                        return;
+                    }
+                }
+                this.currentSession = null;
+                this.exercicesDetails = [];
+                this.sessionStep = 1;
+                this.sessionNomTemp = '';
+                this.sessionMobileTemp = 'Hypertrophie';
+                this.currentView = 'dashboard';
+                this.currentTab = 'sessions';
+                this.render();
+            }
+
             createNewSession() {
                 this.currentSession = null;
-                this.exercicesTemp = [];
-                this.musclesTemp = [];
+                this.exercicesDetails = [];
+                this.sessionStep = 1;
+                this.sessionNomTemp = '';
+                this.sessionMobileTemp = 'Hypertrophie';
                 this.currentView = 'session-form';
                 this.render();
             }
@@ -3703,10 +3714,34 @@
             editSession(index) {
                 this.currentSession = index;
                 const session = this.sessions[index];
-                this.exercicesTemp = [...session.exercices];
-                this.musclesTemp = [...session.muscles];
+                
+                // Charger les exercices détaillés si nouvelle structure
+                if (session.exercicesDetailles) {
+                    this.exercicesDetaillesTemp = [...session.exercicesDetailles];
+                } else {
+                    // Ancienne structure - pour compatibilité
+                    this.exercicesTemp = [...(session.exercices || [])];
+                    this.musclesTemp = [...(session.muscles || [])];
+                }
+                
                 this.currentView = 'session-form';
                 this.render();
+            }
+            
+            toggleExerciceTermine(indexExercice) {
+                const session = this.sessions[this.currentSession];
+                if (!session || !session.exercicesDetailles) return;
+                
+                // Toggle le statut
+                session.exercicesDetailles[indexExercice].termine = !session.exercicesDetailles[indexExercice].termine;
+                
+                // Sauvegarder
+                this.saveSessions();
+                
+                // Recharger juste cette partie (pas tout)
+                this.render();
+                
+                console.log(`Exercice ${indexExercice} marqué comme ${session.exercicesDetailles[indexExercice].termine ? 'terminé' : 'non terminé'}`);
             }
 
             deleteSession(index) {
@@ -3720,13 +3755,6 @@
             viewSession(index) {
                 this.currentSession = index;
                 this.currentView = 'session-detail';
-                this.render();
-            }
-
-            cancelSession() {
-                this.currentSession = null;
-                this.currentView = 'dashboard';
-                this.currentTab = 'sessions';
                 this.render();
             }
 
@@ -3942,6 +3970,788 @@
                     document.getElementById('code-input').value = '';
                     document.getElementById('code-input').focus();
                 }
+            }
+
+            submitCode() {
+                const code = document.getElementById('code-input').value;
+                if (securite.verifierCode(code)) {
+                    securite.validerCode();
+                    this.currentView = 'login';
+                    this.render();
+                } else {
+                    document.getElementById('code-error').classList.remove('hidden');
+                    document.getElementById('code-input').value = '';
+                    document.getElementById('code-input').focus();
+                }
+            }
+
+            showSignup() {
+                this.currentView = 'signup';
+                this.render();
+            }
+
+            selectUser(username) {
+                this.currentUser = username;
+                this.loadUserData();
+                this.currentView = 'dashboard';
+                this.currentTab = 'dashboard';
+                this.render();
+            }
+
+            handleSelectUser() {
+                const select = document.getElementById('select-user');
+                const username = select.value;
+                if (!username) {
+                    alert('⚠️ Sélectionne un profil');
+                    return;
+                }
+                this.selectUser(username);
+            }
+
+            showLogin() {
+                this.currentView = 'login';
+                this.render();
+            }
+
+            submitSignup() {
+                const username = document.getElementById('signup-username').value.trim();
+                const age = parseInt(document.getElementById('signup-age').value);
+                const sexe = document.getElementById('signup-sexe').value;
+                const taille = parseInt(document.getElementById('signup-taille').value);
+                const poids = parseFloat(document.getElementById('signup-poids').value);
+
+                // Validation
+                if (!username) {
+                    alert('⚠️ Entre ton prénom');
+                    return;
+                }
+                if (!age || age < 10 || age > 100) {
+                    alert('⚠️ Entre un âge valide');
+                    return;
+                }
+                if (!sexe) {
+                    alert('⚠️ Sélectionne ton sexe');
+                    return;
+                }
+                if (!taille || taille < 100 || taille > 250) {
+                    alert('⚠️ Entre une taille valide (cm)');
+                    return;
+                }
+                if (!poids || poids < 30 || poids > 200) {
+                    alert('⚠️ Entre un poids valide (kg)');
+                    return;
+                }
+
+                // Créer le profil
+                this.currentUser = username;
+                const userData = { age, sexe, taille, poids };
+                const userKey = `user-${username}`;
+                storage.save(userKey, JSON.stringify(userData), true);
+
+                // Charger les données
+                this.loadUserData();
+                
+                // Aller au dashboard
+                this.currentView = 'dashboard';
+                this.currentTab = 'dashboard';
+                this.render();
+
+                console.log('✅ Profil créé:', username);
+            }
+
+            // ========== FONCTIONS DE NAVIGATION ==========
+            
+            switchTab(tab) {
+                this.currentTab = tab;
+                this.render();
+            }
+
+            switchCoursTab(tab) {
+                this.currentCoursTab = tab;
+                this.render();
+            }
+
+            logout() {
+                const message = 'Que voulez-vous faire ?\n\n' +
+                               '✅ OK = Changer de profil (garder le code de classe)\n' +
+                               '❌ Annuler = Verrouiller complètement (redemander le code)';
+                
+                if (confirm(message)) {
+                    this.currentView = 'login';
+                } else {
+                    securite.revoquerAcces();
+                    IS_COACH_MODE = false;
+                    this.currentView = 'code-access';
+                }
+                
+                this.currentUser = null;
+                this.sessions = [];
+                this.rmHistory = [];
+                this.userAvatar = null;
+                this.sessionHistory = [];
+                this.calculatedCharges = {};
+                this.badges = [];
+                this.objectifs = [];
+                this.currentStreak = 0;
+                this.longestStreak = 0;
+                
+                this.render();
+            }
+
+            // ========== FONCTIONS DE PROFIL ==========
+
+            updateProfile() {
+                const age = parseInt(document.getElementById('profile-age').value);
+                const taille = parseInt(document.getElementById('profile-taille').value);
+                const poids = parseFloat(document.getElementById('profile-poids').value);
+                
+                if (!age || !taille || !poids) {
+                    alert('⚠️ Remplis tous les champs');
+                    return;
+                }
+                
+                const userKey = `user-${this.currentUser}`;
+                const result = storage.get(userKey, true);
+                const userData = result.exists ? JSON.parse(result.value) : {};
+                
+                userData.age = age;
+                userData.taille = taille;
+                userData.poids = poids;
+                
+                storage.save(userKey, JSON.stringify(userData), true);
+                this.render();
+                
+                alert('✅ Profil mis à jour !');
+            }
+
+            deletePhoto() {
+                if (confirm('Supprimer ta photo de profil ?')) {
+                    this.userAvatar = null;
+                    this.saveUserAvatar();
+                    this.render();
+                }
+            }
+
+            changeTheme(theme) {
+                this.currentTheme = theme;
+                document.documentElement.style.setProperty('--primary-color', 
+                    theme === 'cyan' ? '#06b6d4' : 
+                    theme === 'blue' ? '#3b82f6' : 
+                    theme === 'purple' ? '#a855f7' : 
+                    theme === 'green' ? '#10b981' : '#06b6d4'
+                );
+                storage.save('theme', theme);
+                this.render();
+            }
+
+            // ========== FONCTIONS 1RM ==========
+
+            calculateRM() {
+                const exercise = document.getElementById('rm-exercise').value;
+                const weight = parseFloat(document.getElementById('rm-weight').value);
+                const reps = parseInt(document.getElementById('rm-reps').value);
+                
+                if (!exercise || !weight || !reps) {
+                    alert('⚠️ Remplis tous les champs');
+                    return;
+                }
+                
+                let rm;
+                if (reps === 1) {
+                    rm = weight;
+                } else if (reps <= 10) {
+                    rm = weight * (1 + reps / 30);
+                } else {
+                    rm = weight * (1 + reps / 25);
+                }
+                
+                rm = Math.round(rm * 10) / 10;
+                
+                const test = {
+                    exercise,
+                    rm,
+                    weight,
+                    reps,
+                    date: new Date().toISOString()
+                };
+                
+                this.rmHistory.push(test);
+                this.saveRMHistory();
+                this.checkBadges();
+                this.currentTab = 'charges';
+                this.render();
+            }
+
+            editRM(index) {
+                alert('✏️ Fonctionnalité en développement');
+            }
+
+            deleteRM(index) {
+                if (confirm('Supprimer ce test ?')) {
+                    this.rmHistory.splice(index, 1);
+                    this.saveRMHistory();
+                    this.checkBadges();
+                    this.render();
+                }
+            }
+
+            calculateCharges() {
+                const select = document.getElementById('charges-rm-select');
+                const index = parseInt(select.value);
+                if (isNaN(index)) {
+                    this.calculatedCharges = {};
+                } else {
+                    const test = this.rmHistory[index];
+                    this.calculatedCharges = {
+                        exercise: test.exercise, 
+                        rm: test.rm,
+                        selectedIndex: index
+                    };
+                    this.saveCalculatedCharges();
+                }
+                this.render();
+            }
+
+            updatePercentage(value) {
+                this.selectedPercentage = parseInt(value);
+                const percentageDisplay = document.querySelector('.text-cyan[style*="font-size: 2.5rem"]');
+                const chargeDisplay = percentageDisplay ? percentageDisplay.nextElementSibling : null;
+                
+                if (percentageDisplay && chargeDisplay && this.calculatedCharges.rm) {
+                    percentageDisplay.textContent = `${this.selectedPercentage}%`;
+                    chargeDisplay.textContent = `${Math.round(this.calculatedCharges.rm * this.selectedPercentage / 100)} kg`;
+                    
+                    const rows = document.querySelectorAll('.charges-table tbody tr');
+                    const ranges = [
+                        [85, 100], [30, 60], [65, 80], [60, 75], [40, 60], [10, 120]
+                    ];
+                    
+                    rows.forEach((row, index) => {
+                        const [min, max] = ranges[index];
+                        if (this.selectedPercentage >= min && this.selectedPercentage <= max) {
+                            row.style.background = row.children[0].style.color.replace('rgb', 'rgba').replace(')', ', 0.2)');
+                        } else {
+                            row.style.background = 'transparent';
+                        }
+                    });
+                }
+            }
+
+            // ========== FONCTIONS COURS ==========
+
+            updateSearchQuery() {
+                this.searchQuery = document.getElementById('search-input').value.toLowerCase();
+                this.render();
+            }
+
+            toggleFilter(muscle) {
+                const index = this.activeFilters.indexOf(muscle);
+                if (index > -1) {
+                    this.activeFilters.splice(index, 1);
+                } else {
+                    this.activeFilters.push(muscle);
+                }
+                this.render();
+            }
+
+            // ========== FONCTIONS TIMER ==========
+
+            setTimerMode(mode) {
+                this.timerMode = mode;
+                this.render();
+            }
+
+            // ========== FONCTIONS RENDER MANQUANTES ==========
+
+            renderProfilTab() {
+                const userKey = `user-${this.currentUser}`;
+                const result = storage.get(userKey, true);
+                const userData = result.exists ? JSON.parse(result.value) : {};
+                
+                return `
+                    <div>
+                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">👤 Mon Profil</h2>
+                        <div class="profile-section">
+                            <div class="text-center mb-4">
+                                ${this.userAvatar ? 
+                                    `<img src="${this.userAvatar}" class="profile-avatar-large" alt="Avatar" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin: 0 auto;">
+                                     <button class="btn btn-danger mt-2" onclick="app.deletePhoto()">🗑️ Supprimer</button>` 
+                                    : `<div class="default-avatar-large" style="width: 120px; height: 120px; font-size: 4rem; margin: 0 auto;">👤</div>`
+                                }
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-white mb-1" style="display: block; font-weight: 600;">Prénom</label>
+                                <input type="text" class="input" value="${this.currentUser}" disabled>
+                            </div>
+                            <div class="grid grid-cols-3 gap-3 mb-3">
+                                <div>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">Âge</label>
+                                    <input type="number" class="input" id="profile-age" value="${userData.age || ''}" min="10" max="100">
+                                </div>
+                                <div>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">Taille (cm)</label>
+                                    <input type="number" class="input" id="profile-taille" value="${userData.taille || ''}" min="100" max="250">
+                                </div>
+                                <div>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">Poids (kg)</label>
+                                    <input type="number" class="input" id="profile-poids" value="${userData.poids || ''}" min="30" max="200" step="0.1">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="app.updateProfile()" style="width: 100%;">💾 Sauvegarder</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderSessionDetail() {
+                const session = this.sessions[this.currentSession];
+                if (!session) return '';
+                
+                const exercicesDetails = session.exercicesDetails || [];
+                
+                if (exercicesDetails.length === 0) {
+                    return `
+                        <div class="container">
+                            <div class="card">
+                                <button class="btn btn-secondary mb-4" onclick="app.cancelSession()">← Retour</button>
+                                <div class="text-center" style="padding: 3rem;">
+                                    <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+                                    <div class="text-white">Cette séance utilise l'ancien format</div>
+                                    <div class="text-white" style="opacity: 0.7; margin-top: 0.5rem;">Recréez-la avec le nouveau système</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Récupérer l'historique de cette séance
+                const sessionHistory = this.sessionHistory.filter(h => h.sessionIndex === this.currentSession);
+                const hasHistory = sessionHistory.length > 0;
+                
+                return `
+                    <div class="container">
+                        <div class="card">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-white" style="font-size: 1.5rem;">${session.nom}</h2>
+                                <button class="btn btn-secondary" onclick="app.cancelSession()">← Retour</button>
+                            </div>
+                            
+                            <div class="text-center mb-4">
+                                <span class="badge badge-${session.type.toLowerCase().replace(/ /g, '-')}">${session.type}</span>
+                            </div>
+                            
+                            <!-- Programme de la séance -->
+                            <div style="background: rgba(6, 182, 212, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 2px solid var(--primary-color);">
+                                <h3 class="text-cyan mb-3" style="font-size: 1.2rem;">📋 Programme</h3>
+                                ${exercicesDetails.map((ex, i) => `
+                                    <div style="background: rgba(15, 23, 42, 0.5); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
+                                        <div class="text-white mb-1" style="font-weight: 600;">${i + 1}. ${ex.nom}</div>
+                                        <div class="text-cyan mb-1" style="font-size: 0.9rem;">💪 ${ex.muscle}</div>
+                                        <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">
+                                            ${ex.series}×${ex.reps} • ${ex.chargeReelle ? ex.chargeReelle + 'kg' : 'PDC'}
+                                            ${ex.tempo ? ' • ' + ex.tempo : ''} • ${ex.recup}s
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <!-- Historique des réalisations -->
+                            ${hasHistory ? `
+                                <div style="background: rgba(168, 85, 247, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 2px solid #a855f7;">
+                                    <h3 class="text-cyan mb-3" style="font-size: 1.2rem;">📊 Historique des réalisations (${sessionHistory.length})</h3>
+                                    ${sessionHistory.slice().reverse().map((entry, index) => {
+                                        const date = new Date(entry.completedAt);
+                                        const dateStr = date.toLocaleDateString('fr-FR', { 
+                                            day: 'numeric', 
+                                            month: 'long', 
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        });
+                                        
+                                        const isComplete = entry.completed !== false && (!entry.totalExercices || entry.exercicesCompleted === entry.totalExercices);
+                                        const completionText = entry.totalExercices 
+                                            ? `${entry.exercicesCompleted}/${entry.totalExercices} exercices`
+                                            : 'Séance complète';
+                                        
+                                        // Couleur RPE
+                                        const rpeColor = entry.rpe <= 3 ? '#10b981' : 
+                                                        entry.rpe <= 6 ? '#fbbf24' : 
+                                                        entry.rpe <= 8 ? '#f97316' : '#ef4444';
+                                        
+                                        return `
+                                            <div style="background: rgba(15, 23, 42, 0.6); padding: 1.25rem; border-radius: 0.75rem; margin-bottom: 1rem; border-left: 4px solid ${isComplete ? '#10b981' : '#ffa500'};">
+                                                <div class="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <div class="text-white" style="font-weight: 600; font-size: 1rem;">
+                                                            ${isComplete ? '✅' : '⚠️'} ${dateStr}
+                                                        </div>
+                                                        <div class="text-white" style="opacity: 0.7; font-size: 0.85rem; margin-top: 0.25rem;">
+                                                            ${completionText}
+                                                        </div>
+                                                    </div>
+                                                    ${entry.rpe !== null && entry.rpe !== undefined ? `
+                                                        <div style="background: ${rpeColor}; padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-weight: 600; color: #0f172a;">
+                                                            RPE ${entry.rpe}/10
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
+                                                
+                                                ${entry.notes ? `
+                                                    <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 0.5rem; margin-top: 0.75rem;">
+                                                        <div class="text-cyan" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">📝 Notes :</div>
+                                                        <div class="text-white" style="opacity: 0.9; font-size: 0.9rem; font-style: italic;">"${entry.notes}"</div>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            ` : `
+                                <div style="background: rgba(255, 165, 0, 0.1); padding: 2rem; border-radius: 1rem; margin-bottom: 2rem; border: 2px dashed #ffa500; text-align: center;">
+                                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
+                                    <div class="text-white mb-2" style="font-size: 1.1rem; font-weight: 600;">Aucune réalisation</div>
+                                    <div class="text-white" style="opacity: 0.7; font-size: 0.9rem;">Cette séance n'a jamais été effectuée</div>
+                                </div>
+                            `}
+                            
+                            <!-- Bouton démarrer -->
+                            <button class="btn btn-success" onclick="app.startSession()" style="width: 100%; font-size: 1.1rem; padding: 1rem;">
+                                🏋️ ${hasHistory ? 'Refaire cette séance' : 'Démarrer la séance'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            startSession() {
+                this.currentView = 'session-live';
+                this.render();
+            }
+
+            renderSessionLive() {
+                const session = this.sessions[this.currentSession];
+                if (!session || !session.exercicesDetails) return '';
+                
+                const exercicesDetails = session.exercicesDetails;
+                const completedCount = exercicesDetails.filter(e => e.completed).length;
+                const totalCount = exercicesDetails.length;
+                const progressPercent = Math.round((completedCount / totalCount) * 100);
+                
+                return `
+                    <div class="container">
+                        <div class="card">
+                            <!-- Header -->
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-white" style="font-size: 1.5rem;">🏋️ ${session.nom}</h2>
+                                <button class="btn btn-secondary" onclick="app.endSessionLive()">← Retour</button>
+                            </div>
+                            
+                            <!-- Timer intégré -->
+                            <div style="background: rgba(168, 85, 247, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 2px solid #a855f7;">
+                                <div class="text-white mb-2" style="font-weight: 600; font-size: 1.1rem;">⏱️ Timer de repos</div>
+                                <div class="timer-display ${this.timerRunning ? 'running' : ''} ${this.timerSeconds === 0 ? 'finished' : ''}" id="timer-display" style="font-size: 3rem; text-align: center; margin: 1rem 0; font-weight: 700; font-family: 'Courier New', monospace; color: ${this.timerSeconds === 0 ? '#ef4444' : 'var(--primary-color)'};">
+                                    ${Math.floor(this.timerSeconds / 60).toString().padStart(2, '0')}:${(this.timerSeconds % 60).toString().padStart(2, '0')}
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; justify-content: center;">
+                                    <button class="btn ${this.timerSeconds === 30 && !this.timerRunning ? 'btn-primary' : 'btn-secondary'}" onclick="app.setTimerPreset(30)" style="padding: 0.5rem 1rem;">30s</button>
+                                    <button class="btn ${this.timerSeconds === 60 && !this.timerRunning ? 'btn-primary' : 'btn-secondary'}" onclick="app.setTimerPreset(60)" style="padding: 0.5rem 1rem;">1min</button>
+                                    <button class="btn ${this.timerSeconds === 90 && !this.timerRunning ? 'btn-primary' : 'btn-secondary'}" onclick="app.setTimerPreset(90)" style="padding: 0.5rem 1rem;">1min30</button>
+                                    <button class="btn ${this.timerSeconds === 120 && !this.timerRunning ? 'btn-primary' : 'btn-secondary'}" onclick="app.setTimerPreset(120)" style="padding: 0.5rem 1rem;">2min</button>
+                                    <button class="btn ${this.timerSeconds === 180 && !this.timerRunning ? 'btn-primary' : 'btn-secondary'}" onclick="app.setTimerPreset(180)" style="padding: 0.5rem 1rem;">3min</button>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                                    <button class="btn ${this.timerRunning ? 'btn-warning' : 'btn-success'}" onclick="app.toggleTimer()" style="min-width: 120px; font-size: 1rem; padding: 0.75rem;">
+                                        ${this.timerRunning ? '⏸️ Pause' : '▶️ Start'}
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="app.resetTimer()" style="min-width: 120px; font-size: 1rem; padding: 0.75rem;">
+                                        🔄 Reset
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Progression -->
+                            <div style="background: rgba(6, 182, 212, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 2px solid var(--primary-color);">
+                                <div class="flex justify-between items-center mb-2">
+                                    <div class="text-white" style="font-weight: 600;">Progression</div>
+                                    <div class="text-cyan" style="font-weight: 600; font-size: 1.2rem;">${completedCount} / ${totalCount}</div>
+                                </div>
+                                <div style="background: rgba(15, 23, 42, 0.5); height: 20px; border-radius: 10px; overflow: hidden;">
+                                    <div style="background: var(--primary-color); height: 100%; width: ${progressPercent}%; transition: width 0.3s;"></div>
+                                </div>
+                                <div class="text-white text-center mt-2" style="opacity: 0.8; font-size: 0.9rem;">${progressPercent}%</div>
+                            </div>
+                            
+                            <!-- Liste des exercices -->
+                            ${exercicesDetails.map((ex, index) => `
+                                <div style="background: ${ex.completed ? 'rgba(16, 185, 129, 0.2)' : 'rgba(15, 23, 42, 0.5)'}; padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem; border-left: 4px solid ${ex.completed ? '#10b981' : 'var(--primary-color)'}; transition: all 0.3s;">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div style="flex: 1;">
+                                            <h3 class="text-white mb-1" style="font-size: 1.2rem; font-weight: 600; ${ex.completed ? 'text-decoration: line-through; opacity: 0.7;' : ''}">${index + 1}. ${ex.nom}</h3>
+                                            <div class="text-cyan" style="font-size: 0.9rem;">💪 ${ex.muscle}</div>
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            class="btn ${ex.completed ? 'btn-success' : 'btn-primary'}" 
+                                            onclick="app.toggleExerciceCompleted(${index})"
+                                            style="min-width: 100px;"
+                                        >
+                                            ${ex.completed ? '✅ Fait' : '⭕ Faire'}
+                                        </button>
+                                    </div>
+                                    
+                                    <div style="background: rgba(15, 23, 42, 0.6); padding: 1rem; border-radius: 0.5rem;">
+                                        <div class="grid grid-cols-2 gap-2 text-white" style="font-size: 0.95rem;">
+                                            <div><strong>Séries ×Reps:</strong> ${ex.series} × ${ex.reps}</div>
+                                            <div><strong>Charge:</strong> ${ex.chargeReelle ? ex.chargeReelle + ' kg' : 'PDC'}</div>
+                                            ${ex.tempo ? `<div><strong>Tempo:</strong> ${ex.tempo}</div>` : ''}
+                                            <div><strong>Récup:</strong> ${ex.recup}s</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            
+                            <!-- Boutons de fin -->
+                            <div style="background: ${completedCount === totalCount ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 165, 0, 0.1)'}; padding: 2rem; border-radius: 1rem; text-align: center; border: 2px solid ${completedCount === totalCount ? '#10b981' : '#ffa500'};">
+                                ${completedCount === totalCount ? `
+                                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
+                                    <h3 class="text-white mb-3" style="font-size: 1.3rem;">Tous les exercices terminés !</h3>
+                                ` : `
+                                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">⚠️</div>
+                                    <h3 class="text-white mb-3" style="font-size: 1.2rem;">Séance incomplète (${completedCount}/${totalCount})</h3>
+                                    <div class="text-white mb-3" style="opacity: 0.8; font-size: 0.9rem;">Blessure, manque de temps ? Pas de problème !</div>
+                                `}
+                                <button class="btn btn-success" onclick="app.showSessionBilan()" style="width: 100%; max-width: 350px; font-size: 1.1rem; padding: 1rem;">
+                                    📝 ${completedCount === totalCount ? 'Faire le bilan et valider' : 'Terminer et faire le bilan'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            toggleExerciceCompleted(index) {
+                const session = this.sessions[this.currentSession];
+                if (!session || !session.exercicesDetails) return;
+                
+                // Toggle le statut
+                session.exercicesDetails[index].completed = !session.exercicesDetails[index].completed;
+                
+                // Sauvegarder immédiatement
+                this.saveSessions();
+                
+                // Recharger
+                this.render();
+                
+                console.log(`✅ Exercice ${index + 1} ${session.exercicesDetails[index].completed ? 'terminé' : 'non terminé'}`);
+            }
+
+            showSessionBilan() {
+                this.currentView = 'session-bilan';
+                this.render();
+            }
+
+            renderSessionBilan() {
+                const session = this.sessions[this.currentSession];
+                if (!session || !session.exercicesDetails) return '';
+                
+                const completedCount = session.exercicesDetails.filter(e => e.completed).length;
+                const totalCount = session.exercicesDetails.length;
+                const isComplete = completedCount === totalCount;
+                
+                return `
+                    <div class="container">
+                        <div class="card">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-white" style="font-size: 1.5rem;">📝 Bilan de séance</h2>
+                                <button class="btn btn-secondary" onclick="app.backToSessionLive()">← Retour</button>
+                            </div>
+                            
+                            <!-- Résumé de la séance -->
+                            <div style="background: rgba(6, 182, 212, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 2px solid var(--primary-color);">
+                                <h3 class="text-cyan mb-3" style="font-size: 1.2rem;">${session.nom}</h3>
+                                <div class="text-white mb-2" style="font-size: 1rem;">
+                                    <strong>Exercices réalisés :</strong> ${completedCount} / ${totalCount} 
+                                    ${isComplete ? '✅' : '⚠️'}
+                                </div>
+                                <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">
+                                    ${isComplete ? '🎉 Séance complète' : '⚠️ Séance incomplète'}
+                                </div>
+                            </div>
+                            
+                            <!-- RPE (Rate of Perceived Exertion) -->
+                            <div style="background: rgba(168, 85, 247, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 2px solid #a855f7;">
+                                <h3 class="text-white mb-3" style="font-size: 1.2rem;">💪 RPE - Perception de l'effort</h3>
+                                <div class="text-white mb-3" style="opacity: 0.8; font-size: 0.9rem;">
+                                    Comment as-tu trouvé la séance ?
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(11, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+                                    ${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(rpe => `
+                                        <label style="cursor: pointer;">
+                                            <input 
+                                                type="radio" 
+                                                name="rpe" 
+                                                value="${rpe}" 
+                                                id="rpe-${rpe}"
+                                                style="display: none;"
+                                                onchange="app.selectRPE(${rpe})"
+                                            >
+                                            <div 
+                                                id="rpe-btn-${rpe}"
+                                                style="
+                                                    background: rgba(255,255,255,0.1); 
+                                                    padding: 0.75rem 0.5rem; 
+                                                    text-align: center; 
+                                                    border-radius: 0.5rem; 
+                                                    border: 2px solid transparent;
+                                                    transition: all 0.2s;
+                                                    font-weight: 600;
+                                                "
+                                                class="text-white"
+                                            >
+                                                ${rpe}
+                                            </div>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                                    <div class="text-white" style="opacity: 0.7; font-size: 0.85rem;">😌 Très facile</div>
+                                    <div class="text-white" style="opacity: 0.7; font-size: 0.85rem;">💀 Extrêmement difficile</div>
+                                </div>
+                                
+                                <div id="rpe-description" class="text-cyan" style="margin-top: 1rem; text-align: center; font-size: 0.95rem; min-height: 1.5rem;"></div>
+                            </div>
+                            
+                            <!-- Notes -->
+                            <div style="background: rgba(16, 185, 129, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 2px solid #10b981;">
+                                <h3 class="text-white mb-3" style="font-size: 1.2rem;">📋 Notes (optionnel)</h3>
+                                <div class="text-white mb-2" style="opacity: 0.8; font-size: 0.9rem;">
+                                    Ressenti, difficultés, points positifs...
+                                </div>
+                                <textarea 
+                                    class="input" 
+                                    id="session-notes" 
+                                    placeholder="Ex: Bonnes sensations sur le développé couché. Épaule gauche un peu douloureuse sur les écartés. À surveiller." 
+                                    rows="5"
+                                    style="resize: vertical;"
+                                ></textarea>
+                            </div>
+                            
+                            <!-- Validation -->
+                            <button 
+                                class="btn btn-success" 
+                                onclick="app.finalizeSessionBilan()" 
+                                style="width: 100%; font-size: 1.2rem; padding: 1rem;"
+                            >
+                                ✅ Valider et enregistrer la séance
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            selectRPE(rpe) {
+                // Désélectionner tous
+                for (let i = 0; i <= 10; i++) {
+                    const btn = document.getElementById(`rpe-btn-${i}`);
+                    if (btn) {
+                        btn.style.background = 'rgba(255,255,255,0.1)';
+                        btn.style.borderColor = 'transparent';
+                    }
+                }
+                
+                // Sélectionner celui cliqué
+                const selectedBtn = document.getElementById(`rpe-btn-${rpe}`);
+                if (selectedBtn) {
+                    selectedBtn.style.background = 'var(--primary-color)';
+                    selectedBtn.style.borderColor = 'var(--primary-color)';
+                    selectedBtn.style.color = '#0f172a';
+                }
+                
+                // Afficher la description
+                const descriptions = {
+                    0: '😴 Repos complet',
+                    1: '😌 Très très facile',
+                    2: '😊 Facile',
+                    3: '🙂 Modéré',
+                    4: '😐 Un peu difficile',
+                    5: '😅 Difficile',
+                    6: '😓 Plus difficile',
+                    7: '😰 Très difficile',
+                    8: '😵 Extrêmement difficile',
+                    9: '💀 Presque maximal',
+                    10: '🔥 Effort maximal absolu'
+                };
+                
+                const descDiv = document.getElementById('rpe-description');
+                if (descDiv) {
+                    descDiv.textContent = descriptions[rpe];
+                }
+            }
+
+            finalizeSessionBilan() {
+                const session = this.sessions[this.currentSession];
+                const completedCount = session.exercicesDetails.filter(e => e.completed).length;
+                
+                // Récupérer RPE
+                const rpeInput = document.querySelector('input[name="rpe"]:checked');
+                const rpe = rpeInput ? parseInt(rpeInput.value) : null;
+                
+                if (rpe === null) {
+                    alert('⚠️ Indique ton RPE (perception de l\'effort)');
+                    return;
+                }
+                
+                // Récupérer notes
+                const notes = document.getElementById('session-notes').value.trim();
+                
+                // Ajouter à l'historique
+                const historyEntry = {
+                    sessionIndex: this.currentSession,
+                    completed: completedCount === session.exercicesDetails.length,
+                    completedAt: new Date().toISOString(),
+                    exercicesCompleted: completedCount,
+                    totalExercices: session.exercicesDetails.length,
+                    rpe: rpe,
+                    notes: notes
+                };
+                
+                this.sessionHistory.push(historyEntry);
+                this.saveSessionHistory();
+                this.checkBadges();
+                this.updateStreak();
+                
+                // Réinitialiser les états completed pour la prochaine fois
+                session.exercicesDetails.forEach(ex => ex.completed = false);
+                this.saveSessions();
+                
+                // Retour aux séances
+                this.currentView = 'dashboard';
+                this.currentTab = 'sessions';
+                this.render();
+                
+                alert('✅ Séance enregistrée avec succès ! Bien joué ! 💪');
+            }
+
+            backToSessionLive() {
+                this.currentView = 'session-live';
+                this.render();
+            }
+
+            endSessionLive() {
+                const session = this.sessions[this.currentSession];
+                const completedCount = session.exercicesDetails.filter(e => e.completed).length;
+                
+                if (completedCount > 0 && completedCount < session.exercicesDetails.length) {
+                    if (!confirm('Tu n\'as pas terminé tous les exercices. Quitter quand même ?')) {
+                        return;
+                    }
+                }
+                
+                this.currentView = 'session-detail';
+                this.render();
             }
 
             attachCodeAccessEvents() {
