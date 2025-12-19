@@ -1539,6 +1539,7 @@
                 this.sessionStep = 1; // Étape actuelle (1=infos, 2=exercices, 3=validation)
                 this.sessionNomTemp = ''; // Nom temporaire de la séance
                 this.sessionMobileTemp = 'Hypertrophie'; // Mobile temporaire
+                this.editingRM = null; // Index du RM en cours d'édition
                 this.init();
                 this.initOfflineMode();
             }
@@ -2105,61 +2106,132 @@
             }
 
             renderRMTab() {
+                // Trier l'historique : muscle > exercice > date (plus récent en premier)
+                const sortedHistory = [...this.rmHistory].sort((a, b) => {
+                    // 1. Tri par muscle
+                    if (a.muscle !== b.muscle) {
+                        return a.muscle.localeCompare(b.muscle);
+                    }
+                    // 2. Tri par exercice
+                    if (a.exercise !== b.exercise) {
+                        return a.exercise.localeCompare(b.exercise);
+                    }
+                    // 3. Tri par date (plus récent en premier)
+                    return new Date(b.date) - new Date(a.date);
+                });
+                
                 return `
                     <div>
                         <h2 class="text-white mb-4" style="font-size: 1.5rem;">🎯 Calculateur de 1RM</h2>
-                        <form id="rm-form" class="mb-4">
-                            <div class="grid grid-cols-2 gap-3 mb-3">
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Groupe musculaire</label>
-                                    <select class="input" id="rm-muscle" required>
-                                        <option value="">Sélectionner...</option>
-                                        ${this.musclesList.map(m => `<option value="${m}">${m}</option>`).join('')}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Exercice</label>
-                                    <input type="text" class="input" id="rm-exercise" placeholder="Ex: Développé couché" required>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-3 gap-3 mb-3">
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Charge (kg)</label>
-                                    <input type="number" class="input" id="rm-weight" placeholder="Ex: 80" min="1" step="0.5" required>
-                                </div>
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Répétitions</label>
-                                    <input type="number" class="input" id="rm-reps" placeholder="Ex: 8" min="1" max="20" required>
-                                </div>
-                                <div>
-                                    <label class="text-white mb-1" style="display: block;">Date</label>
-                                    <input type="date" class="input" id="rm-date" required>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">Calculer mon 1RM</button>
-                        </form>
-                        <div id="rm-result" class="hidden mb-4"></div>
-                        ${this.rmHistory.length > 0 ? `
-                            <h3 class="text-white mb-3" style="font-size: 1.2rem;">📊 Historique (${this.rmHistory.length})</h3>
-                            ${this.rmHistory.map((test, index) => `
-                                <div class="rm-history-card">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <div class="text-cyan" style="font-weight: 600; font-size: 1.1rem;">${test.exercise}</div>
-                                            <div class="text-white" style="opacity: 0.8; margin: 0.5rem 0;">${test.muscle}</div>
-                                            <div class="text-white" style="opacity: 0.7; font-size: 0.9rem;">${test.weight}kg × ${test.reps} rép. • ${new Date(test.date).toLocaleDateString('fr-FR')}</div>
-                                        </div>
-                                        <div>
-                                            <div style="color: #10b981; font-size: 2rem; font-weight: bold; text-align: center;">${test.rm}kg</div>
-                                            <div class="text-white" style="opacity: 0.7; font-size: 0.85rem; text-align: center;">1RM</div>
-                                            <div class="flex gap-2 mt-2">
-                                                <button class="btn btn-warning" style="padding: 0.5rem 1rem;" onclick="app.editRM(${index})">✏️</button>
-                                                <button class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="app.deleteRM(${index})">🗑️</button>
-                                            </div>
-                                        </div>
+                        
+                        ${this.editingRM !== null ? `
+                            <!-- Formulaire d'édition -->
+                            <div style="background: rgba(251, 191, 36, 0.1); padding: 1.5rem; border-radius: 1rem; border: 2px solid #fbbf24; margin-bottom: 2rem;">
+                                <h3 class="text-white mb-3" style="font-size: 1.2rem;">✏️ Modifier le test</h3>
+                                <div class="grid grid-cols-2 gap-3 mb-3">
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Groupe musculaire</label>
+                                        <select class="input" id="edit-rm-muscle">
+                                            ${this.musclesList.map(m => `<option value="${m}" ${sortedHistory[this.editingRM].muscle === m ? 'selected' : ''}>${m}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Exercice</label>
+                                        <input type="text" class="input" id="edit-rm-exercise" value="${sortedHistory[this.editingRM].exercise}">
                                     </div>
                                 </div>
-                            `).join('')}
+                                <div class="grid grid-cols-3 gap-3 mb-3">
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Charge (kg)</label>
+                                        <input type="number" class="input" id="edit-rm-weight" value="${sortedHistory[this.editingRM].weight}" step="0.5">
+                                    </div>
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Répétitions</label>
+                                        <input type="number" class="input" id="edit-rm-reps" value="${sortedHistory[this.editingRM].reps}" min="1" max="20">
+                                    </div>
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Date</label>
+                                        <input type="date" class="input" id="edit-rm-date" value="${sortedHistory[this.editingRM].date.split('T')[0]}">
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-success" onclick="app.saveEditRM()" style="flex: 1;">💾 Enregistrer</button>
+                                    <button class="btn btn-secondary" onclick="app.cancelEditRM()" style="flex: 1;">❌ Annuler</button>
+                                </div>
+                            </div>
+                        ` : `
+                            <!-- Formulaire de création -->
+                            <form id="rm-form" class="mb-4">
+                                <div class="grid grid-cols-2 gap-3 mb-3">
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Groupe musculaire</label>
+                                        <select class="input" id="rm-muscle" required>
+                                            <option value="">Sélectionner...</option>
+                                            ${this.musclesList.map(m => `<option value="${m}">${m}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Exercice</label>
+                                        <input type="text" class="input" id="rm-exercise" placeholder="Ex: Développé couché" required>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-3 mb-3">
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Charge (kg)</label>
+                                        <input type="number" class="input" id="rm-weight" placeholder="Ex: 80" min="1" step="0.5" required>
+                                    </div>
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Répétitions</label>
+                                        <input type="number" class="input" id="rm-reps" placeholder="Ex: 8" min="1" max="20" required>
+                                    </div>
+                                    <div>
+                                        <label class="text-white mb-1" style="display: block;">Date</label>
+                                        <input type="date" class="input" id="rm-date" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="width: 100%;">Calculer mon 1RM</button>
+                            </form>
+                        `}
+                        
+                        <div id="rm-result" class="hidden mb-4"></div>
+                        
+                        ${sortedHistory.length > 0 ? `
+                            <h3 class="text-white mb-3" style="font-size: 1.2rem;">📊 Historique (${sortedHistory.length})</h3>
+                            ${(() => {
+                                // Grouper par muscle
+                                const byMuscle = {};
+                                sortedHistory.forEach((test, index) => {
+                                    if (!byMuscle[test.muscle]) {
+                                        byMuscle[test.muscle] = [];
+                                    }
+                                    byMuscle[test.muscle].push({ test, index });
+                                });
+                                
+                                // Afficher chaque groupe
+                                return Object.entries(byMuscle).map(([muscle, tests]) => `
+                                    <div style="background: rgba(6, 182, 212, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 2px solid var(--primary-color);">
+                                        <h4 class="text-cyan mb-3" style="font-size: 1.2rem; font-weight: 600;">💪 ${muscle} (${tests.length})</h4>
+                                        ${tests.map(({ test, index }) => `
+                                            <div class="rm-history-card" style="margin-bottom: 1rem; background: rgba(15, 23, 42, 0.6);">
+                                                <div class="flex justify-between items-center">
+                                                    <div>
+                                                        <div class="text-cyan" style="font-weight: 600; font-size: 1.1rem;">${test.exercise}</div>
+                                                        <div class="text-white" style="opacity: 0.7; font-size: 0.9rem; margin-top: 0.5rem;">${test.weight}kg × ${test.reps} rép. • ${new Date(test.date).toLocaleDateString('fr-FR')}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div style="color: #10b981; font-size: 2rem; font-weight: bold; text-align: center;">${test.rm}kg</div>
+                                                        <div class="text-white" style="opacity: 0.7; font-size: 0.85rem; text-align: center;">1RM</div>
+                                                        <div class="flex gap-2 mt-2">
+                                                            <button class="btn btn-warning" style="padding: 0.5rem 1rem;" onclick="app.editRM(${index})">✏️</button>
+                                                            <button class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="app.deleteRM(${index})">🗑️</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                `).join('');
+                            })()}
                         ` : `
                             <div class="text-center" style="padding: 3rem 1rem; opacity: 0.5;">
                                 <div style="font-size: 4rem; margin-bottom: 1rem;">📊</div>
@@ -4146,12 +4218,16 @@
 
             // ========== FONCTIONS 1RM ==========
 
-            calculateRM() {
-                const exercise = document.getElementById('rm-exercise').value;
+            calculateRM(e) {
+                if (e) e.preventDefault();
+                
+                const muscle = document.getElementById('rm-muscle').value;
+                const exercise = document.getElementById('rm-exercise').value.trim();
                 const weight = parseFloat(document.getElementById('rm-weight').value);
                 const reps = parseInt(document.getElementById('rm-reps').value);
+                const dateInput = document.getElementById('rm-date').value;
                 
-                if (!exercise || !weight || !reps) {
+                if (!muscle || !exercise || !weight || !reps || !dateInput) {
                     alert('⚠️ Remplis tous les champs');
                     return;
                 }
@@ -4168,27 +4244,104 @@
                 rm = Math.round(rm * 10) / 10;
                 
                 const test = {
+                    muscle,
                     exercise,
                     rm,
                     weight,
                     reps,
-                    date: new Date().toISOString()
+                    date: new Date(dateInput).toISOString()
                 };
                 
                 this.rmHistory.push(test);
                 this.saveRMHistory();
                 this.checkBadges();
-                this.currentTab = 'charges';
+                
+                // Réinitialiser le formulaire
+                document.getElementById('rm-muscle').value = '';
+                document.getElementById('rm-exercise').value = '';
+                document.getElementById('rm-weight').value = '';
+                document.getElementById('rm-reps').value = '';
+                document.getElementById('rm-date').valueAsDate = new Date();
+                
                 this.render();
+                
+                console.log('✅ Test 1RM enregistré:', test);
             }
 
             editRM(index) {
-                alert('✏️ Fonctionnalité en développement');
+                this.editingRM = index;
+                this.render();
+            }
+
+            saveEditRM() {
+                // Récupérer l'historique trié pour trouver le bon index original
+                const sortedHistory = [...this.rmHistory].sort((a, b) => {
+                    if (a.muscle !== b.muscle) return a.muscle.localeCompare(b.muscle);
+                    if (a.exercise !== b.exercise) return a.exercise.localeCompare(b.exercise);
+                    return new Date(b.date) - new Date(a.date);
+                });
+                
+                const testToEdit = sortedHistory[this.editingRM];
+                const originalIndex = this.rmHistory.indexOf(testToEdit);
+                
+                // Récupérer les nouvelles valeurs
+                const muscle = document.getElementById('edit-rm-muscle').value;
+                const exercise = document.getElementById('edit-rm-exercise').value.trim();
+                const weight = parseFloat(document.getElementById('edit-rm-weight').value);
+                const reps = parseInt(document.getElementById('edit-rm-reps').value);
+                const date = document.getElementById('edit-rm-date').value;
+                
+                if (!muscle || !exercise || !weight || !reps || !date) {
+                    alert('⚠️ Remplis tous les champs');
+                    return;
+                }
+                
+                // Recalculer le 1RM
+                let rm;
+                if (reps === 1) {
+                    rm = weight;
+                } else if (reps <= 10) {
+                    rm = weight * (1 + reps / 30);
+                } else {
+                    rm = weight * (1 + reps / 25);
+                }
+                rm = Math.round(rm * 10) / 10;
+                
+                // Mettre à jour le test
+                this.rmHistory[originalIndex] = {
+                    muscle,
+                    exercise,
+                    weight,
+                    reps,
+                    rm,
+                    date: new Date(date).toISOString()
+                };
+                
+                this.saveRMHistory();
+                this.editingRM = null;
+                this.render();
+                
+                alert('✅ Test modifié avec succès !');
+            }
+
+            cancelEditRM() {
+                this.editingRM = null;
+                this.render();
             }
 
             deleteRM(index) {
                 if (confirm('Supprimer ce test ?')) {
-                    this.rmHistory.splice(index, 1);
+                    // Récupérer l'historique trié pour trouver le bon index original
+                    const sortedHistory = [...this.rmHistory].sort((a, b) => {
+                        if (a.muscle !== b.muscle) return a.muscle.localeCompare(b.muscle);
+                        if (a.exercise !== b.exercise) return a.exercise.localeCompare(b.exercise);
+                        return new Date(b.date) - new Date(a.date);
+                    });
+                    
+                    const testToDelete = sortedHistory[index];
+                    const originalIndex = this.rmHistory.indexOf(testToDelete);
+                    
+                    this.rmHistory.splice(originalIndex, 1);
                     this.saveRMHistory();
                     this.checkBadges();
                     this.render();
