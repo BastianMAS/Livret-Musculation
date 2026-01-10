@@ -3445,6 +3445,13 @@
                             >
                         </div>
                         
+                        <!-- Suggestions de charges basées sur 1RM -->
+                        <div id="rm-suggestions-container" style="display: none; margin-bottom: 1.5rem; background: rgba(6, 182, 212, 0.1); padding: 1rem; border-radius: 0.75rem; border: 2px solid var(--primary-color);">
+                            <div class="text-cyan mb-2" style="font-weight: 600; font-size: 0.95rem;">💡 <span id="rm-info"></span></div>
+                            <div id="rm-suggestions" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+                            <div class="text-white" style="opacity: 0.6; font-size: 0.8rem; margin-top: 0.75rem;">👆 Clique pour remplir la charge automatiquement</div>
+                        </div>
+                        
                         <div id="exercice-details-container" style="display: none;">
                             <div class="grid grid-cols-2 gap-3 mb-3">
                                 <div>
@@ -3655,6 +3662,7 @@
                 const select = document.getElementById('exercice-name-select');
                 const customInput = document.getElementById('exercice-name-custom');
                 const detailsContainer = document.getElementById('exercice-details-container');
+                const suggestionsContainer = document.getElementById('rm-suggestions-container');
                 
                 if (select.value === 'CUSTOM') {
                     customInput.style.display = 'block';
@@ -3666,9 +3674,58 @@
                 // Afficher les détails si un exercice est sélectionné
                 if (select.value) {
                     detailsContainer.style.display = 'block';
+                    
+                    // Chercher si un 1RM existe pour cet exercice
+                    const exerciceName = select.value === 'CUSTOM' ? customInput.value : select.value;
+                    this.showRMSuggestions(exerciceName);
                 } else {
                     detailsContainer.style.display = 'none';
+                    suggestionsContainer.style.display = 'none';
                 }
+            }
+
+            showRMSuggestions(exerciceName) {
+                const suggestionsContainer = document.getElementById('rm-suggestions-container');
+                const rmInfo = document.getElementById('rm-info');
+                const rmSuggestions = document.getElementById('rm-suggestions');
+                
+                if (!exerciceName || exerciceName === 'CUSTOM') {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+                
+                // Chercher les 1RM pour cet exercice
+                const rms = this.rmHistory.filter(test => 
+                    test.exercise.toLowerCase() === exerciceName.toLowerCase()
+                );
+                
+                if (rms.length === 0) {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+                
+                // Prendre le 1RM le plus récent
+                const latestRM = rms.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                
+                // Afficher les suggestions
+                suggestionsContainer.style.display = 'block';
+                rmInfo.textContent = `Ton 1RM : ${latestRM.rm}kg`;
+                
+                // Générer les boutons de suggestions
+                const percentages = [70, 75, 80, 85, 90];
+                rmSuggestions.innerHTML = percentages.map(pct => {
+                    const charge = Math.round(latestRM.rm * pct / 100 * 2) / 2; // Arrondi à 0.5kg
+                    return `<button type="button" class="btn btn-secondary" onclick="app.fillCharge(${charge})" style="padding: 0.5rem 1rem; font-size: 0.9rem;">${charge}kg<br><span style="font-size: 0.75rem; opacity: 0.8;">(${pct}%)</span></button>`;
+                }).join('');
+            }
+
+            fillCharge(charge) {
+                document.getElementById('exercice-charge-reelle').value = charge;
+                // Focus sur le champ pour montrer qu'il a été rempli
+                document.getElementById('exercice-charge-reelle').style.background = 'rgba(6, 182, 212, 0.2)';
+                setTimeout(() => {
+                    document.getElementById('exercice-charge-reelle').style.background = '';
+                }, 1000);
             }
 
             addExerciceDetail() {
