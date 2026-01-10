@@ -3711,20 +3711,20 @@
                 suggestionsContainer.style.display = 'block';
                 rmInfo.textContent = `Ton 1RM : ${latestRM.rm}kg`;
                 
-                // Générer les boutons de suggestions
-                const percentages = [70, 75, 80, 85, 90];
+                // Générer les boutons de suggestions (de 40% à 100% par paliers de 5%)
+                const percentages = [40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
                 rmSuggestions.innerHTML = percentages.map(pct => {
                     const charge = Math.round(latestRM.rm * pct / 100 * 2) / 2; // Arrondi à 0.5kg
-                    return `<button type="button" class="btn btn-secondary" onclick="app.fillCharge(${charge})" style="padding: 0.5rem 1rem; font-size: 0.9rem;">${charge}kg<br><span style="font-size: 0.75rem; opacity: 0.8;">(${pct}%)</span></button>`;
+                    return `<button type="button" class="btn btn-secondary" onclick="app.fillCharge(${charge})" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">${charge}kg<br><span style="font-size: 0.7rem; opacity: 0.8;">(${pct}%)</span></button>`;
                 }).join('');
             }
 
             fillCharge(charge) {
-                document.getElementById('exercice-charge-reelle').value = charge;
+                document.getElementById('exercice-charge-theo').value = charge;
                 // Focus sur le champ pour montrer qu'il a été rempli
-                document.getElementById('exercice-charge-reelle').style.background = 'rgba(6, 182, 212, 0.2)';
+                document.getElementById('exercice-charge-theo').style.background = 'rgba(6, 182, 212, 0.2)';
                 setTimeout(() => {
-                    document.getElementById('exercice-charge-reelle').style.background = '';
+                    document.getElementById('exercice-charge-theo').style.background = '';
                 }, 1000);
             }
 
