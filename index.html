@@ -2174,14 +2174,17 @@
                                 <div class="grid grid-cols-2 gap-3 mb-3">
                                     <div>
                                         <label class="text-white mb-1" style="display: block;">Groupe musculaire</label>
-                                        <select class="input" id="rm-muscle" required>
+                                        <select class="input" id="rm-muscle" onchange="app.updateRMExercicesList()" required>
                                             <option value="">Sélectionner...</option>
                                             ${this.musclesList.map(m => `<option value="${m}">${m}</option>`).join('')}
                                         </select>
                                     </div>
                                     <div>
                                         <label class="text-white mb-1" style="display: block;">Exercice</label>
-                                        <input type="text" class="input" id="rm-exercise" placeholder="Ex: Développé couché" required>
+                                        <select class="input" id="rm-exercise-select" onchange="app.toggleRMCustomExercice()" required style="display: none;">
+                                            <option value="">Choisir...</option>
+                                        </select>
+                                        <input type="text" class="input" id="rm-exercise-custom" placeholder="Ex: Développé couché" style="display: none;">
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-3 gap-3 mb-3">
@@ -3694,9 +3697,42 @@
                     return;
                 }
                 
-                // Chercher les 1RM pour cet exercice
+                // Fonction de normalisation pour recherche floue
+                const normalize = (str) => {
+                    return str.toLowerCase()
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Enlever accents
+                        .replace(/\s+/g, ' ') // Espaces multiples → 1 espace
+                        .trim();
+                };
+                
+                // Fonction de similarité
+                const similarity = (str1, str2) => {
+                    const s1 = normalize(str1);
+                    const s2 = normalize(str2);
+                    
+                    // Si correspondance exacte
+                    if (s1 === s2) return 1;
+                    
+                    // Si l'un contient l'autre
+                    if (s1.includes(s2) || s2.includes(s1)) return 0.9;
+                    
+                    // Distance de Levenshtein simplifiée
+                    const longer = s1.length > s2.length ? s1 : s2;
+                    const shorter = s1.length > s2.length ? s2 : s1;
+                    
+                    if (longer.length === 0) return 1.0;
+                    
+                    let matches = 0;
+                    for (let i = 0; i < shorter.length; i++) {
+                        if (longer.includes(shorter[i])) matches++;
+                    }
+                    
+                    return matches / longer.length;
+                };
+                
+                // Chercher les 1RM pour cet exercice avec recherche floue
                 const rms = this.rmHistory.filter(test => 
-                    test.exercise.toLowerCase() === exerciceName.toLowerCase()
+                    similarity(test.exercise, exerciceName) >= 0.7 // 70% de similarité minimum
                 );
                 
                 if (rms.length === 0) {
@@ -3710,6 +3746,9 @@
                 // Afficher les suggestions
                 suggestionsContainer.style.display = 'block';
                 rmInfo.textContent = `Ton 1RM : ${latestRM.rm}kg`;
+                if (normalize(latestRM.exercise) !== normalize(exerciceName)) {
+                    rmInfo.textContent += ` (${latestRM.exercise})`;
+                }
                 
                 // Générer les boutons de suggestions (de 40% à 100% par paliers de 5%)
                 const percentages = [40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
@@ -4309,7 +4348,9 @@
                 if (e) e.preventDefault();
                 
                 const muscle = document.getElementById('rm-muscle').value;
-                const exercise = document.getElementById('rm-exercise').value.trim();
+                const selectValue = document.getElementById('rm-exercise-select').value;
+                const customValue = document.getElementById('rm-exercise-custom').value.trim();
+                const exercise = selectValue === 'CUSTOM' ? customValue : selectValue;
                 const weight = parseFloat(document.getElementById('rm-weight').value);
                 const reps = parseInt(document.getElementById('rm-reps').value);
                 const dateInput = document.getElementById('rm-date').value;
@@ -4345,7 +4386,10 @@
                 
                 // Réinitialiser le formulaire
                 document.getElementById('rm-muscle').value = '';
-                document.getElementById('rm-exercise').value = '';
+                document.getElementById('rm-exercise-select').style.display = 'none';
+                document.getElementById('rm-exercise-select').value = '';
+                document.getElementById('rm-exercise-custom').style.display = 'none';
+                document.getElementById('rm-exercise-custom').value = '';
                 document.getElementById('rm-weight').value = '';
                 document.getElementById('rm-reps').value = '';
                 document.getElementById('rm-date').valueAsDate = new Date();
@@ -4353,6 +4397,46 @@
                 this.render();
                 
                 console.log('✅ Test 1RM enregistré:', test);
+            }
+
+            updateRMExercicesList() {
+                const muscle = document.getElementById('rm-muscle').value;
+                const exerciceSelect = document.getElementById('rm-exercise-select');
+                const exerciceCustom = document.getElementById('rm-exercise-custom');
+                
+                if (!muscle) {
+                    exerciceSelect.style.display = 'none';
+                    exerciceCustom.style.display = 'none';
+                    return;
+                }
+                
+                // Afficher le select et le remplir
+                exerciceSelect.style.display = 'block';
+                exerciceSelect.innerHTML = '<option value="">Choisir...</option>';
+                
+                const exercices = this.getExercicesByMuscle(muscle);
+                exercices.forEach(ex => {
+                    exerciceSelect.innerHTML += `<option value="${ex}">${ex}</option>`;
+                });
+                
+                // Ajouter option "Autre"
+                exerciceSelect.innerHTML += '<option value="CUSTOM">✏️ Autre exercice...</option>';
+            }
+
+            toggleRMCustomExercice() {
+                const select = document.getElementById('rm-exercise-select');
+                const customInput = document.getElementById('rm-exercise-custom');
+                
+                if (select.value === 'CUSTOM') {
+                    customInput.style.display = 'block';
+                    customInput.focus();
+                    customInput.required = true;
+                    select.required = false;
+                } else {
+                    customInput.style.display = 'none';
+                    customInput.required = false;
+                    select.required = true;
+                }
             }
 
             editRM(index) {
