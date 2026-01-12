@@ -1495,6 +1495,14 @@
                 {nom: "Face Pull (Poulie)", description: "Tirer corde vers visage pour deltoïdes postérieurs.", technique: ["Coudes hauts", "Séparer corde", "Vers oreilles", "Contraction arrière épaules"], variantes: ["Poulie haute", "Poulie basse", "Élastique"], video: "https://www.youtube.com/watch?v=a9AaQh1dtRs"}
             ],
 
+            exercicesTrapezes: [
+                {nom: "Tirage Horizontal (Poulie)", description: "Assis, tirer poignées vers abdos.", technique: ["Dos droit", "Coudes le long du corps", "Serrer omoplates", "Poitrine sortie"], variantes: ["Prise neutre", "Pronation", "Supination"], video: "https://www.youtube.com/shorts/hnNjcQI9ZMU"},
+                {nom: "Tirage Menton (Barre)", description: "Debout, tirer barre vers menton, coudes hauts.", technique: ["Prise serrée", "Coudes vers haut", "Tirer vers menton", "Contracter trapèzes"], variantes: ["Barre droite", "Barre EZ", "Prise large"], video: "https://www.youtube.com/watch?v=j3Igk5G76KI"},
+                {nom: "Tirage Menton (Poulie)", description: "Poulie basse, tirer vers menton, coudes hauts.", technique: ["Prise serrée", "Coudes vers haut", "Tirer vers menton", "Contracter trapèzes"], variantes: ["Corde", "Barre"], video: "https://www.youtube.com/watch?v=j3Igk5G76KI"},
+                {nom: "Shrugs (Barre)", description: "Debout, barre en mains, hausser épaules.", technique: ["Bras tendus", "Monter épaules vers oreilles", "Pause en haut", "Descente contrôlée"], variantes: ["Devant", "Derrière", "Smith machine"], video: "https://www.youtube.com/watch?v=cJRVVxmytaM"},
+                {nom: "Shrugs (Haltères)", description: "Debout, haltères en mains, hausser épaules.", technique: ["Bras tendus", "Monter épaules vers oreilles", "Pause en haut", "Descente contrôlée"], variantes: ["Assis", "Un bras"], video: "https://www.youtube.com/watch?v=cJRVVxmytaM"}
+            ],
+
             exercicesBiceps: [
                 {nom: "Larry Scott (Pupitre Barre)", description: "Assis, bras sur pupitre, curl barre.", technique: ["Coudes sur pupitre", "Amplitude complète", "Pas décoller coudes", "Contraction pic"], variantes: ["Barre EZ", "Prise large/serrée"], video: "https://www.youtube.com/watch?v=8MSRc2_b2d4"},
                 {nom: "Larry Scott (Pupitre Haltères)", description: "Assis, bras sur pupitre, curl haltère.", technique: ["Coudes sur pupitre", "Amplitude complète", "Un bras ou deux"], variantes: ["Alternés", "Simultanés"], video: "https://www.youtube.com/watch?v=8MSRc2_b2d4"},
@@ -3110,6 +3118,7 @@
                     const muscleMap = {
                         'Pectoraux': coursData.exercicesPectoraux,
                         'Dos': coursData.exercicesDos,
+                        'Trapèzes': coursData.exercicesTrapezes,
                         'Épaules': coursData.exercicesEpaules,
                         'Biceps': coursData.exercicesBiceps,
                         'Triceps': coursData.exercicesTriceps,
@@ -3130,7 +3139,7 @@
             }
 
             renderExercicesTab(filteredExercises) {
-                const filters = ['Pectoraux', 'Dos', 'Épaules', 'Biceps', 'Triceps', 'Quadriceps', 'Ischio-jambiers', 'Fessiers', 'Mollets', 'Adducteurs', 'Abdos'];
+                const filters = ['Pectoraux', 'Dos', 'Trapèzes', 'Épaules', 'Biceps', 'Triceps', 'Quadriceps', 'Ischio-jambiers', 'Fessiers', 'Mollets', 'Adducteurs', 'Abdos'];
                 return `
                     <div>
                         <div class="search-container">
@@ -3683,7 +3692,7 @@
                 const exercicesMap = {
                     'Pectoraux': coursData.exercicesPectoraux,
                     'Grand dorsal': coursData.exercicesDos,
-                    'Trapèzes': coursData.exercicesDos,
+                    'Trapèzes': coursData.exercicesTrapezes,
                     'Deltoïdes': coursData.exercicesEpaules,
                     'Biceps': coursData.exercicesBiceps,
                     'Triceps': coursData.exercicesTriceps,
