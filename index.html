@@ -2009,8 +2009,6 @@
                     endurance: this.sessions.filter(s => s.type === 'Endurance').length,
                     equilibre: this.sessions.filter(s => s.type === 'Équilibre').length
                 };
-                const unlockedBadges = this.badges.filter(b => b.unlocked).length;
-                const recentBadges = this.badges.filter(b => b.unlocked).sort((a, b) => new Date(b.unlockedAt) - new Date(a.unlockedAt)).slice(0, 3);
 
                 return `
                     <div class="grid grid-cols-2 gap-3 mb-4">
@@ -2026,10 +2024,6 @@
                             <div style="color: #fb923c; font-size: 2.5rem; font-weight: bold;">${sessionsThisMonth}</div>
                             <div class="text-white" style="opacity: 0.9;">Ce mois-ci</div>
                         </div>
-                        <div style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(168, 85, 247, 0.3);">
-                            <div style="color: #a855f7; font-size: 2.5rem; font-weight: bold;">${unlockedBadges}</div>
-                            <div class="text-white" style="opacity: 0.9;">Badges</div>
-                        </div>
                     </div>
                     ${this.currentStreak > 0 ? `
                         <div class="tip-box" style="border-color: #fb923c; background: linear-gradient(135deg, rgba(251, 146, 60, 0.2) 0%, rgba(249, 115, 22, 0.1) 100%);">
@@ -2042,14 +2036,6 @@
                             </div>
                         </div>
                     ` : ""}
-                    ${recentBadges.length > 0 ? `
-                        <div class="tip-box" style="border-color: #a855f7; background: rgba(168, 85, 247, 0.1);">
-                            <div class="text-white" style="font-weight: 600; margin-bottom: 0.75rem;">🏆 Derniers badges</div>
-                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                                ${recentBadges.map(b => `<div style="display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 2rem;">${b.icon}</span><div><div class="text-white" style="font-weight: 600;">${b.name}</div></div></div>`).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
                     <div class="tip-box">
                         <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">💡 Conseil du jour</div>
                         <div class="text-white" style="opacity: 0.9;">Échauffez-vous bien et étirez-vous après. La récupération est aussi importante que l'entraînement !</div>
@@ -4082,7 +4068,6 @@
                     sessionHistory: this.sessionHistory,
                     calculatedCharges: this.calculatedCharges,
                     theme: this.currentTheme,
-                    badges: this.badges,
                     userData: JSON.parse(localStorage.getItem(`user-${this.currentUser}`))
                 };
                 const dataStr = JSON.stringify(data, null, 2);
@@ -4113,7 +4098,6 @@
                                 this.currentTheme = data.theme;
                                 this.applyTheme(data.theme);
                             }
-                            if (data.badges) this.badges = data.badges;
                             if (data.userData) {
                                 localStorage.setItem(`user-${this.currentUser}`, JSON.stringify(data.userData));
                             }
@@ -4266,7 +4250,6 @@
                 this.userAvatar = null;
                 this.sessionHistory = [];
                 this.calculatedCharges = {};
-                this.badges = [];
                 this.objectifs = [];
                 this.currentStreak = 0;
                 this.longestStreak = 0;
