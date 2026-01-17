@@ -5239,14 +5239,97 @@
                 clearInterval(this.timerInterval);
                 this.timerInterval = null;
                 this.timerRunning = false;
+                
+                // 🔊 SON - Bip sonore
+                this.playTimerSound();
+                
+                // 🗣️ SYNTHÈSE VOCALE
                 if ('speechSynthesis' in window) {
                     const utterance = new SpeechSynthesisUtterance('Repos terminé');
                     utterance.lang = 'fr-FR';
                     utterance.rate = 1.2;
                     speechSynthesis.speak(utterance);
                 }
-                if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+                
+                // 📱 VIBRATION (3 fois)
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([300, 100, 300, 100, 300]);
+                }
+                
+                // ⚡ FLASH ÉCRAN
+                this.flashScreen();
+                
                 this.render();
+            }
+
+            playTimerSound() {
+                // Création d'un bip sonore avec Web Audio API
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    // Bip aigu (800Hz)
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+                    
+                    // Volume progressif
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    
+                    // Deuxième bip
+                    setTimeout(() => {
+                        const osc2 = audioContext.createOscillator();
+                        const gain2 = audioContext.createGain();
+                        osc2.connect(gain2);
+                        gain2.connect(audioContext.destination);
+                        osc2.frequency.value = 1000;
+                        osc2.type = 'sine';
+                        gain2.gain.setValueAtTime(0, audioContext.currentTime);
+                        gain2.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+                        gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                        osc2.start(audioContext.currentTime);
+                        osc2.stop(audioContext.currentTime + 0.3);
+                    }, 200);
+                } catch (e) {
+                    console.log('Son non supporté');
+                }
+            }
+
+            flashScreen() {
+                // Créer un overlay flash
+                const flash = document.createElement('div');
+                flash.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: #06b6d4;
+                    opacity: 0;
+                    z-index: 99999;
+                    pointer-events: none;
+                    transition: opacity 0.1s;
+                `;
+                document.body.appendChild(flash);
+                
+                // Animation du flash
+                setTimeout(() => flash.style.opacity = '0.8', 10);
+                setTimeout(() => flash.style.opacity = '0', 150);
+                setTimeout(() => flash.style.opacity = '0.6', 300);
+                setTimeout(() => flash.style.opacity = '0', 450);
+                setTimeout(() => flash.style.opacity = '0.4', 600);
+                setTimeout(() => {
+                    flash.style.opacity = '0';
+                    setTimeout(() => flash.remove(), 200);
+                }, 750);
             }
 
             resetTimer() {
