@@ -1608,6 +1608,8 @@
                 this.longestStreak = 0;
                 this.exercicesDetails = []; // Nouvelle structure pour les exercices détaillés
                 this.currentExerciceForm = {}; // Formulaire d'exercice en cours
+                this.audioContext = null; // Pour le son du timer
+                this.audioUnlocked = false; // Flag pour débloquer l'audio sur iOS
                 this.sessionStep = 1; // Étape actuelle (1=infos, 2=exercices, 3=validation)
                 this.sessionNomTemp = ''; // Nom temporaire de la séance
                 this.sessionMobileTemp = 'Hypertrophie'; // Mobile temporaire
@@ -5207,6 +5209,9 @@
             }
 
             toggleTimer() {
+                // Débloquer l'audio au premier clic (iOS)
+                this.unlockAudio();
+                
                 if (this.timerRunning) {
                     clearInterval(this.timerInterval);
                     this.timerInterval = null;
@@ -5262,44 +5267,75 @@
                 this.render();
             }
 
+            unlockAudio() {
+                // Débloquer l'audio au premier clic utilisateur (requis sur iOS)
+                if (!this.audioUnlocked) {
+                    try {
+                        if (!this.audioContext) {
+                            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        }
+                        // Jouer un son silencieux pour débloquer
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+                        gainNode.gain.value = 0.001; // Quasi silencieux
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+                        oscillator.start(this.audioContext.currentTime);
+                        oscillator.stop(this.audioContext.currentTime + 0.01);
+                        this.audioUnlocked = true;
+                        console.log('✅ Audio débloqué');
+                    } catch (e) {
+                        console.log('❌ Impossible de débloquer l\'audio:', e);
+                    }
+                }
+            }
+
             playTimerSound() {
                 // Création d'un bip sonore avec Web Audio API
                 try {
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
+                    if (!this.audioContext) {
+                        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    
+                    // Reprendre le contexte si suspendu (iOS)
+                    if (this.audioContext.state === 'suspended') {
+                        this.audioContext.resume();
+                    }
+                    
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
                     
                     oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
+                    gainNode.connect(this.audioContext.destination);
                     
                     // Bip aigu (800Hz)
                     oscillator.frequency.value = 800;
                     oscillator.type = 'sine';
                     
                     // Volume progressif
-                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-                    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
                     
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.3);
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.3);
                     
                     // Deuxième bip
                     setTimeout(() => {
-                        const osc2 = audioContext.createOscillator();
-                        const gain2 = audioContext.createGain();
+                        const osc2 = this.audioContext.createOscillator();
+                        const gain2 = this.audioContext.createGain();
                         osc2.connect(gain2);
-                        gain2.connect(audioContext.destination);
+                        gain2.connect(this.audioContext.destination);
                         osc2.frequency.value = 1000;
                         osc2.type = 'sine';
-                        gain2.gain.setValueAtTime(0, audioContext.currentTime);
-                        gain2.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
-                        gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-                        osc2.start(audioContext.currentTime);
-                        osc2.stop(audioContext.currentTime + 0.3);
+                        gain2.gain.setValueAtTime(0, this.audioContext.currentTime);
+                        gain2.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.01);
+                        gain2.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+                        osc2.start(this.audioContext.currentTime);
+                        osc2.stop(this.audioContext.currentTime + 0.3);
                     }, 200);
                 } catch (e) {
-                    console.log('Son non supporté');
+                    console.log('❌ Son non supporté:', e);
                 }
             }
 
