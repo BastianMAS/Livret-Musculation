@@ -1603,7 +1603,6 @@
                 this.calculatedCharges = {};
                 this.selectedPercentage = 75;
                 this.currentTheme = 'cyan';
-                this.badges = [];
                 this.objectifs = [];
                 this.currentStreak = 0;
                 this.longestStreak = 0;
@@ -1624,10 +1623,8 @@
                 this.loadSessionHistory();
                 this.loadCalculatedCharges();
                 this.loadTheme();
-                this.loadBadges();
                 this.loadObjectifs();
                 this.calculateStreaks();
-                this.checkBadges();
                                 this.editingHistoryId = null;
                 this.render();
             }
@@ -1702,7 +1699,6 @@
                 this.loadSessionHistory();
                 this.loadCalculatedCharges();
                 this.loadTheme();
-                this.loadBadges();
                 this.loadObjectifs();
                 this.updateStreak();
             }
@@ -1789,64 +1785,6 @@
 
 
 
-            loadBadges() {
-                if (!this.currentUser) return;
-                const result = storage.get('badges');
-                if (result.exists) {
-                    this.badges = JSON.parse(result.value);
-                } else {
-                    this.badges = this.initializeBadges();
-                    this.saveBadges();
-                }
-            }
-
-            saveBadges() { storage.save('badges', this.badges); }
-
-            initializeBadges() {
-                return [
-                    {id: 'first-session', name: 'Première Séance', icon: '🎯', description: 'Créer votre première séance', unlocked: false},
-                    {id: 'first-rm', name: 'Premier Test', icon: '💪', description: 'Calculer votre premier 1RM', unlocked: false},
-                    {id: 'sessions-5', name: 'Débutant', icon: '🔥', description: 'Effectuer 5 séances', unlocked: false},
-                    {id: 'sessions-10', name: 'Régulier', icon: '⚡', description: 'Effectuer 10 séances', unlocked: false},
-                    {id: 'sessions-25', name: 'Assidu', icon: '💎', description: 'Effectuer 25 séances', unlocked: false},
-                    {id: 'sessions-50', name: 'Expert', icon: '👑', description: 'Effectuer 50 séances', unlocked: false},
-                    {id: 'rm-5', name: 'Testeur', icon: '🎪', description: 'Effectuer 5 tests 1RM', unlocked: false},
-                    {id: 'weekly-streak', name: 'Hebdomadaire', icon: '📅', description: 'Séances 7 jours consécutifs', unlocked: false},
-                    {id: 'all-mobiles', name: 'Polyvalent', icon: '🌟', description: 'Tester les 3 mobiles', unlocked: false}
-                ];
-            }
-
-            checkBadges() {
-                const completedCount = this.sessionHistory.filter(h => h.completed).length;
-                const rmCount = this.rmHistory.length;
-                const hasAllMobiles = this.sessions.some(s => s.type === 'Force') && 
-                                     this.sessions.some(s => s.type === 'Équilibre') && 
-                                     this.sessions.some(s => s.type === 'Endurance');
-
-                const badgeChecks = [
-                    {id: 'first-session', condition: this.sessions.length >= 1},
-                    {id: 'first-rm', condition: rmCount >= 1},
-                    {id: 'sessions-5', condition: completedCount >= 5},
-                    {id: 'sessions-10', condition: completedCount >= 10},
-                    {id: 'sessions-25', condition: completedCount >= 25},
-                    {id: 'sessions-50', condition: completedCount >= 50},
-                    {id: 'rm-5', condition: rmCount >= 5},
-                    {id: 'all-mobiles', condition: hasAllMobiles}
-                ];
-
-                let newBadgesUnlocked = false;
-                badgeChecks.forEach(check => {
-                    const badge = this.badges.find(b => b.id === check.id);
-                    if (badge && !badge.unlocked && check.condition) {
-                        badge.unlocked = true;
-                        badge.unlockedAt = new Date().toISOString();
-                        newBadgesUnlocked = true;
-                    }
-                });
-
-                if (newBadgesUnlocked) this.saveBadges();
-            }
-
             render() {
                 const app = document.getElementById('app');
                 if (this.currentView === 'code-access') {
@@ -1913,7 +1851,7 @@
                 const users = [];
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
-                    if (key.startsWith('user-') && !key.includes('-sessions') && !key.includes('-rmHistory') && !key.includes('-avatar') && !key.includes('-sessionHistory') && !key.includes('-calculatedCharges') && !key.includes('-theme') && !key.includes('-badges')) {
+                    if (key.startsWith('user-') && !key.includes('-sessions') && !key.includes('-rmHistory') && !key.includes('-avatar') && !key.includes('-sessionHistory') && !key.includes('-calculatedCharges') && !key.includes('-theme')) {
                         users.push(key.replace('user-', ''));
                     }
                 }
@@ -2014,7 +1952,6 @@
                     const date = new Date(h.completedAt);
                     return h.completed && date.getMonth() === thisMonth && date.getFullYear() === thisYear;
                 }).length;
-                const unlockedBadges = this.badges.filter(b => b.unlocked).length;
 
                 return `
                     <div class="container">
@@ -2030,7 +1967,7 @@
                                     <div>
                                         <h1 class="text-white" style="font-size: 2rem;">${this.currentUser}</h1>
                                         <p class="text-cyan" style="font-size: 0.9rem;">${userData.age} ans • ${userData.sexe} • ${userData.taille}cm • ${userData.poids}kg</p>
-                                        <p class="text-white" style="opacity: 0.7; font-size: 0.85rem; margin-top: 0.25rem;">📚 ${securite.getNomClasse()} • 🏆 ${unlockedBadges}/${this.badges.length} badges</p>
+                                        <p class="text-white" style="opacity: 0.7; font-size: 0.85rem; margin-top: 0.25rem;">📚 ${securite.getNomClasse()}</p>
                                     </div>
                                 </div>
                                 <div class="flex gap-2">
@@ -2047,7 +1984,6 @@
                                 <button class="tab-btn ${this.currentTab === 'progression' ? 'active' : ''}" onclick="app.switchTab('progression')">📊 Graphiques</button>
                                 <button class="tab-btn ${this.currentTab === 'sessions' ? 'active' : ''}" onclick="app.switchTab('sessions')">📝 Séances</button>
                                 <button class="tab-btn ${this.currentTab === 'historique' ? 'active' : ''}" onclick="app.switchTab('historique')">📅 Historique</button>
-                                <button class="tab-btn ${this.currentTab === 'badges' ? 'active' : ''}" onclick="app.switchTab('badges')">🏆 Badges</button>
                                 <button class="tab-btn ${this.currentTab === 'objectifs' ? 'active' : ''}" onclick="app.switchTab('objectifs')">🎯 Objectifs</button>
                                 <button class="tab-btn ${this.currentTab === 'cours' ? 'active' : ''}" onclick="app.switchTab('cours')">📚 Cours</button>
                             </div>
@@ -2059,7 +1995,6 @@
                             ${this.currentTab === 'sessions' ? this.renderSessionsTab() : ''}
                             ${this.currentTab === 'timer' ? this.renderTimerTab() : ''}
                             ${this.currentTab === 'historique' ? this.renderHistoriqueTab() : ''}
-                            ${this.currentTab === 'badges' ? this.renderBadgesTab() : ''}
                             ${this.currentTab === 'objectifs' ? this.renderObjectifsTab() : ''}
                             ${this.currentTab === 'cours' ? this.renderCoursTab() : ''}
                         </div>
@@ -3043,34 +2978,6 @@
                 document.getElementById('objectif-form').reset();
                 this.updateObjectifForm();
             }
-            renderBadgesTab() {
-                const unlockedCount = this.badges.filter(b => b.unlocked).length;
-                const totalCount = this.badges.length;
-                const progressPercent = Math.round((unlockedCount / totalCount) * 100);
-
-                return `
-                    <div>
-                        <h2 class="text-white mb-4" style="font-size: 1.5rem;">🏆 Mes Badges (${unlockedCount}/${totalCount})</h2>
-                        <div class="mb-4">
-                            <div class="text-white mb-2" style="font-weight: 600;">Progression globale : ${progressPercent}%</div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${progressPercent}%;"></div>
-                            </div>
-                        </div>
-                        <div class="badge-grid">
-                            ${this.badges.map(badge => `
-                                <div class="badge-item ${badge.unlocked ? 'unlocked' : 'locked'}">
-                                    <div class="badge-icon">${badge.icon}</div>
-                                    <div class="text-white" style="font-weight: 600; margin-bottom: 0.5rem;">${badge.name}</div>
-                                    <div class="text-white" style="opacity: 0.7; font-size: 0.85rem; margin-bottom: 0.5rem;">${badge.description}</div>
-                                    ${badge.unlocked ? `<div class="text-cyan" style="font-size: 0.8rem;">✓ Débloqué le ${new Date(badge.unlockedAt).toLocaleDateString('fr-FR')}</div>` : `<div class="text-white" style="opacity: 0.5; font-size: 0.8rem;">🔒 Verrouillé</div>`}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
             renderCoursTab() {
                 const allExercises = [
                     ...coursData.exercicesPectoraux,
@@ -3671,7 +3578,6 @@
                 }
                 
                 this.saveSessions();
-                this.checkBadges();
                 
                 // Passer à l'étape 3 (confirmation)
                 this.sessionStep = 3;
@@ -3945,7 +3851,6 @@
                 }
                 
                 this.saveSessions();
-                this.checkBadges();
                 
                 // Réinitialiser
                 this.currentSession = null;
@@ -4132,7 +4037,6 @@
                 }
                 
                 this.saveSessions();
-                this.checkBadges();
                 
                 // Réinitialiser
                 this.currentSession = null;
@@ -4164,7 +4068,6 @@
                 };
                 this.sessionHistory.push(historyEntry);
                 this.saveSessionHistory();
-                this.checkBadges();
                 this.calculateStreaks();
                 this.updateObjectifProgress();
                 alert('✅ Séance validée !');
@@ -4220,7 +4123,6 @@
                             this.saveSessionHistory();
                             this.saveCalculatedCharges();
                             this.saveTheme();
-                            this.saveBadges();
                             alert('✅ Données importées !');
                             this.render();
                         } catch (error) {
@@ -4458,7 +4360,6 @@
                 
                 this.rmHistory.push(test);
                 this.saveRMHistory();
-                this.checkBadges();
                 
                 // Réinitialiser le formulaire
                 document.getElementById('rm-muscle').value = '';
@@ -4590,7 +4491,6 @@
                     
                     this.rmHistory.splice(originalIndex, 1);
                     this.saveRMHistory();
-                    this.checkBadges();
                     this.render();
                 }
             }
@@ -5121,7 +5021,6 @@
                 
                 this.sessionHistory.push(historyEntry);
                 this.saveSessionHistory();
-                this.checkBadges();
                 this.updateStreak();
                 
                 // Réinitialiser les états completed pour la prochaine fois
