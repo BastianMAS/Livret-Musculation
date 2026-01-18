@@ -5302,25 +5302,25 @@
                         this.audioContext.resume();
                     }
                     
+                    // PREMIER BIP (800Hz)
                     const oscillator = this.audioContext.createOscillator();
                     const gainNode = this.audioContext.createGain();
                     
                     oscillator.connect(gainNode);
                     gainNode.connect(this.audioContext.destination);
                     
-                    // Bip aigu (800Hz)
                     oscillator.frequency.value = 800;
                     oscillator.type = 'sine';
                     
-                    // Volume progressif
+                    // Volume plus fort : 0.7 au lieu de 0.3
                     gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-                    gainNode.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.01);
+                    gainNode.gain.linearRampToValueAtTime(0.7, this.audioContext.currentTime + 0.01);
                     gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
                     
                     oscillator.start(this.audioContext.currentTime);
                     oscillator.stop(this.audioContext.currentTime + 0.3);
                     
-                    // Deuxième bip
+                    // DEUXIÈME BIP (1000Hz)
                     setTimeout(() => {
                         const osc2 = this.audioContext.createOscillator();
                         const gain2 = this.audioContext.createGain();
@@ -5329,11 +5329,26 @@
                         osc2.frequency.value = 1000;
                         osc2.type = 'sine';
                         gain2.gain.setValueAtTime(0, this.audioContext.currentTime);
-                        gain2.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.01);
+                        gain2.gain.linearRampToValueAtTime(0.7, this.audioContext.currentTime + 0.01);
                         gain2.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
                         osc2.start(this.audioContext.currentTime);
                         osc2.stop(this.audioContext.currentTime + 0.3);
                     }, 200);
+                    
+                    // TROISIÈME BIP (1200Hz) - NOUVEAU
+                    setTimeout(() => {
+                        const osc3 = this.audioContext.createOscillator();
+                        const gain3 = this.audioContext.createGain();
+                        osc3.connect(gain3);
+                        gain3.connect(this.audioContext.destination);
+                        osc3.frequency.value = 1200;
+                        osc3.type = 'sine';
+                        gain3.gain.setValueAtTime(0, this.audioContext.currentTime);
+                        gain3.gain.linearRampToValueAtTime(0.7, this.audioContext.currentTime + 0.01);
+                        gain3.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+                        osc3.start(this.audioContext.currentTime);
+                        osc3.stop(this.audioContext.currentTime + 0.3);
+                    }, 400);
                 } catch (e) {
                     console.log('❌ Son non supporté:', e);
                 }
