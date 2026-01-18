@@ -2565,9 +2565,9 @@
                                             </div>
                                             <div class="flex gap-2 items-center">
                                                 <span class="badge badge-${sessionType.toLowerCase()}">${sessionType}</span>
+                                                <button class="delete-btn" onclick="app.deleteHistory('${entry.id}')" title="Supprimer cette séance">🗑️</button>
                                                 ${IS_COACH_MODE ? `
                                                     <button class="edit-btn" onclick="app.editHistory('${entry.id}')">✏️</button>
-                                                    <button class="delete-btn" onclick="app.deleteHistory('${entry.id}')">🗑️</button>
                                                 ` : ''}
                                             </div>
                                         </div>
@@ -5499,9 +5499,7 @@
             }
 
             deleteHistory(id) {
-                if (!IS_COACH_MODE) return;
-                
-                if (confirm('Êtes-vous sûr de vouloir supprimer cette entrée de l\'historique ?')) {
+                if (confirm('⚠️ Supprimer cette séance de l\'historique ?\n\nCette action est irréversible.')) {
                     this.sessionHistory = this.sessionHistory.filter(h => h.id !== id);
                     this.saveSessionHistory();
                     this.render();
