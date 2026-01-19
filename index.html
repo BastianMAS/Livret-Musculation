@@ -2467,15 +2467,22 @@
                                         : (session.muscles || []);
                                     
                                     return `
-                                        <div class="session-card ${isCompleted ? 'completed' : ''}" onclick="app.viewSession(${index})">
-                                            ${isCompleted ? '<div class="session-completed-badge">✓ Effectuée</div>' : ''}
-                                            <h3 class="text-white mb-2" style="font-size: 1.2rem;">${session.nom}</h3>
-                                            <div class="mb-2">
-                                                <span class="badge badge-${session.type.toLowerCase().replace(/ /g, '-')}">${session.type}</span>
-                                                ${session.forme ? `<span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #a855f7; margin-left: 0.5rem;">${session.forme}</span>` : ''}
+                                        <div class="session-card ${isCompleted ? 'completed' : ''}" style="position: relative;">
+                                            <button 
+                                                class="delete-btn" 
+                                                onclick="event.stopPropagation(); app.deleteSession(${index})" 
+                                                style="position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10; background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.5); padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 1rem;"
+                                                title="Supprimer cette séance"
+                                            >🗑️</button>
+                                            <div onclick="app.viewSession(${index})" style="cursor: pointer;">
+                                                ${isCompleted ? '<div class="session-completed-badge">✓ Effectuée</div>' : ''}
+                                                <h3 class="text-white mb-2" style="font-size: 1.2rem;">${session.nom}</h3>
+                                                <div class="mb-2">
+                                                    <span class="badge badge-${session.type.toLowerCase().replace(/ /g, '-')}">${session.type}</span>
+                                                </div>
+                                                <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">💪 ${muscles.join(', ')}</div>
+                                                <div class="text-white" style="opacity: 0.7; font-size: 0.85rem; margin-top: 0.5rem;">📋 ${nbExercices} exercice${nbExercices > 1 ? 's' : ''}</div>
                                             </div>
-                                            <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">💪 ${muscles.join(', ')}</div>
-                                            <div class="text-white" style="opacity: 0.7; font-size: 0.85rem; margin-top: 0.5rem;">📋 ${nbExercices} exercice${nbExercices > 1 ? 's' : ''}</div>
                                         </div>
                                     `;
                                 }).join('')}
@@ -3398,25 +3405,6 @@
                             </div>
                         </div>
                         
-                        <div class="mb-4">
-                            <label class="text-white mb-2" style="display: block; font-weight: 600; font-size: 1.1rem;">Forme d'entraînement *</label>
-                            <select class="input" id="session-forme-step1" style="font-size: 1.1rem;">
-                                <option value="Séries droites" ${this.sessionFormeTemp === 'Séries droites' ? 'selected' : ''}>📊 Séries droites</option>
-                                <option value="Pyramidal ascendant" ${this.sessionFormeTemp === 'Pyramidal ascendant' ? 'selected' : ''}>📈 Pyramidal ascendant</option>
-                                <option value="Pyramidal descendant" ${this.sessionFormeTemp === 'Pyramidal descendant' ? 'selected' : ''}>📉 Pyramidal descendant</option>
-                                <option value="Dégressif" ${this.sessionFormeTemp === 'Dégressif' ? 'selected' : ''}>⬇️ Dégressif (Drop sets)</option>
-                                <option value="Superset" ${this.sessionFormeTemp === 'Superset' ? 'selected' : ''}>🔗 Superset</option>
-                                <option value="Biset" ${this.sessionFormeTemp === 'Biset' ? 'selected' : ''}>➕ Biset</option>
-                                <option value="Triset" ${this.sessionFormeTemp === 'Triset' ? 'selected' : ''}>➕➕ Triset</option>
-                                <option value="Circuit" ${this.sessionFormeTemp === 'Circuit' ? 'selected' : ''}>🔄 Circuit training</option>
-                                <option value="Rest-pause" ${this.sessionFormeTemp === 'Rest-pause' ? 'selected' : ''}>⏸️ Rest-pause</option>
-                                <option value="Séries longues" ${this.sessionFormeTemp === 'Séries longues' ? 'selected' : ''}>⏱️ Séries longues</option>
-                            </select>
-                            <div class="text-white" style="opacity: 0.6; font-size: 0.85rem; margin-top: 0.5rem;">
-                                📖 Défini la structure générale de ta séance (voir onglet Cours pour les détails)
-                            </div>
-                        </div>
-                        
                         <button type="button" class="btn btn-success" onclick="app.validateStep1()" style="width: 100%; font-size: 1.2rem; padding: 1rem;">
                             ✅ Valider et passer aux exercices →
                         </button>
@@ -3431,7 +3419,7 @@
                         <div class="flex justify-between items-center">
                             <div>
                                 <div class="text-cyan" style="font-weight: 600; font-size: 1.1rem;">📝 ${this.sessionNomTemp}</div>
-                                <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">${this.sessionMobileTemp} • ${this.sessionFormeTemp}</div>
+                                <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">${this.sessionMobileTemp}</div>
                             </div>
                             <button type="button" class="btn btn-secondary" onclick="app.backToStep1()" style="padding: 0.5rem 1rem;">✏️ Modifier</button>
                         </div>
@@ -3471,35 +3459,51 @@
                         </div>
                         
                         <div id="exercice-details-container" style="display: none;">
+                            <div class="mb-3">
+                                <label class="text-white mb-1" style="display: block; font-weight: 600;">3. Forme d'entraînement</label>
+                                <select class="input" id="exercice-forme">
+                                    <option value="Séries droites">📊 Séries droites</option>
+                                    <option value="Pyramidal ascendant">📈 Pyramidal ascendant</option>
+                                    <option value="Pyramidal descendant">📉 Pyramidal descendant</option>
+                                    <option value="Dégressif">⬇️ Dégressif (Drop sets)</option>
+                                    <option value="Superset">🔗 Superset</option>
+                                    <option value="Biset">➕ Biset</option>
+                                    <option value="Triset">➕➕ Triset</option>
+                                    <option value="Circuit">🔄 Circuit training</option>
+                                    <option value="Rest-pause">⏸️ Rest-pause</option>
+                                    <option value="Séries longues">⏱️ Séries longues</option>
+                                </select>
+                            </div>
+                            
                             <div class="grid grid-cols-2 gap-3 mb-3">
                                 <div>
-                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">3. Séries</label>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">4. Séries</label>
                                     <input type="number" class="input" id="exercice-series" value="4" min="1" max="10">
                                 </div>
                                 <div>
-                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">4. Répétitions</label>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">5. Répétitions</label>
                                     <input type="number" class="input" id="exercice-reps" value="10" min="1" max="50">
                                 </div>
                             </div>
                             
                             <div class="grid grid-cols-2 gap-3 mb-3">
                                 <div>
-                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">5. Charge théorique (kg)</label>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">6. Charge théorique (kg)</label>
                                     <input type="number" class="input" id="exercice-charge-theo" placeholder="Auto si 1RM" step="0.5">
                                 </div>
                                 <div>
-                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">6. Charge réelle (kg)</label>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">7. Charge réelle (kg)</label>
                                     <input type="number" class="input" id="exercice-charge-reelle" placeholder="À charger" step="0.5">
                                 </div>
                             </div>
                             
                             <div class="grid grid-cols-2 gap-3 mb-3">
                                 <div>
-                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">7. Tempo (optionnel)</label>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">8. Tempo (optionnel)</label>
                                     <input type="text" class="input" id="exercice-tempo" placeholder="Ex: 3-1-1">
                                 </div>
                                 <div>
-                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">8. Récup (sec)</label>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">9. Récup (sec)</label>
                                     <input type="number" class="input" id="exercice-recup" value="90" min="0" max="600">
                                 </div>
                             </div>
@@ -3522,6 +3526,7 @@
                                     </div>
                                     <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">
                                         <span style="color: var(--primary-color);">💪 ${ex.muscle}</span> • 
+                                        <span style="color: #a855f7;">📊 ${ex.forme || 'Séries droites'}</span> • 
                                         ${ex.series}×${ex.reps} • 
                                         ${ex.chargeReelle ? ex.chargeReelle + 'kg' : 'PDC'} • 
                                         ${ex.recup}s repos
@@ -3563,7 +3568,6 @@
             validateStep1() {
                 const nom = document.getElementById('session-name-step1').value.trim();
                 const mobile = document.getElementById('session-mobile-step1').value;
-                const forme = document.getElementById('session-forme-step1').value;
                 
                 if (!nom) {
                     alert('⚠️ Entre un nom pour la séance');
@@ -3573,13 +3577,12 @@
                 // Sauvegarder les données temporaires
                 this.sessionNomTemp = nom;
                 this.sessionMobileTemp = mobile;
-                this.sessionFormeTemp = forme;
                 
                 // Passer à l'étape 2
                 this.sessionStep = 2;
                 this.render();
                 
-                console.log('✅ Étape 1 validée:', nom, mobile, forme);
+                console.log('✅ Étape 1 validée:', nom, mobile);
             }
 
             backToStep1() {
@@ -3597,7 +3600,6 @@
                 const session = {
                     nom: this.sessionNomTemp,
                     type: this.sessionMobileTemp,
-                    forme: this.sessionFormeTemp,
                     exercicesDetails: [...this.exercicesDetails],
                     dateCreation: new Date().toISOString()
                 };
@@ -3628,7 +3630,6 @@
                 this.sessionStep = 1;
                 this.sessionNomTemp = '';
                 this.sessionMobileTemp = 'Hypertrophie';
-                this.sessionFormeTemp = 'Séries droites';
                 
                 // Retour aux séances
                 this.currentView = 'dashboard';
@@ -3789,6 +3790,7 @@
                 const muscle = document.getElementById('exercice-muscle').value;
                 const selectValue = document.getElementById('exercice-name-select').value;
                 const customValue = document.getElementById('exercice-name-custom').value.trim();
+                const forme = document.getElementById('exercice-forme').value;
                 const series = parseInt(document.getElementById('exercice-series').value);
                 const reps = parseInt(document.getElementById('exercice-reps').value);
                 const chargeTheo = parseFloat(document.getElementById('exercice-charge-theo').value) || null;
@@ -3812,6 +3814,7 @@
                 const exercice = {
                     muscle,
                     nom: nomExercice,
+                    forme,
                     series,
                     reps,
                     chargeTheo,
@@ -3827,6 +3830,7 @@
                 document.getElementById('exercice-muscle').value = '';
                 document.getElementById('exercice-name-select').innerHTML = '<option value="">-- Choisir un exercice --</option>';
                 document.getElementById('exercice-name-custom').value = '';
+                document.getElementById('exercice-forme').value = 'Séries droites';
                 document.getElementById('exercice-series').value = '4';
                 document.getElementById('exercice-reps').value = '10';
                 document.getElementById('exercice-charge-theo').value = '';
@@ -5524,6 +5528,29 @@
             deleteHistory(id) {
                 if (confirm('⚠️ Supprimer cette séance de l\'historique ?\n\nCette action est irréversible.')) {
                     this.sessionHistory = this.sessionHistory.filter(h => h.id !== id);
+                    this.saveSessionHistory();
+                    this.render();
+                }
+            }
+
+            deleteSession(index) {
+                const session = this.sessions[index];
+                if (confirm(`⚠️ Supprimer la séance "${session.nom}" ?\n\nCette action est irréversible.\n\nAttention : L'historique des séances effectuées sera également supprimé.`)) {
+                    // Supprimer la séance
+                    this.sessions.splice(index, 1);
+                    
+                    // Supprimer toutes les entrées d'historique liées à cette séance
+                    this.sessionHistory = this.sessionHistory.filter(h => h.sessionIndex !== index);
+                    
+                    // Mettre à jour les index des séances suivantes dans l'historique
+                    this.sessionHistory = this.sessionHistory.map(h => {
+                        if (h.sessionIndex > index) {
+                            return { ...h, sessionIndex: h.sessionIndex - 1 };
+                        }
+                        return h;
+                    });
+                    
+                    this.saveSessions();
                     this.saveSessionHistory();
                     this.render();
                 }
