@@ -1681,7 +1681,28 @@
             loadSessionHistory() {
                 if (!this.currentUser) return;
                 const result = storage.get('sessionHistory');
-                if (result.exists) this.sessionHistory = JSON.parse(result.value);
+                if (result.exists) {
+                    this.sessionHistory = JSON.parse(result.value);
+                    
+                    // MIGRATION : Ajouter des id aux anciennes séances qui n'en ont pas
+                    let needsSave = false;
+                    this.sessionHistory = this.sessionHistory.map(entry => {
+                        if (!entry.id) {
+                            needsSave = true;
+                            return {
+                                ...entry,
+                                id: Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9)
+                            };
+                        }
+                        return entry;
+                    });
+                    
+                    // Sauvegarder si des id ont été ajoutés
+                    if (needsSave) {
+                        this.saveSessionHistory();
+                        console.log('✅ Migration : IDs ajoutés aux séances de l\'historique');
+                    }
+                }
             }
 
             saveSessionHistory() { storage.save('sessionHistory', this.sessionHistory); }
@@ -2565,9 +2586,9 @@
                                             </div>
                                             <div class="flex gap-2 items-center">
                                                 <span class="badge badge-${sessionType.toLowerCase()}">${sessionType}</span>
+                                                <button class="delete-btn" onclick="app.deleteHistory('${entry.id}')" title="Supprimer cette séance">🗑️</button>
                                                 ${IS_COACH_MODE ? `
                                                     <button class="edit-btn" onclick="app.editHistory('${entry.id}')">✏️</button>
-                                                    <button class="delete-btn" onclick="app.deleteHistory('${entry.id}')">🗑️</button>
                                                 ` : ''}
                                             </div>
                                         </div>
@@ -4076,6 +4097,7 @@
             markSessionCompleted() {
                 const notes = document.getElementById('session-notes').value.trim();
                 const historyEntry = {
+                    id: Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9), // ID unique
                     sessionIndex: this.currentSession,
                     completed: true,
                     completedAt: new Date().toISOString(),
@@ -5022,6 +5044,7 @@
                 
                 // Ajouter à l'historique
                 const historyEntry = {
+                    id: Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9), // ID unique
                     sessionIndex: this.currentSession,
                     completed: completedCount === session.exercicesDetails.length,
                     completedAt: new Date().toISOString(),
@@ -5499,9 +5522,7 @@
             }
 
             deleteHistory(id) {
-                if (!IS_COACH_MODE) return;
-                
-                if (confirm('Êtes-vous sûr de vouloir supprimer cette entrée de l\'historique ?')) {
+                if (confirm('⚠️ Supprimer cette séance de l\'historique ?\n\nCette action est irréversible.')) {
                     this.sessionHistory = this.sessionHistory.filter(h => h.id !== id);
                     this.saveSessionHistory();
                     this.render();
