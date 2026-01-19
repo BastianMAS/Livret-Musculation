@@ -1426,6 +1426,72 @@
                 }
             ],
 
+            // Configuration MOBILES × FORMES (paramètres auto)
+            mobilesFormes: {
+                "Force Maximale": {
+                    formes: ["Séries droites", "Pyramidal ascendant", "Pyramidal descendant", "Rest-pause"],
+                    params: {
+                        "Séries droites": { series: 5, reps: "3-5", intensite: "85-95%", tempo: "2-0-X-1", recup: 240 },
+                        "Pyramidal ascendant": { series: 5, reps: "6-5-4-3-2", intensite: "75-95%", tempo: "2-0-X-1", recup: 240 },
+                        "Pyramidal descendant": { series: 5, reps: "2-3-4-5-6", intensite: "95-75%", tempo: "2-0-X-1", recup: 240 },
+                        "Rest-pause": { series: 4, reps: "5+2+1", intensite: "85-90%", tempo: "2-0-X-1", recup: 270 }
+                    }
+                },
+                "Hypertrophie": {
+                    formes: ["Séries droites", "Pyramidal ascendant", "Pyramidal descendant", "Dégressif", "Superset", "Biset", "Triset", "Rest-pause", "Séries longues"],
+                    params: {
+                        "Séries droites": { series: 4, reps: "8-12", intensite: "70-80%", tempo: "3-0-1-0", recup: 90 },
+                        "Pyramidal ascendant": { series: 4, reps: "12-10-8-6", intensite: "60-80%", tempo: "3-0-1-0", recup: 90 },
+                        "Pyramidal descendant": { series: 4, reps: "6-8-10-12", intensite: "80-60%", tempo: "3-0-1-0", recup: 90 },
+                        "Dégressif": { series: 3, reps: "10-8-8", intensite: "75-55-40%", tempo: "2-0-1-0", recup: 180 },
+                        "Superset": { series: 4, reps: "10-12", intensite: "65-75%", tempo: "2-0-1-0", recup: 100 },
+                        "Biset": { series: 4, reps: "8-10", intensite: "70-65%", tempo: "3-0-1-0", recup: 120 },
+                        "Triset": { series: 3, reps: "8-10-12", intensite: "70-65-60%", tempo: "3-0-1-0", recup: 150 },
+                        "Rest-pause": { series: 3, reps: "8+3+2", intensite: "75-80%", tempo: "2-0-1-0", recup: 180 },
+                        "Séries longues": { series: 3, reps: "15-25", intensite: "55-65%", tempo: "3-1-1-1", recup: 75 }
+                    }
+                },
+                "Force Explosive": {
+                    formes: ["Séries droites", "Rest-pause"],
+                    params: {
+                        "Séries droites": { series: 8, reps: "3-6", intensite: "50-70%", tempo: "X-0-X-0", recup: 150 },
+                        "Rest-pause": { series: 5, reps: "5+3", intensite: "50-60%", tempo: "X-0-X-0", recup: 150 }
+                    }
+                },
+                "Endurance de Force": {
+                    formes: ["Séries droites", "Circuit", "Séries longues", "Superset"],
+                    params: {
+                        "Séries droites": { series: 4, reps: "12-20", intensite: "50-70%", tempo: "2-0-1-0", recup: 75 },
+                        "Circuit": { series: 3, reps: "12-15", intensite: "55-65%", tempo: "2-0-1-0", recup: 20 },
+                        "Séries longues": { series: 3, reps: "20-30", intensite: "50-60%", tempo: "2-0-1-0", recup: 50 },
+                        "Superset": { series: 3, reps: "12-15", intensite: "55-65%", tempo: "2-0-1-0", recup: 75 }
+                    }
+                },
+                "Endurance Musculaire": {
+                    formes: ["Séries longues", "Circuit", "Séries droites"],
+                    params: {
+                        "Séries longues": { series: 3, reps: "25-50", intensite: "30-50%", tempo: "1-0-1-0", recup: 45 },
+                        "Circuit": { series: 4, reps: "15-20", intensite: "30-50%", tempo: "1-0-1-0", recup: 15 },
+                        "Séries droites": { series: 3, reps: "20-30", intensite: "40-50%", tempo: "2-0-1-0", recup: 50 }
+                    }
+                },
+                "Personnalisé": {
+                    formes: ["Séries droites", "Pyramidal ascendant", "Pyramidal descendant", "Dégressif", "Superset", "Biset", "Triset", "Circuit", "Rest-pause", "Séries longues"],
+                    params: {
+                        "Séries droites": { series: 4, reps: "10", intensite: "70%", tempo: "2-0-1-0", recup: 90 },
+                        "Pyramidal ascendant": { series: 4, reps: "12-10-8-6", intensite: "Variable", tempo: "2-0-1-0", recup: 90 },
+                        "Pyramidal descendant": { series: 4, reps: "6-8-10-12", intensite: "Variable", tempo: "2-0-1-0", recup: 90 },
+                        "Dégressif": { series: 3, reps: "10-8-8", intensite: "Variable", tempo: "2-0-1-0", recup: 120 },
+                        "Superset": { series: 3, reps: "10-12", intensite: "Variable", tempo: "2-0-1-0", recup: 90 },
+                        "Biset": { series: 3, reps: "10", intensite: "Variable", tempo: "2-0-1-0", recup: 90 },
+                        "Triset": { series: 3, reps: "10", intensite: "Variable", tempo: "2-0-1-0", recup: 120 },
+                        "Circuit": { series: 3, reps: "12-15", intensite: "Variable", tempo: "2-0-1-0", recup: 30 },
+                        "Rest-pause": { series: 3, reps: "8+3+2", intensite: "Variable", tempo: "2-0-1-0", recup: 150 },
+                        "Séries longues": { series: 3, reps: "20-30", intensite: "Variable", tempo: "2-0-1-0", recup: 60 }
+                    }
+                }
+            },
+
             hygiene: {
                 avant: [
                     {titre: "Échauffement (10-15 min)", contenu: "Cardio léger puis mouvements dynamiques spécifiques."},
@@ -3461,28 +3527,22 @@
                         <div id="exercice-details-container" style="display: none;">
                             <div class="mb-3">
                                 <label class="text-white mb-1" style="display: block; font-weight: 600;">3. Forme d'entraînement</label>
-                                <select class="input" id="exercice-forme">
-                                    <option value="Séries droites">📊 Séries droites</option>
-                                    <option value="Pyramidal ascendant">📈 Pyramidal ascendant</option>
-                                    <option value="Pyramidal descendant">📉 Pyramidal descendant</option>
-                                    <option value="Dégressif">⬇️ Dégressif (Drop sets)</option>
-                                    <option value="Superset">🔗 Superset</option>
-                                    <option value="Biset">➕ Biset</option>
-                                    <option value="Triset">➕➕ Triset</option>
-                                    <option value="Circuit">🔄 Circuit training</option>
-                                    <option value="Rest-pause">⏸️ Rest-pause</option>
-                                    <option value="Séries longues">⏱️ Séries longues</option>
+                                <select class="input" id="exercice-forme" onchange="app.updateFormeParams()">
+                                    ${this.getFormesOptions()}
                                 </select>
+                                <div class="text-white" style="opacity: 0.6; font-size: 0.75rem; margin-top: 0.5rem;">
+                                    💡 Les paramètres s'adaptent automatiquement selon la forme
+                                </div>
                             </div>
                             
                             <div class="grid grid-cols-2 gap-3 mb-3">
                                 <div>
                                     <label class="text-white mb-1" style="display: block; font-weight: 600;">4. Séries</label>
-                                    <input type="number" class="input" id="exercice-series" value="4" min="1" max="10">
+                                    <input type="number" class="input" id="exercice-series" value="4" min="1" max="15">
                                 </div>
                                 <div>
                                     <label class="text-white mb-1" style="display: block; font-weight: 600;">5. Répétitions</label>
-                                    <input type="number" class="input" id="exercice-reps" value="10" min="1" max="50">
+                                    <input type="text" class="input" id="exercice-reps" value="10" placeholder="Ex: 10 ou 12-10-8-6">
                                 </div>
                             </div>
                             
@@ -3697,6 +3757,9 @@
                 if (select.value) {
                     detailsContainer.style.display = 'block';
                     
+                    // Initialiser les paramètres de forme
+                    this.updateFormeParams();
+                    
                     // Chercher si un 1RM existe pour cet exercice
                     const exerciceName = select.value === 'CUSTOM' ? customInput.value : select.value;
                     this.showRMSuggestions(exerciceName);
@@ -3786,13 +3849,59 @@
                 }, 1000);
             }
 
+            getFormesOptions() {
+                // Récupérer les formes compatibles avec le mobile sélectionné
+                const mobile = this.sessionMobileTemp || 'Hypertrophie';
+                const formesDisponibles = coursData.mobilesFormes[mobile]?.formes || [];
+                
+                const icones = {
+                    "Séries droites": "📊",
+                    "Pyramidal ascendant": "📈",
+                    "Pyramidal descendant": "📉",
+                    "Dégressif": "⬇️",
+                    "Superset": "🔗",
+                    "Biset": "➕",
+                    "Triset": "➕➕",
+                    "Circuit": "🔄",
+                    "Rest-pause": "⏸️",
+                    "Séries longues": "⏱️"
+                };
+                
+                return formesDisponibles.map(forme => 
+                    `<option value="${forme}">${icones[forme] || '📊'} ${forme}</option>`
+                ).join('');
+            }
+
+            updateFormeParams() {
+                const mobile = this.sessionMobileTemp || 'Hypertrophie';
+                const forme = document.getElementById('exercice-forme').value;
+                const params = coursData.mobilesFormes[mobile]?.params[forme];
+                
+                if (params) {
+                    // Auto-remplir les champs
+                    document.getElementById('exercice-series').value = params.series;
+                    document.getElementById('exercice-reps').value = params.reps;
+                    document.getElementById('exercice-tempo').value = params.tempo;
+                    document.getElementById('exercice-recup').value = params.recup;
+                    
+                    // Flash visuel pour montrer le changement
+                    ['exercice-series', 'exercice-reps', 'exercice-tempo', 'exercice-recup'].forEach(id => {
+                        const el = document.getElementById(id);
+                        el.style.background = 'rgba(6, 182, 212, 0.2)';
+                        setTimeout(() => {
+                            el.style.background = '';
+                        }, 800);
+                    });
+                }
+            }
+
             addExerciceDetail() {
                 const muscle = document.getElementById('exercice-muscle').value;
                 const selectValue = document.getElementById('exercice-name-select').value;
                 const customValue = document.getElementById('exercice-name-custom').value.trim();
                 const forme = document.getElementById('exercice-forme').value;
                 const series = parseInt(document.getElementById('exercice-series').value);
-                const reps = parseInt(document.getElementById('exercice-reps').value);
+                const reps = document.getElementById('exercice-reps').value; // Maintenant c'est un string
                 const chargeTheo = parseFloat(document.getElementById('exercice-charge-theo').value) || null;
                 const chargeReelle = parseFloat(document.getElementById('exercice-charge-reelle').value) || null;
                 const tempo = document.getElementById('exercice-tempo').value.trim() || null;
