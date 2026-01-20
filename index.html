@@ -1066,6 +1066,17 @@
                     console.error('Erreur de lecture:', e);
                     return { exists: false, value: null };
                 }
+            },
+            
+            remove: (key, isGlobal = false) => {
+                try {
+                    const fullKey = isGlobal ? key : `user-${app.currentUser}-${key}`;
+                    localStorage.removeItem(fullKey);
+                    return true;
+                } catch (e) {
+                    console.error('Erreur de suppression:', e);
+                    return false;
+                }
             }
         };
 
