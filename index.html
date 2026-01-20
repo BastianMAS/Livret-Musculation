@@ -1773,6 +1773,40 @@
 
             saveSessionHistory() { storage.save('sessionHistory', this.sessionHistory); }
 
+            // Sauvegarde automatique de la séance en cours de création
+            saveSessionEnCours() {
+                const sessionEnCours = {
+                    step: this.sessionStep,
+                    nom: this.sessionNomTemp,
+                    mobile: this.sessionMobileTemp,
+                    exercicesDetails: [...this.exercicesDetails],
+                    timestamp: Date.now()
+                };
+                storage.save('sessionEnCours', sessionEnCours);
+                console.log('💾 Séance en cours sauvegardée');
+            }
+
+            loadSessionEnCours() {
+                const result = storage.get('sessionEnCours');
+                if (result.exists) {
+                    const data = JSON.parse(result.value);
+                    // Vérifier que la séance n'est pas trop ancienne (>24h)
+                    const age = Date.now() - data.timestamp;
+                    if (age < 24 * 60 * 60 * 1000) {
+                        return data;
+                    } else {
+                        // Supprimer si trop ancienne
+                        this.clearSessionEnCours();
+                    }
+                }
+                return null;
+            }
+
+            clearSessionEnCours() {
+                storage.remove('sessionEnCours');
+                console.log('🗑️ Séance en cours supprimée');
+            }
+
             loadCalculatedCharges() {
                 if (!this.currentUser) return;
                 const result = storage.get('calculatedCharges');
@@ -3640,6 +3674,10 @@
                 
                 // Passer à l'étape 2
                 this.sessionStep = 2;
+                
+                // Sauvegarde automatique
+                this.saveSessionEnCours();
+                
                 this.render();
                 
                 console.log('✅ Étape 1 validée:', nom, mobile);
@@ -3676,6 +3714,9 @@
                 
                 this.saveSessions();
                 
+                // Nettoyer la séance en cours
+                this.clearSessionEnCours();
+                
                 // Passer à l'étape 3 (confirmation)
                 this.sessionStep = 3;
                 this.render();
@@ -3690,6 +3731,9 @@
                 this.sessionStep = 1;
                 this.sessionNomTemp = '';
                 this.sessionMobileTemp = 'Hypertrophie';
+                
+                // Nettoyer la séance en cours
+                this.clearSessionEnCours();
                 
                 // Retour aux séances
                 this.currentView = 'dashboard';
@@ -3935,6 +3979,9 @@
                 
                 this.exercicesDetails.push(exercice);
                 
+                // Sauvegarde automatique
+                this.saveSessionEnCours();
+                
                 // Réinitialiser le formulaire d'exercice sans recharger
                 document.getElementById('exercice-muscle').value = '';
                 document.getElementById('exercice-name-select').innerHTML = '<option value="">-- Choisir un exercice --</option>';
@@ -3959,6 +4006,10 @@
             removeExerciceDetail(index) {
                 if (confirm('Supprimer cet exercice de la séance ?')) {
                     this.exercicesDetails.splice(index, 1);
+                    
+                    // Sauvegarde automatique
+                    this.saveSessionEnCours();
+                    
                     this.render();
                 }
             }
@@ -4030,6 +4081,38 @@
             }
 
             createNewSession() {
+                // Vérifier s'il y a une séance en cours
+                const sessionEnCours = this.loadSessionEnCours();
+                
+                if (sessionEnCours) {
+                    // Proposer de continuer ou recommencer
+                    const continuer = confirm(
+                        `🔄 Tu as une séance en cours de création :\n\n` +
+                        `📝 ${sessionEnCours.nom}\n` +
+                        `🏋️ ${sessionEnCours.mobile}\n` +
+                        `💪 ${sessionEnCours.exercicesDetails.length} exercice(s)\n\n` +
+                        `Veux-tu continuer cette séance ?\n\n` +
+                        `[OK] = Continuer\n[Annuler] = Recommencer à zéro`
+                    );
+                    
+                    if (continuer) {
+                        // Restaurer la séance en cours
+                        this.sessionStep = sessionEnCours.step;
+                        this.sessionNomTemp = sessionEnCours.nom;
+                        this.sessionMobileTemp = sessionEnCours.mobile;
+                        this.exercicesDetails = sessionEnCours.exercicesDetails;
+                        this.currentSession = null;
+                        this.currentView = 'session-form';
+                        this.render();
+                        console.log('🔄 Séance en cours restaurée');
+                        return;
+                    } else {
+                        // Supprimer et recommencer
+                        this.clearSessionEnCours();
+                    }
+                }
+                
+                // Nouvelle séance
                 this.currentSession = null;
                 this.exercicesDetails = [];
                 this.sessionStep = 1;
