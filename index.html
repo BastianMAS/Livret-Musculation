@@ -2571,11 +2571,13 @@
                                     const isCompleted = this.sessionHistory.some(h => h.sessionIndex === index && h.completed);
                                     
                                     // Gérer ancienne et nouvelle structure
-                                    const exercices = session.exercicesDetailles || session.exercices || [];
+                                    const exercices = session.exercicesDetails || session.exercicesDetailles || session.exercices || [];
                                     const nbExercices = exercices.length;
-                                    const muscles = session.exercicesDetailles 
-                                        ? [...new Set(session.exercicesDetailles.map(e => e.muscle))]
-                                        : (session.muscles || []);
+                                    const muscles = session.exercicesDetails 
+                                        ? [...new Set(session.exercicesDetails.map(e => e.muscle))]
+                                        : (session.exercicesDetailles 
+                                            ? [...new Set(session.exercicesDetailles.map(e => e.muscle))]
+                                            : (session.muscles || []));
                                     
                                     return `
                                         <div class="session-card ${isCompleted ? 'completed' : ''}" style="position: relative;">
