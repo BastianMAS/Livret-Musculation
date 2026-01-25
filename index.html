@@ -1692,6 +1692,7 @@
                 this.sessionMobileTemp = 'Hypertrophie'; // Mobile temporaire
                 this.sessionFormeTemp = 'Séries droites'; // Forme d'entraînement temporaire
                 this.editingRM = null; // Index du RM en cours d'édition
+                this.editingExerciceIndex = null; // Index de l'exercice en cours d'édition (null = ajout)
                 this.init();
                 this.initOfflineMode();
             }
@@ -3615,9 +3616,14 @@
                                 </div>
                             </div>
                             
-                            <button type="button" class="btn btn-primary" onclick="app.addExerciceDetail()" style="width: 100%;">
-                                ➕ Ajouter cet exercice
+                            <button type="button" class="btn ${this.editingExerciceIndex !== null ? 'btn-warning' : 'btn-primary'}" onclick="app.addExerciceDetail()" style="width: 100%;">
+                                ${this.editingExerciceIndex !== null ? '✏️ Mettre à jour l\'exercice' : '➕ Ajouter cet exercice'}
                             </button>
+                            ${this.editingExerciceIndex !== null ? `
+                                <button type="button" class="btn btn-secondary" onclick="app.cancelEditExercice()" style="width: 100%; margin-top: 0.5rem;">
+                                    ❌ Annuler la modification
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                     
@@ -3629,7 +3635,10 @@
                                 <div style="background: rgba(15, 23, 42, 0.8); padding: 1rem; border-radius: 0.75rem; margin-bottom: 1rem; border-left: 4px solid var(--primary-color);">
                                     <div class="flex justify-between items-center mb-2">
                                         <div class="text-white" style="font-weight: 600; font-size: 1.1rem;">${index + 1}. ${ex.nom}</div>
-                                        <button type="button" class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="app.removeExerciceDetail(${index})">🗑️</button>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <button type="button" class="btn btn-warning" style="padding: 0.5rem 1rem;" onclick="app.editExerciceDetail(${index})">✏️</button>
+                                            <button type="button" class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="app.removeExerciceDetail(${index})">🗑️</button>
+                                        </div>
                                     </div>
                                     <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">
                                         <span style="color: var(--primary-color);">💪 ${ex.muscle}</span> • 
@@ -3990,7 +3999,17 @@
                     completed: false
                 };
                 
-                this.exercicesDetails.push(exercice);
+                // Mode édition ou ajout
+                if (this.editingExerciceIndex !== null) {
+                    // MODIFICATION
+                    this.exercicesDetails[this.editingExerciceIndex] = exercice;
+                    this.editingExerciceIndex = null;
+                    console.log('✏️ Exercice modifié:', nomExercice);
+                } else {
+                    // AJOUT
+                    this.exercicesDetails.push(exercice);
+                    console.log('✅ Exercice ajouté:', nomExercice);
+                }
                 
                 // Sauvegarde automatique
                 this.saveSessionEnCours();
@@ -4012,13 +4031,19 @@
                 
                 // Recharger pour afficher la liste mise à jour
                 this.render();
-                
-                console.log('✅ Exercice ajouté:', nomExercice);
             }
 
             removeExerciceDetail(index) {
                 if (confirm('Supprimer cet exercice de la séance ?')) {
                     this.exercicesDetails.splice(index, 1);
+                    
+                    // Si on était en train d'éditer cet exercice, annuler l'édition
+                    if (this.editingExerciceIndex === index) {
+                        this.editingExerciceIndex = null;
+                    } else if (this.editingExerciceIndex > index) {
+                        // Ajuster l'index si on supprime un exercice avant celui qu'on édite
+                        this.editingExerciceIndex--;
+                    }
                     
                     // Sauvegarde automatique
                     this.saveSessionEnCours();
@@ -4028,8 +4053,74 @@
             }
 
             editExerciceDetail(index) {
-                // TODO: Implémenter l'édition (pour l'instant juste supprimer et re-ajouter)
-                alert('✏️ Pour modifier : supprime l\'exercice et ajoute-le à nouveau avec les bonnes valeurs');
+                const ex = this.exercicesDetails[index];
+                
+                // Marquer qu'on est en mode édition
+                this.editingExerciceIndex = index;
+                
+                // Pré-remplir le formulaire avec les données de l'exercice
+                document.getElementById('exercice-muscle').value = ex.muscle;
+                
+                // Déclencher le changement de muscle pour charger la liste d'exercices
+                this.updateExercicesList();
+                
+                // Attendre que la liste soit chargée avant de sélectionner l'exercice
+                setTimeout(() => {
+                    const select = document.getElementById('exercice-name-select');
+                    const options = Array.from(select.options);
+                    const matchingOption = options.find(opt => opt.value === ex.nom);
+                    
+                    if (matchingOption) {
+                        select.value = ex.nom;
+                    } else {
+                        // Si l'exercice n'est pas dans la liste (custom), utiliser l'option custom
+                        select.value = 'CUSTOM';
+                        document.getElementById('exercice-name-custom').value = ex.nom;
+                        document.getElementById('exercice-name-custom').style.display = 'block';
+                    }
+                    
+                    // Déclencher l'affichage du formulaire de détails
+                    this.toggleCustomExercice();
+                    
+                    // Pré-remplir tous les champs
+                    document.getElementById('exercice-forme').value = ex.forme || 'Séries droites';
+                    document.getElementById('exercice-series').value = ex.series;
+                    document.getElementById('exercice-reps').value = ex.reps;
+                    document.getElementById('exercice-charge-theo').value = ex.chargeTheo || '';
+                    document.getElementById('exercice-charge-reelle').value = ex.chargeReelle || '';
+                    document.getElementById('exercice-tempo').value = ex.tempo || '';
+                    document.getElementById('exercice-recup').value = ex.recup;
+                    
+                    // Scroller vers le formulaire
+                    document.getElementById('exercice-details-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+                
+                this.render();
+                
+                console.log('✏️ Édition de:', ex.nom);
+            }
+
+            cancelEditExercice() {
+                this.editingExerciceIndex = null;
+                
+                // Réinitialiser le formulaire
+                document.getElementById('exercice-muscle').value = '';
+                document.getElementById('exercice-name-select').innerHTML = '<option value="">-- Choisir un exercice --</option>';
+                document.getElementById('exercice-name-custom').value = '';
+                document.getElementById('exercice-forme').value = 'Séries droites';
+                document.getElementById('exercice-series').value = '4';
+                document.getElementById('exercice-reps').value = '10';
+                document.getElementById('exercice-charge-theo').value = '';
+                document.getElementById('exercice-charge-reelle').value = '';
+                document.getElementById('exercice-tempo').value = '';
+                document.getElementById('exercice-recup').value = '90';
+                document.getElementById('exercice-select-container').style.display = 'none';
+                document.getElementById('exercice-name-custom').style.display = 'none';
+                document.getElementById('exercice-details-container').style.display = 'none';
+                
+                this.render();
+                
+                console.log('❌ Édition annulée');
             }
 
             finalizeSession() {
