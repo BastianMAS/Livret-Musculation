@@ -4139,17 +4139,27 @@
                 this.currentSession = index;
                 const session = this.sessions[index];
                 
-                // Charger les exercices détaillés si nouvelle structure
-                if (session.exercicesDetailles) {
-                    this.exercicesDetaillesTemp = [...session.exercicesDetailles];
+                // Charger TOUTES les données de la séance
+                this.sessionNomTemp = session.nom || '';
+                this.sessionMobileTemp = session.type || 'Hypertrophie';
+                
+                // Charger les exercices (nouvelle structure prioritaire)
+                if (session.exercicesDetails) {
+                    this.exercicesDetails = [...session.exercicesDetails];
+                } else if (session.exercicesDetailles) {
+                    // Ancienne structure avec double "l"
+                    this.exercicesDetails = [...session.exercicesDetailles];
                 } else {
-                    // Ancienne structure - pour compatibilité
-                    this.exercicesTemp = [...(session.exercices || [])];
-                    this.musclesTemp = [...(session.muscles || [])];
+                    // Très ancienne structure
+                    this.exercicesDetails = [];
                 }
                 
+                // Aller directement à l'étape 2 (édition des exercices)
+                this.sessionStep = 2;
                 this.currentView = 'session-form';
                 this.render();
+                
+                console.log('✏️ Édition séance:', session.nom);
             }
             
             toggleExerciceTermine(indexExercice) {
@@ -4958,7 +4968,13 @@
                                 </div>
                             `}
                             
-                            <!-- Bouton démarrer -->
+                            <!-- Boutons d'action -->
+                            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                <button class="btn btn-warning" onclick="app.editSession(${this.currentSession})" style="flex: 1; font-size: 1rem; padding: 0.75rem;">
+                                    ✏️ Modifier la séance
+                                </button>
+                            </div>
+                            
                             <button class="btn btn-success" onclick="app.startSession()" style="width: 100%; font-size: 1.1rem; padding: 1rem;">
                                 🏋️ ${hasHistory ? 'Refaire cette séance' : 'Démarrer la séance'}
                             </button>
@@ -5046,7 +5062,20 @@
                                     <div style="background: rgba(15, 23, 42, 0.6); padding: 1rem; border-radius: 0.5rem;">
                                         <div class="grid grid-cols-2 gap-2 text-white" style="font-size: 0.95rem;">
                                             <div><strong>Séries ×Reps:</strong> ${ex.series} × ${ex.reps}</div>
-                                            <div><strong>Charge:</strong> ${ex.chargeReelle ? ex.chargeReelle + ' kg' : 'PDC'}</div>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <strong>Charge réelle:</strong> 
+                                                <input 
+                                                    type="number" 
+                                                    class="input" 
+                                                    id="charge-live-${index}" 
+                                                    value="${ex.chargeReelle || ''}" 
+                                                    placeholder="PDC"
+                                                    step="0.5"
+                                                    onchange="app.updateChargeReelle(${index}, this.value)"
+                                                    style="width: 80px; padding: 0.25rem 0.5rem; font-size: 0.9rem; background: rgba(6, 182, 212, 0.1); border: 1px solid var(--primary-color);"
+                                                >
+                                                <span style="opacity: 0.8;">kg</span>
+                                            </div>
                                             ${ex.tempo ? `<div><strong>Tempo:</strong> ${ex.tempo}</div>` : ''}
                                             <div><strong>Récup:</strong> ${ex.recup}s</div>
                                         </div>
@@ -5087,6 +5116,20 @@
                 this.render();
                 
                 console.log(`✅ Exercice ${index + 1} ${session.exercicesDetails[index].completed ? 'terminé' : 'non terminé'}`);
+            }
+
+            updateChargeReelle(index, value) {
+                const session = this.sessions[this.currentSession];
+                if (!session || !session.exercicesDetails) return;
+                
+                // Mettre à jour la charge réelle
+                const chargeValue = value ? parseFloat(value) : null;
+                session.exercicesDetails[index].chargeReelle = chargeValue;
+                
+                // Sauvegarder automatiquement
+                this.saveSessions();
+                
+                console.log(`💪 Charge réelle mise à jour pour ${session.exercicesDetails[index].nom}: ${chargeValue || 'PDC'} kg`);
             }
 
             showSessionBilan() {
