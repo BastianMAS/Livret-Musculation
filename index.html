@@ -8,6 +8,7 @@
     <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#06b6d4">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Musculation">
@@ -4058,44 +4059,50 @@
                 // Marquer qu'on est en mode édition
                 this.editingExerciceIndex = index;
                 
-                // Pré-remplir le formulaire avec les données de l'exercice
-                document.getElementById('exercice-muscle').value = ex.muscle;
-                
-                // Déclencher le changement de muscle pour charger la liste d'exercices
-                this.updateExercicesList();
-                
-                // Attendre que la liste soit chargée avant de sélectionner l'exercice
-                setTimeout(() => {
-                    const select = document.getElementById('exercice-name-select');
-                    const options = Array.from(select.options);
-                    const matchingOption = options.find(opt => opt.value === ex.nom);
-                    
-                    if (matchingOption) {
-                        select.value = ex.nom;
-                    } else {
-                        // Si l'exercice n'est pas dans la liste (custom), utiliser l'option custom
-                        select.value = 'CUSTOM';
-                        document.getElementById('exercice-name-custom').value = ex.nom;
-                        document.getElementById('exercice-name-custom').style.display = 'block';
-                    }
-                    
-                    // Déclencher l'affichage du formulaire de détails
-                    this.toggleCustomExercice();
-                    
-                    // Pré-remplir tous les champs
-                    document.getElementById('exercice-forme').value = ex.forme || 'Séries droites';
-                    document.getElementById('exercice-series').value = ex.series;
-                    document.getElementById('exercice-reps').value = ex.reps;
-                    document.getElementById('exercice-charge-theo').value = ex.chargeTheo || '';
-                    document.getElementById('exercice-charge-reelle').value = ex.chargeReelle || '';
-                    document.getElementById('exercice-tempo').value = ex.tempo || '';
-                    document.getElementById('exercice-recup').value = ex.recup;
-                    
-                    // Scroller vers le formulaire
-                    document.getElementById('exercice-details-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-                
+                // Recharger pour afficher le bouton "Mettre à jour" au lieu de "Ajouter"
                 this.render();
+                
+                // APRÈS le render, pré-remplir le formulaire
+                setTimeout(() => {
+                    // Pré-remplir le formulaire avec les données de l'exercice
+                    document.getElementById('exercice-muscle').value = ex.muscle;
+                    
+                    // Déclencher le changement de muscle pour charger la liste d'exercices
+                    this.updateExercicesList();
+                    
+                    // Attendre que la liste soit chargée avant de sélectionner l'exercice
+                    setTimeout(() => {
+                        const select = document.getElementById('exercice-name-select');
+                        const options = Array.from(select.options);
+                        const matchingOption = options.find(opt => opt.value === ex.nom);
+                        
+                        if (matchingOption) {
+                            select.value = ex.nom;
+                        } else {
+                            // Si l'exercice n'est pas dans la liste (custom), utiliser l'option custom
+                            select.value = 'CUSTOM';
+                            document.getElementById('exercice-name-custom').value = ex.nom;
+                            document.getElementById('exercice-name-custom').style.display = 'block';
+                        }
+                        
+                        // Déclencher l'affichage du formulaire de détails
+                        this.toggleCustomExercice();
+                        
+                        // Pré-remplir tous les champs
+                        setTimeout(() => {
+                            document.getElementById('exercice-forme').value = ex.forme || 'Séries droites';
+                            document.getElementById('exercice-series').value = ex.series;
+                            document.getElementById('exercice-reps').value = ex.reps;
+                            document.getElementById('exercice-charge-theo').value = ex.chargeTheo || '';
+                            document.getElementById('exercice-charge-reelle').value = ex.chargeReelle || '';
+                            document.getElementById('exercice-tempo').value = ex.tempo || '';
+                            document.getElementById('exercice-recup').value = ex.recup;
+                            
+                            // Scroller vers le formulaire
+                            document.getElementById('exercice-details-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 50);
+                    }, 100);
+                }, 50);
                 
                 console.log('✏️ Édition de:', ex.nom);
             }
@@ -4952,6 +4959,7 @@
                 if (!session) return '';
                 
                 const exercicesDetails = session.exercicesDetails || [];
+                const sessionIndex = this.currentSession; // Variable locale pour template string
                 
                 if (exercicesDetails.length === 0) {
                     return `
@@ -5061,7 +5069,7 @@
                             
                             <!-- Boutons d'action -->
                             <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                                <button class="btn btn-warning" onclick="app.editSession(${this.currentSession})" style="flex: 1; font-size: 1rem; padding: 0.75rem;">
+                                <button class="btn btn-warning" onclick="app.editSession(${sessionIndex})" style="flex: 1; font-size: 1rem; padding: 0.75rem;">
                                     ✏️ Modifier la séance
                                 </button>
                             </div>
