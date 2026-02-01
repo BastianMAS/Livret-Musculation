@@ -1694,6 +1694,8 @@
                 this.sessionFormeTemp = 'Séries droites'; // Forme d'entraînement temporaire
                 this.editingRM = null; // Index du RM en cours d'édition
                 this.editingExerciceIndex = null; // Index de l'exercice en cours d'édition (null = ajout)
+                this.userMode = 'debutant'; // Mode utilisateur : 'debutant' ou 'avance'
+                this.needsModeSelection = false; // Afficher popup sélection mode au 1er lancement
                 this.init();
                 this.initOfflineMode();
             }
@@ -1706,6 +1708,7 @@
                 this.loadCalculatedCharges();
                 this.loadTheme();
                 this.loadObjectifs();
+                this.loadUserMode();
                 this.calculateStreaks();
                                 this.editingHistoryId = null;
                 this.render();
@@ -1915,6 +1918,141 @@
 
             saveTheme() { storage.save('theme', this.currentTheme); }
 
+            loadUserMode() {
+                if (!this.currentUser) return;
+                const result = storage.get('userMode');
+                if (result.exists) {
+                    this.userMode = result.value;
+                } else {
+                    // Premier lancement : proposer le choix
+                    this.showModeSelection();
+                }
+            }
+
+            saveUserMode() { 
+                storage.save('userMode', this.userMode);
+                console.log('💾 Mode utilisateur sauvegardé:', this.userMode);
+            }
+
+            setUserMode(mode) {
+                this.userMode = mode;
+                this.saveUserMode();
+                this.render();
+                console.log('✅ Mode changé:', mode);
+            }
+
+            showModeSelection() {
+                // Cette fonction sera appelée au premier lancement
+                // On affichera un popup de sélection après connexion
+                this.needsModeSelection = true;
+            }
+
+            renderModeSelectionPopup() {
+                const popup = document.createElement('div');
+                popup.id = 'mode-selection-popup';
+                popup.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.9);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    padding: 1rem;
+                `;
+                
+                popup.innerHTML = `
+                    <div style="background: var(--bg-medium); border-radius: 1.5rem; padding: 2rem; max-width: 500px; width: 100%; border: 2px solid var(--primary-color);">
+                        <h2 class="text-white text-center mb-4" style="font-size: 1.8rem;">👋 Bienvenue ${this.currentUser || ''} !</h2>
+                        
+                        <p class="text-white text-center mb-4" style="opacity: 0.9;">Choisis ton niveau d'utilisation :</p>
+                        
+                        <!-- Mode Débutant -->
+                        <button onclick="app.selectMode('debutant')" class="btn btn-success" style="width: 100%; padding: 1.5rem; margin-bottom: 1rem; text-align: left; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <div style="font-size: 1.3rem; font-weight: 700;">🎓 DÉBUTANT</div>
+                            <div style="opacity: 0.9; font-size: 0.9rem; font-weight: normal;">
+                                • Interface simplifiée<br>
+                                • Idéal pour apprendre<br>
+                                • Recommandé pour lycéens
+                            </div>
+                        </button>
+                        
+                        <!-- Mode Avancé -->
+                        <button onclick="app.selectMode('avance')" class="btn btn-primary" style="width: 100%; padding: 1.5rem; text-align: left; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <div style="font-size: 1.3rem; font-weight: 700;">💪 AVANCÉ</div>
+                            <div style="opacity: 0.9; font-size: 0.9rem; font-weight: normal;">
+                                • Toutes les fonctionnalités<br>
+                                • Calculs 1RM, tempo, RPE<br>
+                                • Pour pratiquants confirmés
+                            </div>
+                        </button>
+                        
+                        <p class="text-white text-center mt-4" style="opacity: 0.6; font-size: 0.85rem;">
+                            ℹ️ Tu pourras changer de mode dans les Paramètres
+                        </p>
+                    </div>
+                `;
+                
+                document.body.appendChild(popup);
+            }
+
+            selectMode(mode) {
+                this.needsModeSelection = false;
+                this.setUserMode(mode);
+                
+                // Fermer le popup
+                const popup = document.getElementById('mode-selection-popup');
+                if (popup) popup.remove();
+                
+                // Afficher message de confirmation
+                alert(mode === 'debutant' 
+                    ? '✅ Mode Débutant activé !\nInterface simplifiée.' 
+                    : '✅ Mode Avancé activé !\nToutes les fonctionnalités disponibles.');
+            }
+
+            getMobileLabel(mobileValue) {
+                // Retourne le libellé selon le mode (débutant = simplifié, avancé = technique)
+                if (this.userMode === 'debutant') {
+                    const labels = {
+                        'Force Maximale': '💪 Devenir plus fort',
+                        'Force Explosive': '⚡ Être explosif',
+                        'Hypertrophie': '🏋️ Prendre du muscle',
+                        'Endurance de Force': '🔥 Tenir longtemps',
+                        'Endurance Musculaire': '🏃 Endurance musculaire',
+                        'Personnalisé': '⚙️ Personnalisé'
+                    };
+                    return labels[mobileValue] || mobileValue;
+                } else {
+                    // Mode avancé = textes techniques
+                    const labels = {
+                        'Force Maximale': '💪 Force Maximale',
+                        'Force Explosive': '⚡ Force Explosive',
+                        'Hypertrophie': '🏋️ Hypertrophie',
+                        'Endurance de Force': '🔥 Endurance de Force',
+                        'Endurance Musculaire': '🏃 Endurance Musculaire',
+                        'Personnalisé': '⚙️ Personnalisé'
+                    };
+                    return labels[mobileValue] || mobileValue;
+                }
+            }
+
+            formatCharge(exercice) {
+                // Formater l'affichage de la charge selon le mode et les données
+                if (exercice.chargeNiveau) {
+                    // Mode débutant avec niveau
+                    return exercice.chargeNiveau;
+                } else if (exercice.chargeReelle) {
+                    // Mode avancé avec kg
+                    return exercice.chargeReelle + 'kg';
+                } else {
+                    // Poids de corps par défaut
+                    return 'PDC';
+                }
+            }
+
             applyTheme(theme) {
                 document.body.className = '';
                 if (theme !== 'cyan') document.body.classList.add(`theme-${theme}`);
@@ -1936,6 +2074,11 @@
                 } else if (this.currentView === 'dashboard') {
                     app.innerHTML = this.renderDashboard();
                     this.attachDashboardEvents();
+                    
+                    // Afficher popup sélection mode si premier lancement
+                    if (this.needsModeSelection) {
+                        this.renderModeSelectionPopup();
+                    }
                 } else if (this.currentView === 'session-form') {
                     app.innerHTML = this.renderSessionForm();
                     this.attachSessionFormEvents();
@@ -2116,7 +2259,7 @@
                             <div class="flex gap-2 mb-4" style="overflow-x: auto;">
                                 <button class="tab-btn ${this.currentTab === 'dashboard' ? 'active' : ''}" onclick="app.switchTab('dashboard')">📊 Dashboard</button>
                                 <button class="tab-btn ${this.currentTab === 'profil' ? 'active' : ''}" onclick="app.switchTab('profil')">👤 Profil</button>
-                                <button class="tab-btn ${this.currentTab === 'rm' ? 'active' : ''}" onclick="app.switchTab('rm')">🎯 1RM</button>
+                                ${this.userMode === 'avance' ? `<button class="tab-btn ${this.currentTab === 'rm' ? 'active' : ''}" onclick="app.switchTab('rm')">🎯 1RM</button>` : ''}
                                 <button class="tab-btn ${this.currentTab === 'charges' ? 'active' : ''}" onclick="app.switchTab('charges')">⚖️ Charges</button>
                                 <button class="tab-btn ${this.currentTab === 'progression' ? 'active' : ''}" onclick="app.switchTab('progression')">📊 Graphiques</button>
                                 <button class="tab-btn ${this.currentTab === 'sessions' ? 'active' : ''}" onclick="app.switchTab('sessions')">📝 Séances</button>
@@ -3506,17 +3649,21 @@
                         </div>
                         
                         <div class="mb-4">
-                            <label class="text-white mb-2" style="display: block; font-weight: 600; font-size: 1.1rem;">Mobile d'entraînement *</label>
+                            <label class="text-white mb-2" style="display: block; font-weight: 600; font-size: 1.1rem;">
+                                ${this.userMode === 'debutant' ? 'Objectif *' : 'Mobile d\'entraînement *'}
+                            </label>
                             <select class="input" id="session-mobile-step1" style="font-size: 1.1rem;">
-                                <option value="Force Maximale" ${this.sessionMobileTemp === 'Force Maximale' ? 'selected' : ''}>💪 Force Maximale</option>
-                                <option value="Force Explosive" ${this.sessionMobileTemp === 'Force Explosive' ? 'selected' : ''}>⚡ Force Explosive</option>
-                                <option value="Hypertrophie" ${this.sessionMobileTemp === 'Hypertrophie' ? 'selected' : ''}>🏋️ Hypertrophie</option>
-                                <option value="Endurance de Force" ${this.sessionMobileTemp === 'Endurance de Force' ? 'selected' : ''}>🔥 Endurance de Force</option>
-                                <option value="Endurance Musculaire" ${this.sessionMobileTemp === 'Endurance Musculaire' ? 'selected' : ''}>🏃 Endurance Musculaire</option>
-                                <option value="Personnalisé" ${this.sessionMobileTemp === 'Personnalisé' ? 'selected' : ''}>⚙️ Personnalisé</option>
+                                <option value="Force Maximale" ${this.sessionMobileTemp === 'Force Maximale' ? 'selected' : ''}>${this.getMobileLabel('Force Maximale')}</option>
+                                <option value="Force Explosive" ${this.sessionMobileTemp === 'Force Explosive' ? 'selected' : ''}>${this.getMobileLabel('Force Explosive')}</option>
+                                <option value="Hypertrophie" ${this.sessionMobileTemp === 'Hypertrophie' ? 'selected' : ''}>${this.getMobileLabel('Hypertrophie')}</option>
+                                <option value="Endurance de Force" ${this.sessionMobileTemp === 'Endurance de Force' ? 'selected' : ''}>${this.getMobileLabel('Endurance de Force')}</option>
+                                <option value="Endurance Musculaire" ${this.sessionMobileTemp === 'Endurance Musculaire' ? 'selected' : ''}>${this.getMobileLabel('Endurance Musculaire')}</option>
+                                <option value="Personnalisé" ${this.sessionMobileTemp === 'Personnalisé' ? 'selected' : ''}>${this.getMobileLabel('Personnalisé')}</option>
                             </select>
                             <div class="text-white" style="opacity: 0.6; font-size: 0.85rem; margin-top: 0.5rem;">
-                                ℹ️ Le mobile est indicatif, tu personnaliseras chaque exercice à l'étape suivante
+                                ${this.userMode === 'debutant' 
+                                    ? 'ℹ️ Choisis ce que tu veux travailler aujourd\'hui'
+                                    : 'ℹ️ Le mobile est indicatif, tu personnaliseras chaque exercice à l\'étape suivante'}
                             </div>
                         </div>
                         
@@ -3595,6 +3742,20 @@
                                 </div>
                             </div>
                             
+                            ${this.userMode === 'debutant' ? `
+                            <!-- MODE DÉBUTANT : Niveau de charge simplifié -->
+                            <div class="mb-3">
+                                <label class="text-white mb-1" style="display: block; font-weight: 600;">6. Niveau de charge</label>
+                                <select class="input" id="exercice-charge-niveau">
+                                    <option value="PDC">💪 Poids de corps (PDC)</option>
+                                    <option value="Léger">🟢 Léger (tu peux faire 15-20 reps)</option>
+                                    <option value="Moyen" selected>🟡 Moyen (tu arrives à 10-12 reps)</option>
+                                    <option value="Lourd">🟠 Lourd (tu arrives à 6-8 reps)</option>
+                                    <option value="Très lourd">🔴 Très lourd (tu arrives à 3-5 reps)</option>
+                                </select>
+                            </div>
+                            ` : `
+                            <!-- MODE AVANCÉ : Charges précises -->
                             <div class="grid grid-cols-2 gap-3 mb-3">
                                 <div>
                                     <label class="text-white mb-1" style="display: block; font-weight: 600;">6. Charge théorique (kg)</label>
@@ -3605,14 +3766,17 @@
                                     <input type="number" class="input" id="exercice-charge-reelle" placeholder="À charger" step="0.5">
                                 </div>
                             </div>
+                            `}
                             
                             <div class="grid grid-cols-2 gap-3 mb-3">
+                                ${this.userMode === 'avance' ? `
                                 <div>
                                     <label class="text-white mb-1" style="display: block; font-weight: 600;">8. Tempo (optionnel)</label>
                                     <input type="text" class="input" id="exercice-tempo" placeholder="Ex: 3-1-1">
                                 </div>
-                                <div>
-                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">9. Récup (sec)</label>
+                                ` : ''}
+                                <div ${this.userMode === 'debutant' ? 'style="grid-column: span 2;"' : ''}>
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">${this.userMode === 'avance' ? '9.' : '8.'} Récup (sec)</label>
                                     <input type="number" class="input" id="exercice-recup" value="90" min="0" max="600">
                                 </div>
                             </div>
@@ -3645,9 +3809,9 @@
                                         <span style="color: var(--primary-color);">💪 ${ex.muscle}</span> • 
                                         <span style="color: #a855f7;">📊 ${ex.forme || 'Séries droites'}</span> • 
                                         ${ex.series}×${ex.reps} • 
-                                        ${ex.chargeReelle ? ex.chargeReelle + 'kg' : 'PDC'} • 
+                                        ${this.formatCharge(ex)} • 
                                         ${ex.recup}s repos
-                                        ${ex.tempo ? ' • Tempo: ' + ex.tempo : ''}
+                                        ${ex.tempo && this.userMode === 'avance' ? ' • Tempo: ' + ex.tempo : ''}
                                     </div>
                                 </div>
                             `).join('')}
@@ -3919,7 +4083,14 @@
             getFormesOptions() {
                 // Récupérer les formes compatibles avec le mobile sélectionné
                 const mobile = this.sessionMobileTemp || 'Hypertrophie';
-                const formesDisponibles = coursData.mobilesFormes[mobile]?.formes || [];
+                let formesDisponibles = coursData.mobilesFormes[mobile]?.formes || [];
+                
+                // Filtrer selon le mode
+                if (this.userMode === 'debutant') {
+                    // Mode débutant : uniquement les formes simples
+                    const formesSimples = ['Séries droites', 'Circuit', 'Séries longues'];
+                    formesDisponibles = formesDisponibles.filter(forme => formesSimples.includes(forme));
+                }
                 
                 const icones = {
                     "Séries droites": "📊",
@@ -3945,19 +4116,29 @@
                 const params = coursData.mobilesFormes[mobile]?.params[forme];
                 
                 if (params) {
-                    // Auto-remplir les champs
+                    // Auto-remplir les champs communs
                     document.getElementById('exercice-series').value = params.series;
                     document.getElementById('exercice-reps').value = params.reps;
-                    document.getElementById('exercice-tempo').value = params.tempo;
                     document.getElementById('exercice-recup').value = params.recup;
                     
+                    // Tempo uniquement en mode avancé
+                    if (this.userMode === 'avance') {
+                        const tempoInput = document.getElementById('exercice-tempo');
+                        if (tempoInput) tempoInput.value = params.tempo;
+                    }
+                    
                     // Flash visuel pour montrer le changement
-                    ['exercice-series', 'exercice-reps', 'exercice-tempo', 'exercice-recup'].forEach(id => {
+                    const fieldsToFlash = ['exercice-series', 'exercice-reps', 'exercice-recup'];
+                    if (this.userMode === 'avance') fieldsToFlash.push('exercice-tempo');
+                    
+                    fieldsToFlash.forEach(id => {
                         const el = document.getElementById(id);
-                        el.style.background = 'rgba(6, 182, 212, 0.2)';
-                        setTimeout(() => {
-                            el.style.background = '';
-                        }, 800);
+                        if (el) {
+                            el.style.background = 'rgba(6, 182, 212, 0.2)';
+                            setTimeout(() => {
+                                el.style.background = '';
+                            }, 800);
+                        }
                     });
                 }
             }
@@ -3969,10 +4150,28 @@
                 const forme = document.getElementById('exercice-forme').value;
                 const series = parseInt(document.getElementById('exercice-series').value);
                 const reps = document.getElementById('exercice-reps').value; // Maintenant c'est un string
-                const chargeTheo = parseFloat(document.getElementById('exercice-charge-theo').value) || null;
-                const chargeReelle = parseFloat(document.getElementById('exercice-charge-reelle').value) || null;
-                const tempo = document.getElementById('exercice-tempo').value.trim() || null;
                 const recup = parseInt(document.getElementById('exercice-recup').value);
+                
+                // Gestion des charges selon le mode
+                let chargeTheo = null;
+                let chargeReelle = null;
+                let chargeNiveau = null;
+                let tempo = null;
+                
+                if (this.userMode === 'debutant') {
+                    // Mode débutant : niveau de charge
+                    const niveauSelect = document.getElementById('exercice-charge-niveau');
+                    chargeNiveau = niveauSelect ? niveauSelect.value : 'Moyen';
+                } else {
+                    // Mode avancé : charges en kg + tempo
+                    const chargeTheoInput = document.getElementById('exercice-charge-theo');
+                    const chargeReelleInput = document.getElementById('exercice-charge-reelle');
+                    const tempoInput = document.getElementById('exercice-tempo');
+                    
+                    chargeTheo = chargeTheoInput ? parseFloat(chargeTheoInput.value) || null : null;
+                    chargeReelle = chargeReelleInput ? parseFloat(chargeReelleInput.value) || null : null;
+                    tempo = tempoInput ? tempoInput.value.trim() || null : null;
+                }
                 
                 // Validation
                 if (!muscle) {
@@ -3995,6 +4194,7 @@
                     reps,
                     chargeTheo,
                     chargeReelle,
+                    chargeNiveau, // Niveau pour mode débutant
                     tempo,
                     recup,
                     completed: false
@@ -4022,9 +4222,20 @@
                 document.getElementById('exercice-forme').value = 'Séries droites';
                 document.getElementById('exercice-series').value = '4';
                 document.getElementById('exercice-reps').value = '10';
-                document.getElementById('exercice-charge-theo').value = '';
-                document.getElementById('exercice-charge-reelle').value = '';
-                document.getElementById('exercice-tempo').value = '';
+                
+                // Réinitialiser selon le mode
+                if (this.userMode === 'debutant') {
+                    const niveauSelect = document.getElementById('exercice-charge-niveau');
+                    if (niveauSelect) niveauSelect.value = 'Moyen';
+                } else {
+                    const chargeTheoInput = document.getElementById('exercice-charge-theo');
+                    const chargeReelleInput = document.getElementById('exercice-charge-reelle');
+                    const tempoInput = document.getElementById('exercice-tempo');
+                    if (chargeTheoInput) chargeTheoInput.value = '';
+                    if (chargeReelleInput) chargeReelleInput.value = '';
+                    if (tempoInput) tempoInput.value = '';
+                }
+                
                 document.getElementById('exercice-recup').value = '90';
                 document.getElementById('exercice-select-container').style.display = 'none';
                 document.getElementById('exercice-name-custom').style.display = 'none';
@@ -4093,9 +4304,23 @@
                             document.getElementById('exercice-forme').value = ex.forme || 'Séries droites';
                             document.getElementById('exercice-series').value = ex.series;
                             document.getElementById('exercice-reps').value = ex.reps;
-                            document.getElementById('exercice-charge-theo').value = ex.chargeTheo || '';
-                            document.getElementById('exercice-charge-reelle').value = ex.chargeReelle || '';
-                            document.getElementById('exercice-tempo').value = ex.tempo || '';
+                            
+                            // Charges selon mode
+                            if (this.userMode === 'debutant') {
+                                const niveauSelect = document.getElementById('exercice-charge-niveau');
+                                if (niveauSelect && ex.chargeNiveau) {
+                                    niveauSelect.value = ex.chargeNiveau;
+                                }
+                            } else {
+                                const chargeTheoInput = document.getElementById('exercice-charge-theo');
+                                const chargeReelleInput = document.getElementById('exercice-charge-reelle');
+                                const tempoInput = document.getElementById('exercice-tempo');
+                                
+                                if (chargeTheoInput) chargeTheoInput.value = ex.chargeTheo || '';
+                                if (chargeReelleInput) chargeReelleInput.value = ex.chargeReelle || '';
+                                if (tempoInput) tempoInput.value = ex.tempo || '';
+                            }
+                            
                             document.getElementById('exercice-recup').value = ex.recup;
                             
                             // Scroller vers le formulaire
@@ -4117,9 +4342,20 @@
                 document.getElementById('exercice-forme').value = 'Séries droites';
                 document.getElementById('exercice-series').value = '4';
                 document.getElementById('exercice-reps').value = '10';
-                document.getElementById('exercice-charge-theo').value = '';
-                document.getElementById('exercice-charge-reelle').value = '';
-                document.getElementById('exercice-tempo').value = '';
+                
+                // Réinitialiser selon le mode
+                if (this.userMode === 'debutant') {
+                    const niveauSelect = document.getElementById('exercice-charge-niveau');
+                    if (niveauSelect) niveauSelect.value = 'Moyen';
+                } else {
+                    const chargeTheoInput = document.getElementById('exercice-charge-theo');
+                    const chargeReelleInput = document.getElementById('exercice-charge-reelle');
+                    const tempoInput = document.getElementById('exercice-tempo');
+                    if (chargeTheoInput) chargeTheoInput.value = '';
+                    if (chargeReelleInput) chargeReelleInput.value = '';
+                    if (tempoInput) tempoInput.value = '';
+                }
+                
                 document.getElementById('exercice-recup').value = '90';
                 document.getElementById('exercice-select-container').style.display = 'none';
                 document.getElementById('exercice-name-custom').style.display = 'none';
@@ -4948,6 +5184,22 @@
                                     <input type="number" class="input" id="profile-poids" value="${userData.poids || ''}" min="30" max="200" step="0.1">
                                 </div>
                             </div>
+                            
+                            <!-- SÉLECTION MODE -->
+                            <div class="mb-3" style="background: rgba(6, 182, 212, 0.1); padding: 1rem; border-radius: 0.75rem; border: 2px solid var(--primary-color);">
+                                <label class="text-white mb-2" style="display: block; font-weight: 600; font-size: 1.1rem;">🎓 Mode d'utilisation</label>
+                                <select class="input" id="profile-mode" onchange="app.setUserMode(this.value)" style="font-size: 1rem;">
+                                    <option value="debutant" ${this.userMode === 'debutant' ? 'selected' : ''}>🎓 DÉBUTANT - Interface simplifiée</option>
+                                    <option value="avance" ${this.userMode === 'avance' ? 'selected' : ''}>💪 AVANCÉ - Toutes les fonctionnalités</option>
+                                </select>
+                                <div class="text-white mt-2" style="opacity: 0.7; font-size: 0.85rem;">
+                                    ${this.userMode === 'debutant' ? 
+                                        '✅ Mode simplifié actif : charges en niveaux, pas de tempo/1RM' : 
+                                        '✅ Mode avancé actif : calculs 1RM, tempo, RPE, charges précises'
+                                    }
+                                </div>
+                            </div>
+                            
                             <button class="btn btn-primary" onclick="app.updateProfile()" style="width: 100%;">💾 Sauvegarder</button>
                         </div>
                     </div>
@@ -5000,8 +5252,8 @@
                                         <div class="text-white mb-1" style="font-weight: 600;">${i + 1}. ${ex.nom}</div>
                                         <div class="text-cyan mb-1" style="font-size: 0.9rem;">💪 ${ex.muscle}</div>
                                         <div class="text-white" style="opacity: 0.8; font-size: 0.9rem;">
-                                            ${ex.series}×${ex.reps} • ${ex.chargeReelle ? ex.chargeReelle + 'kg' : 'PDC'}
-                                            ${ex.tempo ? ' • ' + ex.tempo : ''} • ${ex.recup}s
+                                            ${ex.series}×${ex.reps} • ${this.formatCharge(ex)}
+                                            ${ex.tempo && this.userMode === 'avance' ? ' • ' + ex.tempo : ''} • ${ex.recup}s
                                         </div>
                                     </div>
                                 `).join('')}
@@ -5161,21 +5413,25 @@
                                     <div style="background: rgba(15, 23, 42, 0.6); padding: 1rem; border-radius: 0.5rem;">
                                         <div class="grid grid-cols-2 gap-2 text-white" style="font-size: 0.95rem;">
                                             <div><strong>Séries ×Reps:</strong> ${ex.series} × ${ex.reps}</div>
-                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                                <strong>Charge réelle:</strong> 
-                                                <input 
-                                                    type="number" 
-                                                    class="input" 
-                                                    id="charge-live-${index}" 
-                                                    value="${ex.chargeReelle || ''}" 
-                                                    placeholder="PDC"
-                                                    step="0.5"
-                                                    onchange="app.updateChargeReelle(${index}, this.value)"
-                                                    style="width: 80px; padding: 0.25rem 0.5rem; font-size: 0.9rem; background: rgba(6, 182, 212, 0.1); border: 1px solid var(--primary-color);"
-                                                >
-                                                <span style="opacity: 0.8;">kg</span>
-                                            </div>
-                                            ${ex.tempo ? `<div><strong>Tempo:</strong> ${ex.tempo}</div>` : ''}
+                                            ${this.userMode === 'debutant' ? `
+                                                <div><strong>Charge:</strong> ${ex.chargeNiveau || 'Moyen'}</div>
+                                            ` : `
+                                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                    <strong>Charge réelle:</strong> 
+                                                    <input 
+                                                        type="number" 
+                                                        class="input" 
+                                                        id="charge-live-${index}" 
+                                                        value="${ex.chargeReelle || ''}" 
+                                                        placeholder="PDC"
+                                                        step="0.5"
+                                                        onchange="app.updateChargeReelle(${index}, this.value)"
+                                                        style="width: 80px; padding: 0.25rem 0.5rem; font-size: 0.9rem; background: rgba(6, 182, 212, 0.1); border: 1px solid var(--primary-color);"
+                                                    >
+                                                    <span style="opacity: 0.8;">kg</span>
+                                                </div>
+                                            `}
+                                            ${ex.tempo && this.userMode === 'avance' ? `<div><strong>Tempo:</strong> ${ex.tempo}</div>` : ''}
                                             <div><strong>Récup:</strong> ${ex.recup}s</div>
                                         </div>
                                     </div>
@@ -5264,7 +5520,8 @@
                                 </div>
                             </div>
                             
-                            <!-- RPE (Rate of Perceived Exertion) -->
+                            <!-- RPE (Rate of Perceived Exertion) - Mode avancé uniquement -->
+                            ${this.userMode === 'avance' ? `
                             <div style="background: rgba(168, 85, 247, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 2px solid #a855f7;">
                                 <h3 class="text-white mb-3" style="font-size: 1.2rem;">💪 RPE - Perception de l'effort</h3>
                                 <div class="text-white mb-3" style="opacity: 0.8; font-size: 0.9rem;">
@@ -5309,6 +5566,7 @@
                                 
                                 <div id="rpe-description" class="text-cyan" style="margin-top: 0.75rem; text-align: center; font-size: 0.85rem; min-height: 1.5rem;"></div>
                             </div>
+                            ` : ''}
                             
                             <!-- Notes -->
                             <div style="background: rgba(16, 185, 129, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 2px solid #10b981;">
@@ -5381,13 +5639,16 @@
                 const session = this.sessions[this.currentSession];
                 const completedCount = session.exercicesDetails.filter(e => e.completed).length;
                 
-                // Récupérer RPE
-                const rpeInput = document.querySelector('input[name="rpe"]:checked');
-                const rpe = rpeInput ? parseInt(rpeInput.value) : null;
-                
-                if (rpe === null) {
-                    alert('⚠️ Indique ton RPE (perception de l\'effort)');
-                    return;
+                // Récupérer RPE (uniquement en mode avancé)
+                let rpe = null;
+                if (this.userMode === 'avance') {
+                    const rpeInput = document.querySelector('input[name="rpe"]:checked');
+                    rpe = rpeInput ? parseInt(rpeInput.value) : null;
+                    
+                    if (rpe === null) {
+                        alert('⚠️ Indique ton RPE (perception de l\'effort)');
+                        return;
+                    }
                 }
                 
                 // Récupérer notes
