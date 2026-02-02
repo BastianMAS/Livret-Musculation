@@ -1661,7 +1661,7 @@
                 this.rmHistory = [];
                 this.currentSession = null;
                 this.userAvatar = null;
-                this.musclesList = ['Pectoraux', 'Grand dorsal', 'Trapèzes', 'Deltoïdes', 'Biceps', 'Triceps', 'Abdominaux', 'Quadriceps', 'Ischio-jambiers', 'Fessiers', 'Mollets', 'Adducteurs'];
+                this.musclesList = ['Pectoraux', 'Dorsaux', 'Trapèzes', 'Deltoïdes', 'Biceps', 'Triceps', 'Abdominaux', 'Quadriceps', 'Ischio-jambiers', 'Fessiers', 'Mollets', 'Adducteurs'];
                 this.currentCoursTab = 'principes';
                 this.exercicesTemp = [];
                 this.musclesTemp = [];
@@ -2017,11 +2017,11 @@
                 // Retourne le libellé selon le mode (débutant = simplifié, avancé = technique)
                 if (this.userMode === 'debutant') {
                     const labels = {
-                        'Force Maximale': '💪 Devenir plus fort',
-                        'Force Explosive': '⚡ Être explosif',
-                        'Hypertrophie': '🏋️ Prendre du muscle',
-                        'Endurance de Force': '🔥 Tenir longtemps',
-                        'Endurance Musculaire': '🏃 Endurance musculaire',
+                        'Endurance Musculaire': '💪 Tonification musculaire',
+                        'Hypertrophie': '🏋️ Hypertrophie',
+                        'Force Explosive': '⚡ Puissance',
+                        'Force Maximale': '💪 Force Maximale', // Au cas où (anciennes séances)
+                        'Endurance de Force': '🔥 Endurance de Force', // Au cas où
                         'Personnalisé': '⚙️ Personnalisé'
                     };
                     return labels[mobileValue] || mobileValue;
@@ -2245,8 +2245,16 @@
                                 <div class="flex items-center gap-3">
                                     ${this.userAvatar ? `<img src="${this.userAvatar}" class="profile-avatar" alt="Avatar">` : `<div class="default-avatar">👤</div>`}
                                     <div>
-                                        <h1 class="text-white" style="font-size: 2rem;">${this.currentUser}</h1>
-                                        <p class="text-cyan" style="font-size: 0.9rem;">${userData.age} ans • ${userData.sexe} • ${userData.taille}cm • ${userData.poids}kg</p>
+                                        <h1 class="text-white" style="font-size: 2rem;">${this.currentUser}-objectifs</h1>
+                                        <p class="text-cyan" style="font-size: 0.9rem;">
+                                            ${userData.age ? `${userData.age} ans` : ''} 
+                                            ${userData.age && userData.sexe ? ' • ' : ''}
+                                            ${userData.sexe || ''} 
+                                            ${(userData.age || userData.sexe) && userData.taille ? ' • ' : ''}
+                                            ${userData.taille ? `${userData.taille}cm` : ''} 
+                                            ${(userData.age || userData.sexe || userData.taille) && userData.poids ? ' • ' : ''}
+                                            ${userData.poids ? `${userData.poids}kg` : ''}
+                                        </p>
                                         <p class="text-white" style="opacity: 0.7; font-size: 0.85rem; margin-top: 0.25rem;">📚 ${securite.getNomClasse()}</p>
                                     </div>
                                 </div>
@@ -3653,12 +3661,21 @@
                                 ${this.userMode === 'debutant' ? 'Objectif *' : 'Mobile d\'entraînement *'}
                             </label>
                             <select class="input" id="session-mobile-step1" style="font-size: 1.1rem;">
-                                <option value="Force Maximale" ${this.sessionMobileTemp === 'Force Maximale' ? 'selected' : ''}>${this.getMobileLabel('Force Maximale')}</option>
-                                <option value="Force Explosive" ${this.sessionMobileTemp === 'Force Explosive' ? 'selected' : ''}>${this.getMobileLabel('Force Explosive')}</option>
-                                <option value="Hypertrophie" ${this.sessionMobileTemp === 'Hypertrophie' ? 'selected' : ''}>${this.getMobileLabel('Hypertrophie')}</option>
-                                <option value="Endurance de Force" ${this.sessionMobileTemp === 'Endurance de Force' ? 'selected' : ''}>${this.getMobileLabel('Endurance de Force')}</option>
-                                <option value="Endurance Musculaire" ${this.sessionMobileTemp === 'Endurance Musculaire' ? 'selected' : ''}>${this.getMobileLabel('Endurance Musculaire')}</option>
-                                <option value="Personnalisé" ${this.sessionMobileTemp === 'Personnalisé' ? 'selected' : ''}>${this.getMobileLabel('Personnalisé')}</option>
+                                ${this.userMode === 'debutant' ? `
+                                    <!-- MODE DÉBUTANT : 3 mobiles + Personnalisé -->
+                                    <option value="Endurance Musculaire" ${this.sessionMobileTemp === 'Endurance Musculaire' ? 'selected' : ''}>${this.getMobileLabel('Endurance Musculaire')}</option>
+                                    <option value="Hypertrophie" ${this.sessionMobileTemp === 'Hypertrophie' ? 'selected' : ''}>${this.getMobileLabel('Hypertrophie')}</option>
+                                    <option value="Force Explosive" ${this.sessionMobileTemp === 'Force Explosive' ? 'selected' : ''}>${this.getMobileLabel('Force Explosive')}</option>
+                                    <option value="Personnalisé" ${this.sessionMobileTemp === 'Personnalisé' ? 'selected' : ''}>${this.getMobileLabel('Personnalisé')}</option>
+                                ` : `
+                                    <!-- MODE AVANCÉ : Tous les mobiles -->
+                                    <option value="Force Maximale" ${this.sessionMobileTemp === 'Force Maximale' ? 'selected' : ''}>${this.getMobileLabel('Force Maximale')}</option>
+                                    <option value="Force Explosive" ${this.sessionMobileTemp === 'Force Explosive' ? 'selected' : ''}>${this.getMobileLabel('Force Explosive')}</option>
+                                    <option value="Hypertrophie" ${this.sessionMobileTemp === 'Hypertrophie' ? 'selected' : ''}>${this.getMobileLabel('Hypertrophie')}</option>
+                                    <option value="Endurance de Force" ${this.sessionMobileTemp === 'Endurance de Force' ? 'selected' : ''}>${this.getMobileLabel('Endurance de Force')}</option>
+                                    <option value="Endurance Musculaire" ${this.sessionMobileTemp === 'Endurance Musculaire' ? 'selected' : ''}>${this.getMobileLabel('Endurance Musculaire')}</option>
+                                    <option value="Personnalisé" ${this.sessionMobileTemp === 'Personnalisé' ? 'selected' : ''}>${this.getMobileLabel('Personnalisé')}</option>
+                                `}
                             </select>
                             <div class="text-white" style="opacity: 0.6; font-size: 0.85rem; margin-top: 0.5rem;">
                                 ${this.userMode === 'debutant' 
@@ -3776,8 +3793,24 @@
                                 </div>
                                 ` : ''}
                                 <div ${this.userMode === 'debutant' ? 'style="grid-column: span 2;"' : ''}>
-                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">${this.userMode === 'avance' ? '9.' : '8.'} Récup (sec)</label>
-                                    <input type="number" class="input" id="exercice-recup" value="90" min="0" max="600">
+                                    <label class="text-white mb-1" style="display: block; font-weight: 600;">${this.userMode === 'avance' ? '9.' : '7.'} Récup (sec)</label>
+                                    <input 
+                                        type="number" 
+                                        class="input" 
+                                        id="exercice-recup" 
+                                        value="${this.userMode === 'debutant' ? 
+                                            (this.sessionMobileTemp === 'Hypertrophie' ? 120 : 
+                                             this.sessionMobileTemp === 'Force Explosive' ? 180 : 90) 
+                                            : 90}" 
+                                        min="0" 
+                                        max="600"
+                                        ${this.userMode === 'debutant' ? 'readonly style="opacity: 0.7; cursor: not-allowed;"' : ''}
+                                    >
+                                    ${this.userMode === 'debutant' ? `
+                                        <div class="text-white" style="opacity: 0.6; font-size: 0.75rem; margin-top: 0.25rem;" id="recup-message">
+                                            🔒 Adapté selon l'objectif
+                                        </div>
+                                    ` : ''}
                                 </div>
                             </div>
                             
@@ -3931,7 +3964,7 @@
             getExercicesByMuscle(muscle) {
                 const exercicesMap = {
                     'Pectoraux': coursData.exercicesPectoraux,
-                    'Grand dorsal': coursData.exercicesDos,
+                    'Dorsaux': coursData.exercicesDos,
                     'Trapèzes': coursData.exercicesTrapezes,
                     'Deltoïdes': coursData.exercicesEpaules,
                     'Biceps': coursData.exercicesBiceps,
@@ -4119,7 +4152,21 @@
                     // Auto-remplir les champs communs
                     document.getElementById('exercice-series').value = params.series;
                     document.getElementById('exercice-reps').value = params.reps;
-                    document.getElementById('exercice-recup').value = params.recup;
+                    
+                    // RÉCUP : selon le mode
+                    if (this.userMode === 'debutant') {
+                        // Mode débutant : récup fixée selon le mobile
+                        const recuperationDebutant = {
+                            'Endurance Musculaire': 90,      // Tonification
+                            'Hypertrophie': 120,             // 2 min
+                            'Force Explosive': 180,          // 3 min (Puissance)
+                            'Personnalisé': 90
+                        };
+                        document.getElementById('exercice-recup').value = recuperationDebutant[mobile] || 90;
+                    } else {
+                        // Mode avancé : récup du tableau
+                        document.getElementById('exercice-recup').value = params.recup;
+                    }
                     
                     // Tempo uniquement en mode avancé
                     if (this.userMode === 'avance') {
