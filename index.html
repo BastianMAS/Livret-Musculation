@@ -3793,12 +3793,14 @@
                             <div class="mb-3">
                                 <label class="text-white mb-1" style="display: block; font-weight: 600;">6. Niveau de charge</label>
                                 <select class="input" id="exercice-charge-niveau">
-                                    <option value="PDC">💪 Poids de corps (PDC)</option>
-                                    <option value="Léger">🟢 Léger (tu peux faire 15-20 reps)</option>
-                                    <option value="Moyen" selected>🟡 Moyen (tu arrives à 10-12 reps)</option>
-                                    <option value="Lourd">🟠 Lourd (tu arrives à 6-8 reps)</option>
-                                    <option value="Très lourd">🔴 Très lourd (tu arrives à 3-5 reps)</option>
+                                    ${this.getChargeNiveauxOptions()}
                                 </select>
+                                <div class="text-white" style="opacity: 0.6; font-size: 0.75rem; margin-top: 0.5rem;">
+                                    💡 ${this.sessionMobileTemp === 'Endurance Musculaire' ? 'Charges légères pour tenir 15 reps' : 
+                                         this.sessionMobileTemp === 'Hypertrophie' ? 'Charges moyennes pour 10 reps' :
+                                         this.sessionMobileTemp === 'Force Explosive' ? 'Charges lourdes pour 6 reps explosives' : 
+                                         'Choisis selon tes capacités'}
+                                </div>
                             </div>
                             ` : `
                             <!-- MODE AVANCÉ : Charges précises -->
@@ -4169,6 +4171,46 @@
                 
                 return formesDisponibles.map(forme => 
                     `<option value="${forme}">${icones[forme] || '📊'} ${forme}</option>`
+                ).join('');
+            }
+
+            getChargeNiveauxOptions() {
+                // Retourne les niveaux de charge adaptés au mobile (mode débutant uniquement)
+                const mobile = this.sessionMobileTemp || 'Hypertrophie';
+                
+                const niveauxParMobile = {
+                    'Endurance Musculaire': [
+                        // 15 reps = charges légères
+                        { value: 'PDC', label: '💪 Poids de corps (PDC)', selected: false },
+                        { value: 'Léger', label: '🟢 Léger (15-20 reps)', selected: true },
+                        { value: 'Moyen', label: '🟡 Moyen (10-12 reps)', selected: false }
+                    ],
+                    'Hypertrophie': [
+                        // 10 reps = charges moyennes
+                        { value: 'Léger', label: '🟢 Léger (15-20 reps)', selected: false },
+                        { value: 'Moyen', label: '🟡 Moyen (10-12 reps)', selected: true },
+                        { value: 'Lourd', label: '🟠 Lourd (6-8 reps)', selected: false }
+                    ],
+                    'Force Explosive': [
+                        // 6 reps = charges lourdes
+                        { value: 'Moyen', label: '🟡 Moyen (10-12 reps)', selected: false },
+                        { value: 'Lourd', label: '🟠 Lourd (6-8 reps)', selected: true },
+                        { value: 'Très lourd', label: '🔴 Très lourd (3-5 reps)', selected: false }
+                    ],
+                    'Personnalisé': [
+                        // Tous les niveaux disponibles
+                        { value: 'PDC', label: '💪 Poids de corps (PDC)', selected: false },
+                        { value: 'Léger', label: '🟢 Léger (15-20 reps)', selected: false },
+                        { value: 'Moyen', label: '🟡 Moyen (10-12 reps)', selected: true },
+                        { value: 'Lourd', label: '🟠 Lourd (6-8 reps)', selected: false },
+                        { value: 'Très lourd', label: '🔴 Très lourd (3-5 reps)', selected: false }
+                    ]
+                };
+                
+                const niveaux = niveauxParMobile[mobile] || niveauxParMobile['Personnalisé'];
+                
+                return niveaux.map(niveau => 
+                    `<option value="${niveau.value}" ${niveau.selected ? 'selected' : ''}>${niveau.label}</option>`
                 ).join('');
             }
 
