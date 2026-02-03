@@ -1649,7 +1649,50 @@
             exercicesAbdos: [
                 {nom: "Circuit Abdos 1 (45s/15s)", description: "Circuit training 45s travail / 15s repos, 2-3 tours.", technique: ["Maintenir forme", "Respiration contrôlée", "Qualité > quantité", "Pause si besoin"], variantes: ["Ajouter lest", "Augmenter tempo", "Réduire repos"], video: "https://www.youtube.com/watch?v=UA-OWzKAk9Y"},
                 {nom: "Circuit Abdos 2 (45s/15s)", description: "Circuit training 45s travail / 15s repos, 2-3 tours.", technique: ["Engagement constant", "Contrôle mouvements", "Gainage permanent", "Concentration"], variantes: ["Modifier exercices", "Temps sous tension", "Plus de tours"], video: "https://www.youtube.com/shorts/YiPXMVfsIBM"}
-            ]
+            ],
+
+            // CONSIGNES DE SÉCURITÉ PAR EXERCICE
+            consignesSecurite: {
+                "Développé Couché (Barre)": [
+                    "⚠️ TOUJOURS avec un pareur à proximité",
+                    "👍 Pouces AUTOUR de la barre (jamais en pronation)",
+                    "🔒 Omoplates plaquées contre le banc",
+                    "📏 Barre au niveau des tétons (pas du cou)",
+                    "⬇️ Descente contrôlée (2-3 secondes)"
+                ],
+                "Développé Incliné (Barre)": [
+                    "⚠️ Toujours avec un pareur",
+                    "👍 Pouces autour de la barre",
+                    "🔒 Omoplates serrées et plaquées",
+                    "⬇️ Descente contrôlée vers le haut des pecs"
+                ],
+                "Squat (Barre)": [
+                    "⚠️ Demande à quelqu'un de vérifier ta position",
+                    "🔒 Dos DROIT pendant toute l'exécution",
+                    "👀 Regard vers l'avant (pas vers le bas)",
+                    "🦵 Genoux dans l'axe des pieds (ne rentrent pas vers l'intérieur)",
+                    "⚖️ Commence LÉGER pour maîtriser le mouvement"
+                ],
+                "Soulevé de Terre (Barre)": [
+                    "⚠️ Exercice technique - demande de l'aide au début",
+                    "🔒 Dos DROIT/NEUTRE obligatoire (jamais arrondi)",
+                    "💪 Pousser avec les jambes (pas tirer avec le dos)",
+                    "📏 Barre collée aux jambes pendant la montée",
+                    "⚖️ Commence très léger pour apprendre"
+                ],
+                "Dips": [
+                    "⚠️ Vérifie la solidité du matériel",
+                    "🚫 Arrête si douleur à l'épaule",
+                    "⬇️ Ne descends pas trop bas (épaules fragiles)",
+                    "🔒 Garde les coudes proches du corps"
+                ],
+                "Tractions": [
+                    "⚠️ Vérifie la barre avant de monter",
+                    "🚫 Pas de balancement excessif",
+                    "⬇️ Descente contrôlée (pas de chute libre)",
+                    "💪 Utilise un élastique si besoin"
+                ]
+            }
         };// PARTIE 3/4 - RENDU
         
         class LivretApp {
@@ -4370,8 +4413,86 @@
                 document.getElementById('exercice-name-custom').style.display = 'none';
                 document.getElementById('exercice-details-container').style.display = 'none';
                 
+                // SÉCURITÉ : Vérifier charges trop lourdes en mode débutant
+                if (this.userMode === 'debutant' && chargeNiveau) {
+                    this.checkChargesTropLourdes();
+                }
+                
                 // Recharger pour afficher la liste mise à jour
                 this.render();
+            }
+
+            checkChargesTropLourdes() {
+                // Vérifier les 3 derniers exercices ajoutés
+                const derniers = this.exercicesDetails.slice(-3);
+                
+                // Compter combien ont "Lourd" ou "Très lourd"
+                const chargesLourdes = derniers.filter(ex => 
+                    ex.chargeNiveau === 'Lourd' || ex.chargeNiveau === 'Très lourd'
+                ).length;
+                
+                // Si 3 exercices lourds d'affilée → Alerte
+                if (chargesLourdes >= 3) {
+                    setTimeout(() => {
+                        this.showAlerteChargesLourdes();
+                    }, 300);
+                }
+            }
+
+            showAlerteChargesLourdes() {
+                const popup = document.createElement('div');
+                popup.id = 'alerte-charges-popup';
+                popup.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.95);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    padding: 1rem;
+                    animation: fadeIn 0.3s;
+                `;
+                
+                popup.innerHTML = `
+                    <div style="background: var(--bg-medium); border-radius: 1.5rem; padding: 2rem; max-width: 500px; width: 100%; border: 3px solid #f59e0b; box-shadow: 0 0 30px rgba(245, 158, 11, 0.5);">
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <div style="font-size: 4rem; margin-bottom: 0.5rem;">⚠️</div>
+                            <h2 class="text-white" style="font-size: 1.5rem; margin-bottom: 0.5rem;">ATTENTION !</h2>
+                            <div style="color: #f59e0b; font-size: 1.1rem; font-weight: 600;">Beaucoup de charges lourdes</div>
+                        </div>
+                        
+                        <div style="background: rgba(245, 158, 11, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem; border: 2px solid #f59e0b;">
+                            <div class="text-white" style="font-size: 1rem; line-height: 1.6; margin-bottom: 1rem;">
+                                Tu as mis <strong style="color: #f59e0b;">3 charges "Lourd" ou "Très lourd"</strong> d'affilée.
+                            </div>
+                            <div class="text-white" style="font-size: 0.95rem; line-height: 1.6;">
+                                🤔 Es-tu sûr(e) de pouvoir soulever ces charges <strong>en sécurité</strong> et avec une <strong>bonne technique</strong> ?
+                            </div>
+                        </div>
+                        
+                        <div class="text-white text-center" style="opacity: 0.8; margin-bottom: 1.5rem; font-size: 0.85rem; line-height: 1.5;">
+                            💡 Il vaut mieux commencer <strong>plus léger</strong> et progresser doucement que de se blesser !
+                        </div>
+                        
+                        <button onclick="app.closeAlerteCharges()" class="btn btn-warning" style="width: 100%; font-size: 1rem; padding: 1rem; margin-bottom: 0.5rem;">
+                            ✏️ Revenir modifier les charges
+                        </button>
+                        <button onclick="app.closeAlerteCharges()" class="btn btn-secondary" style="width: 100%; font-size: 1rem; padding: 0.75rem;">
+                            ✅ Je suis sûr(e), continuer quand même
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(popup);
+            }
+
+            closeAlerteCharges() {
+                const popup = document.getElementById('alerte-charges-popup');
+                if (popup) popup.remove();
             }
 
             removeExerciceDetail(index) {
@@ -5464,8 +5585,105 @@
             }
 
             startSession() {
+                // Afficher checklist échauffement en mode débutant
+                if (this.userMode === 'debutant') {
+                    this.showChecklistEchauffement();
+                } else {
+                    // Mode avancé : démarrer directement
+                    this.currentView = 'session-live';
+                    this.render();
+                }
+            }
+
+            showChecklistEchauffement() {
+                const popup = document.createElement('div');
+                popup.id = 'checklist-echauffement-popup';
+                popup.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.95);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    padding: 1rem;
+                    animation: fadeIn 0.3s;
+                `;
+                
+                popup.innerHTML = `
+                    <div style="background: var(--bg-medium); border-radius: 1.5rem; padding: 2rem; max-width: 500px; width: 100%; border: 3px solid #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);">
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <div style="font-size: 4rem; margin-bottom: 0.5rem;">🔥</div>
+                            <h2 class="text-white" style="font-size: 1.5rem; margin-bottom: 0.5rem;">ÉCHAUFFEMENT OBLIGATOIRE</h2>
+                            <div class="text-cyan" style="font-size: 0.95rem; opacity: 0.9;">Avant de commencer, as-tu fait :</div>
+                        </div>
+                        
+                        <div style="background: rgba(239, 68, 68, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem; border: 2px solid #ef4444;">
+                            <label style="display: flex; align-items: center; margin-bottom: 1rem; cursor: pointer;">
+                                <input type="checkbox" id="check-cardio" style="width: 24px; height: 24px; margin-right: 1rem; cursor: pointer;">
+                                <span class="text-white" style="font-size: 1rem;">🏃 Cardio léger (5-10 min) : vélo, tapis, rameur...</span>
+                            </label>
+                            <label style="display: flex; align-items: center; margin-bottom: 1rem; cursor: pointer;">
+                                <input type="checkbox" id="check-mobilite" style="width: 24px; height: 24px; margin-right: 1rem; cursor: pointer;">
+                                <span class="text-white" style="font-size: 1rem;">🤸 Mobilité articulaire : rotations, étirements dynamiques</span>
+                            </label>
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" id="check-series" style="width: 24px; height: 24px; margin-right: 1rem; cursor: pointer;">
+                                <span class="text-white" style="font-size: 1rem;">💪 Séries d'échauffement : charges très légères</span>
+                            </label>
+                        </div>
+                        
+                        <div class="text-white text-center" style="opacity: 0.8; margin-bottom: 1.5rem; font-size: 0.85rem; line-height: 1.5;">
+                            ⚠️ L'échauffement est OBLIGATOIRE pour éviter les blessures !<br>
+                            Ne commence JAMAIS directement avec les charges de travail.
+                        </div>
+                        
+                        <button id="btn-start-session" onclick="app.validateEchauffement()" class="btn btn-secondary" style="width: 100%; font-size: 1.1rem; padding: 1rem; opacity: 0.5; cursor: not-allowed;" disabled>
+                            ✅ Tout est fait, démarrer la séance
+                        </button>
+                        <button onclick="app.closeChecklistEchauffement()" class="btn btn-secondary" style="width: 100%; font-size: 1rem; padding: 0.75rem; margin-top: 0.5rem;">
+                            ← Retour (je vais m'échauffer)
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(popup);
+                
+                // Activer le bouton quand toutes les checkboxes sont cochées
+                ['check-cardio', 'check-mobilite', 'check-series'].forEach(id => {
+                    document.getElementById(id).addEventListener('change', () => {
+                        const allChecked = ['check-cardio', 'check-mobilite', 'check-series'].every(
+                            checkId => document.getElementById(checkId).checked
+                        );
+                        const btn = document.getElementById('btn-start-session');
+                        if (allChecked) {
+                            btn.disabled = false;
+                            btn.className = 'btn btn-success';
+                            btn.style.opacity = '1';
+                            btn.style.cursor = 'pointer';
+                        } else {
+                            btn.disabled = true;
+                            btn.className = 'btn btn-secondary';
+                            btn.style.opacity = '0.5';
+                            btn.style.cursor = 'not-allowed';
+                        }
+                    });
+                });
+            }
+
+            validateEchauffement() {
+                this.closeChecklistEchauffement();
                 this.currentView = 'session-live';
                 this.render();
+                console.log('✅ Échauffement validé, séance démarrée');
+            }
+
+            closeChecklistEchauffement() {
+                const popup = document.getElementById('checklist-echauffement-popup');
+                if (popup) popup.remove();
             }
 
             renderSessionLive() {
@@ -5590,8 +5808,22 @@
                 const session = this.sessions[this.currentSession];
                 if (!session || !session.exercicesDetails) return;
                 
+                const exercice = session.exercicesDetails[index];
+                
+                // Si on essaie de marquer comme "Fait" (et qu'il n'est pas déjà fait)
+                if (!exercice.completed) {
+                    // Vérifier s'il y a des consignes de sécurité pour cet exercice
+                    const consignes = coursData.consignesSecurite[exercice.nom];
+                    
+                    if (consignes && consignes.length > 0) {
+                        // Afficher les consignes de sécurité
+                        this.showConsignesSecurite(exercice.nom, consignes, index);
+                        return; // Ne pas toggle tout de suite
+                    }
+                }
+                
                 // Toggle le statut
-                session.exercicesDetails[index].completed = !session.exercicesDetails[index].completed;
+                exercice.completed = !exercice.completed;
                 
                 // Sauvegarder immédiatement
                 this.saveSessions();
@@ -5599,7 +5831,77 @@
                 // Recharger
                 this.render();
                 
-                console.log(`✅ Exercice ${index + 1} ${session.exercicesDetails[index].completed ? 'terminé' : 'non terminé'}`);
+                console.log(`✅ Exercice ${index + 1} ${exercice.completed ? 'terminé' : 'non terminé'}`);
+            }
+
+            showConsignesSecurite(nomExercice, consignes, index) {
+                // Créer popup de consignes de sécurité
+                const popup = document.createElement('div');
+                popup.id = 'consignes-securite-popup';
+                popup.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.95);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    padding: 1rem;
+                    animation: fadeIn 0.3s;
+                `;
+                
+                popup.innerHTML = `
+                    <div style="background: var(--bg-medium); border-radius: 1.5rem; padding: 2rem; max-width: 500px; width: 100%; border: 3px solid #f59e0b; box-shadow: 0 0 30px rgba(245, 158, 11, 0.5);">
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <div style="font-size: 4rem; margin-bottom: 0.5rem;">⚠️</div>
+                            <h2 class="text-white" style="font-size: 1.5rem; margin-bottom: 0.5rem;">CONSIGNES DE SÉCURITÉ</h2>
+                            <div class="text-cyan" style="font-size: 1.1rem; font-weight: 600;">${nomExercice}</div>
+                        </div>
+                        
+                        <div style="background: rgba(245, 158, 11, 0.1); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem; border: 2px solid #f59e0b;">
+                            ${consignes.map(consigne => `
+                                <div class="text-white" style="margin-bottom: 0.75rem; font-size: 1rem; line-height: 1.5;">
+                                    ${consigne}
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="text-white text-center" style="opacity: 0.8; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                            ℹ️ Lis attentivement ces consignes avant de commencer
+                        </div>
+                        
+                        <button onclick="app.acceptConsignesSecurite(${index})" class="btn btn-success" style="width: 100%; font-size: 1.1rem; padding: 1rem;">
+                            ✅ J'ai compris, commencer l'exercice
+                        </button>
+                        <button onclick="app.closeConsignesSecurite()" class="btn btn-secondary" style="width: 100%; font-size: 1rem; padding: 0.75rem; margin-top: 0.5rem;">
+                            ← Annuler
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(popup);
+            }
+
+            acceptConsignesSecurite(index) {
+                // Fermer le popup
+                this.closeConsignesSecurite();
+                
+                // Marquer l'exercice comme terminé
+                const session = this.sessions[this.currentSession];
+                if (session && session.exercicesDetails) {
+                    session.exercicesDetails[index].completed = true;
+                    this.saveSessions();
+                    this.render();
+                    console.log(`✅ Consignes acceptées, exercice ${index + 1} démarré`);
+                }
+            }
+
+            closeConsignesSecurite() {
+                const popup = document.getElementById('consignes-securite-popup');
+                if (popup) popup.remove();
             }
 
             updateChargeReelle(index, value) {
