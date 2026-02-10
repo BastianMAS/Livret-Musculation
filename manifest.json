@@ -1,29 +1,26 @@
 {
-  "name": "EPS PRO - Évaluation Combinée",
-  "short_name": "EPS PRO",
-  "description": "Application d'évaluation EPS pour le cycle 3 (6ème) - Diagnostics et évaluations finales",
-  "start_url": "/",
+  "name": "Livret Musculation",
+  "short_name": "Musculation",
+  "description": "Application de suivi d'entraînement en musculation",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0f0f23",
-  "theme_color": "#00d2ff",
-  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#06b6d4",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%230f0f23' width='512' height='512'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='280' font-weight='bold' fill='%2300d2ff'%3E⚽%3C/text%3E%3C/svg%3E",
+      "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%230f0f23' width='512' height='512'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='280' font-weight='bold' fill='%2300d2ff'%3E⚽%3C/text%3E%3C/svg%3E",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "categories": ["education", "sports"],
-  "lang": "fr-FR",
-  "dir": "ltr",
-  "scope": "/",
-  "prefer_related_applications": false
+  "categories": ["fitness", "sports", "education"],
+  "lang": "fr-FR"
 }
