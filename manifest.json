@@ -1,7 +1,7 @@
 {
-  "name": "Livret Musculation",
-  "short_name": "Musculation",
-  "description": "Application de suivi d'entraînement en musculation",
+  "name": "EPS Musculation",
+  "short_name": "EPS Muscu",
+  "description": "Application de suivi d'entraînement en musculation pour lycéens",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
@@ -19,6 +19,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "categories": ["fitness", "sports", "education"],
